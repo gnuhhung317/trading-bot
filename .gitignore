@@ -1,0 +1,10 @@
+/temp/*
+build/*
+dist/*
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+.vscode/*
+__pycache__/*
+venv/*
