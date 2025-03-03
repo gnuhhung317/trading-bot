@@ -3,3 +3,7 @@
 2025-03-03 17:41:21,456 - ERROR - Lỗi khi đồng bộ vị thế: name 'STOP_LOSS_PERCENT' is not defined
 2025-03-03 17:45:01,201 - ERROR - 1000PEPEUSDT - Lỗi vào lệnh: APIError(code=-2019): Margin is insufficient.
 2025-03-03 18:00:01,415 - ERROR - Lỗi trong vòng lặp: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
+2025-03-03 19:05:03,657 - ERROR - BOMEUSDT - Lỗi vào lệnh: APIError(code=-2019): Margin is insufficient.
+2025-03-03 20:05:01,255 - ERROR - 1000PEPEUSDT - Lỗi vào lệnh: APIError(code=-2019): Margin is insufficient.
+2025-03-03 20:05:02,313 - ERROR - ETHUSDT - Lỗi vào lệnh: APIError(code=-4164): Order's notional must be no smaller than 20 (unless you choose reduce only).
+2025-03-03 20:05:03,504 - ERROR - BOMEUSDT - Lỗi vào lệnh: APIError(code=-2019): Margin is insufficient.

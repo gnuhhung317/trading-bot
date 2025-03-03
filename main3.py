@@ -7,24 +7,27 @@ from dotenv import load_dotenv
 import os
 import logging
 import math
-
+import requests
 # Load biến môi trường từ file .env
 load_dotenv()
+
 
 # Lấy API key từ biến môi trường
 API_KEY = os.getenv("BINANCE_API_KEY", "")
 API_SECRET = os.getenv("BINANCE_API_SECRET", "")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")  # Thêm biến môi trường cho Telegram token
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")  # Thêm biến môi trường cho Telegram chat ID
 client = Client(API_KEY, API_SECRET)
 
 # Danh sách coin và tham số thử nghiệm
 COINS = {
     "1000PEPEUSDT": {"leverage": 5, "quantity_precision": 0},
     # "BTCUSDT": {"leverage": 20, "quantity_precision": 3},
-    "ETHUSDT": {"leverage": 15, "quantity_precision": 3},
+    "ETHUSDT": {"leverage": 5, "quantity_precision": 3},
     # "SOLUSDT": {"leverage": 7, "quantity_precision": 1},
-    "XRPUSDT": {"leverage": 12, "quantity_precision": 1},
+    "XRPUSDT": {"leverage": 5, "quantity_precision": 1},
     "BOMEUSDT": {"leverage": 5, "quantity_precision": 0},
-    "ADAUSDT": {"leverage": 12, "quantity_precision": 0},
+    "ADAUSDT": {"leverage": 5, "quantity_precision": 0},
     # "ALCHUSDT": {"leverage": 5, "quantity_precision": 1},
     # "BNBUSDT": {"leverage": 15, "quantity_precision": 1},
 }
@@ -49,6 +52,21 @@ for symbol in COINS:
     client.futures_change_leverage(symbol=symbol, leverage=COINS[symbol]["leverage"])
 print(f"Số dư ban đầu: {balance}")
 
+def send_telegram_message(token, chat_id, message):
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": message,
+        "parse_mode": "HTML"  # Hỗ trợ định dạng HTML
+    }
+    try:
+        response = requests.post(url, json=payload)
+        response.raise_for_status()  # Kiểm tra lỗi HTTP
+        return response.json()
+    except Exception as e:
+        logging.error(f"Lỗi gửi tin nhắn Telegram: {e}")
+        print(f"Lỗi gửi tin nhắn Telegram: {e}")
+        return None
 # Hàm lấy dữ liệu lịch sử
 def get_historical_data(symbol, interval, limit=500):
     try:
@@ -62,6 +80,8 @@ def get_historical_data(symbol, interval, limit=500):
         return df
     except Exception as e:
         logging.error(f"Lỗi lấy dữ liệu {symbol}: {e}")
+        send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, f"Lỗi lấy dữ liệu {symbol}: {e}")
+
         return pd.DataFrame()
 
 # Hàm thêm chỉ báo tín hiệu
@@ -167,8 +187,20 @@ def enter_position(symbol, signal):
             positions[symbol].append(position)
             logging.info(f"{symbol} - Vào lệnh {signal} tại {entry_price}, SL: {stop_loss}, Size: {size}, OrderID: {order['orderId']}")
             print(f"{symbol} - Vào lệnh {signal} tại {entry_price}, SL: {stop_loss}, Size: {size}, OrderID: {order['orderId']}")
+
+            # Gửi tin nhắn Telegram
+            message = (
+                f"<b>{symbol} - {signal} Order</b>\n"
+                f"Time: {position['entry_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
+                f"Price: {entry_price:.4f}\n"
+                f"Size: {size:.4f}\n"
+                f"Stop Loss: {stop_loss:.4f}"
+            )
+            send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, message)
     except Exception as e:
         logging.error(f"{symbol} - Lỗi vào lệnh: {e}")
+        send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, f"{symbol} - Lỗi vào lệnh: {e}")
+
 
 # Hàm quản lý nhiều vị thế
 def manage_positions(symbol, df, higher_tf_df):
@@ -210,6 +242,16 @@ def manage_positions(symbol, df, higher_tf_df):
                     balance += trade['profit']
                     logging.info(f"{symbol} - Thoát 30% LONG tại {current_price}, Profit: {trade['profit']}, OrderID: {position['id']}")
             
+                    # Gửi tin nhắn Telegram
+                    message = (
+                        f"<b>{symbol} - LONG Partial Exit (30%)</b>\n"
+                        f"Time: {trade['exit_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
+                        f"Entry Price: {position['entry_price']:.4f}\n"
+                        f"Exit Price: {current_price:.4f}\n"
+                        f"Size: {exit_size:.4f}\n"
+                        f"Profit: {trade['profit']:.4f}"
+                    )
+                    send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, message)
             elif r_multiple >= 2.5 and position['first_target_hit'] and not position['second_target_hit']:
                 exit_size = position['size'] * 0.5
                 order = client.futures_create_order(symbol=symbol, side='SELL', type='MARKET', quantity=exit_size)
@@ -225,6 +267,17 @@ def manage_positions(symbol, df, higher_tf_df):
                     balance += trade['profit']
                     logging.info(f"{symbol} - Thoát 50% LONG tại {current_price}, Profit: {trade['profit']}, OrderID: {position['id']}")
             
+                    # Gửi tin nhắn Telegram
+                    message = (
+                        f"<b>{symbol} - LONG Partial Exit (50%)</b>\n"
+                        f"Time: {trade['exit_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
+                        f"Entry Price: {position['entry_price']:.4f}\n"
+                        f"Exit Price: {current_price:.4f}\n"
+                        f"Size: {exit_size:.4f}\n"
+                        f"Profit: {trade['profit']:.4f}"
+                    )
+                    send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, message)
+
             exit_conditions = [
                 current_price <= position['stop_loss'], current['ema_cross_down'], current['macd_cross_down'],
                 current['rsi14'] > 80, not higher_tf_df['uptrend'].iloc[-1] and r_multiple > 0, r_multiple >= 4
@@ -243,7 +296,17 @@ def manage_positions(symbol, df, higher_tf_df):
                     positions[symbol].pop(i)
                     logging.info(f"{symbol} - Thoát toàn bộ LONG tại {exit_price}, Profit: {trade['profit']}, OrderID: {position['id']}")
                     print(f"{symbol} - Thoát toàn bộ LONG tại {exit_price}, Profit: {trade['profit']}, OrderID: {position['id']}")
-        
+
+                    # Gửi tin nhắn Telegram
+                    message = (
+                        f"<b>{symbol} - LONG Full Exit</b>\n"
+                        f"Time: {trade['exit_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
+                        f"Entry Price: {position['entry_price']:.4f}\n"
+                        f"Exit Price: {exit_price:.4f}\n"
+                        f"Size: {position['size']:.4f}\n"
+                        f"Profit: {trade['profit']:.4f}"
+                    )
+                    send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, message)
         else:  # SHORT
             if r_multiple > 0.7 and not position['breakeven_activated']:
                 position['stop_loss'] = position['entry_price']
@@ -270,6 +333,16 @@ def manage_positions(symbol, df, higher_tf_df):
                     balance += trade['profit']
                     logging.info(f"{symbol} - Thoát 30% SHORT tại {current_price}, Profit: {trade['profit']}, OrderID: {position['id']}")
             
+                    # Gửi tin nhắn Telegram
+                    message = (
+                        f"<b>{symbol} - SHORT Partial Exit (30%)</b>\n"
+                        f"Time: {trade['exit_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
+                        f"Entry Price: {position['entry_price']:.4f}\n"
+                        f"Exit Price: {current_price:.4f}\n"
+                        f"Size: {exit_size:.4f}\n"
+                        f"Profit: {trade['profit']:.4f}"
+                    )
+                    send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, message)
             elif r_multiple >= 2.5 and position['first_target_hit'] and not position['second_target_hit']:
                 exit_size = position['size'] * 0.5
                 order = client.futures_create_order(symbol=symbol, side='BUY', type='MARKET', quantity=exit_size)
@@ -285,6 +358,16 @@ def manage_positions(symbol, df, higher_tf_df):
                     balance += trade['profit']
                     logging.info(f"{symbol} - Thoát 50% SHORT tại {current_price}, Profit: {trade['profit']}, OrderID: {position['id']}")
             
+                     # Gửi tin nhắn Telegram
+                    message = (
+                        f"<b>{symbol} - SHORT Partial Exit (50%)</b>\n"
+                        f"Time: {trade['exit_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
+                        f"Entry Price: {position['entry_price']:.4f}\n"
+                        f"Exit Price: {current_price:.4f}\n"
+                        f"Size: {exit_size:.4f}\n"
+                        f"Profit: {trade['profit']:.4f}"
+                    )
+                    send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, message)
             exit_conditions = [
                 current_price >= position['stop_loss'], current['ema_cross_up'], current['macd_cross_up'],
                 current['rsi14'] < 20, not higher_tf_df['downtrend'].iloc[-1] and r_multiple > 0, r_multiple >= 4
@@ -304,6 +387,16 @@ def manage_positions(symbol, df, higher_tf_df):
                     logging.info(f"{symbol} - Thoát toàn bộ SHORT tại {exit_price}, Profit: {trade['profit']}, OrderID: {position['id']}")
                     print(f"{symbol} - Thoát toàn bộ SHORT tại {exit_price}, Profit: {trade['profit']}, OrderID: {position['id']}")
 
+                    # Gửi tin nhắn Telegram
+                    message = (
+                        f"<b>{symbol} - SHORT Full Exit</b>\n"
+                        f"Time: {trade['exit_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
+                        f"Entry Price: {position['entry_price']:.4f}\n"
+                        f"Exit Price: {exit_price:.4f}\n"
+                        f"Size: {position['size']:.4f}\n"
+                        f"Profit: {trade['profit']:.4f}"
+                    )
+                    send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, message)
 # Vòng lặp giao dịch
 def trading_loop():
     global balance, initial_balance
@@ -319,8 +412,16 @@ def trading_loop():
             total_balance = float(account_info['totalWalletBalance'])
             unrealized_pnl = float(account_info['totalUnrealizedProfit'])
             total_equity = total_balance + unrealized_pnl
-            print(f"Số dư hiện tại (bao gồm vị thế): {total_equity}")
-            
+            print(f"{now} Số dư hiện tại (bao gồm vị thế): {total_equity}")
+            message = (
+                f"<b>Account Info</b>\n"
+                f"Time: {now.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                f"Total Balance: {total_balance:.4f}\n"
+                f"Unrealized PnL: {unrealized_pnl:.4f}\n"
+                f"Total Equity: {total_equity:.4f}"
+            )
+            send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, message)
+
             if total_equity < initial_balance * 0.1:
                 print(f"Số dư đã giảm dưới {STOP_LOSS_THRESHOLD*100}% số dư ban đầu. Dừng bot.")
                 for symbol in COINS:
@@ -351,6 +452,8 @@ def trading_loop():
         except Exception as e:
             logging.error(f"Lỗi trong vòng lặp: {e}")
             print(f"Lỗi: {e}")
+            send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, f"Lỗi trong vòng lặp: {e}")
+
             time.sleep(60)
 def sync_positions_from_binance():
     """
@@ -401,6 +504,8 @@ def sync_positions_from_binance():
 
     except Exception as e:
         logging.error(f"Lỗi khi đồng bộ vị thế: {e}")
+        send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, f"Lỗi khi đồng bộ vị thế: {e}")
+
 if __name__ == "__main__":
     sync_positions_from_binance()
     trading_loop()

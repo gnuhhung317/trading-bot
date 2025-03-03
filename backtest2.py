@@ -734,5 +734,6 @@ if __name__ == "__main__":
     "XRPUSDT",
     "BOMEUSDT",
     "ADAUSDT",
+    
     ]
     test_strategy(start_date, end_date, interval, symbols)
