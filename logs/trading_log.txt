@@ -1,0 +1,13 @@
+2025-03-03 00:28:25,761 - INFO - Bot khởi động!
+2025-03-03 00:28:25,950 - ERROR - Lỗi đặt leverage: APIError(code=-2015): Invalid API-key, IP, or permissions for action
+2025-03-03 00:28:25,950 - ERROR - API key không hợp lệ hoặc không có quyền truy cập!
+2025-03-03 00:28:25,950 - ERROR - Vui lòng kiểm tra lại API key hoặc tạo mới API key trên Binance!
+2025-03-03 00:28:25,950 - ERROR - Không thể thiết lập đòn bẩy - kiểm tra API key và quyền truy cập!
+2025-03-03 00:28:25,950 - WARNING - Tiếp tục trong chế độ SANDBOX với dữ liệu mô phỏng.
+2025-03-03 00:28:26,587 - ERROR - Lỗi lấy balance: APIError(code=-2015): Invalid API-key, IP, or permissions for action
+2025-03-03 00:28:26,587 - ERROR - API key không hợp lệ! Vui lòng kiểm tra API key của bạn.
+2025-03-03 00:28:26,587 - WARNING - Sử dụng balance mặc định: 10 trong chế độ SANDBOX
+2025-03-03 00:28:34,797 - INFO - Bot đã dừng bởi người dùng.
+2025-03-03 00:29:19,254 - INFO - Bot khởi động!
+2025-03-03 00:30:21,338 - INFO - Đã thiết lập đòn bẩy 5x cho ETHUSDT
+2025-03-03 00:30:22,027 - INFO - Số dư hiện tại: 8.95467941 USDT

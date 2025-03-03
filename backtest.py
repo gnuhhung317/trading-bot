@@ -1,542 +1,423 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from binance.client import Client
-import pandas_ta as ta
-from datetime import datetime, timedelta
+import os
 import time
+from datetime import datetime, timedelta
+import argparse
+from typing import Dict, List, Tuple
+import logging
 
-# Kết nối API Binance (chỉ cần để lấy dữ liệu lịch sử)
-api_key = 'Wvjb9scOCRwa95JI3eHvdrgr7XaPQx18mVzd0hfxuLSbiqwFHhjQYlKusMkCIIge'
-api_secret = 'iIkZjKZCDlwjxJG6tPaEnU9uVWHR6Ygh2al3HNYsBKy77Ne8jZwrzGLThGwtRTfL'
+# Import modules
+from config import SYMBOLS, INITIAL_CAPITAL, LEVERAGE, RISK_PER_TRADE
+from modules.data_loader import DataLoader
+from modules.indicators import Indicators
+from modules.strategy import MomentumStrategy
+from modules.risk_manager import RiskManager
+from modules.utils import setup_logging, plot_chart, calculate_drawdown
 
-client = Client(api_key, api_secret)
+logger = logging.getLogger(__name__)
 
-def get_historical_data(symbol, interval, start_date, end_date=None):
-    """Lấy dữ liệu lịch sử từ Binance"""
-    print("Bắt đầu tải dữ liệu...")
-    # Chuyển đổi ngày thành timestamp
-    start_timestamp = int(datetime.strptime(start_date, "%Y-%m-%d").timestamp() * 1000)
+def backtest_strategy(symbol: str, start_date: str, end_date: str, 
+                     interval: str = '5m', capital: float = INITIAL_CAPITAL, 
+                     leverage: int = LEVERAGE, risk_per_trade: float = RISK_PER_TRADE,
+                     plot_results: bool = True) -> Tuple[pd.DataFrame, Dict]:
+    """
+    Backtest chiến lược trên một symbol
     
-    if end_date:
-        end_timestamp = int(datetime.strptime(end_date, "%Y-%m-%d").timestamp() * 1000)
-    else:
-        end_timestamp = int(datetime.now().timestamp() * 1000)
-    
-    # Lấy dữ liệu theo từng chunk để tránh giới hạn API
-    klines = []
-    current = start_timestamp
-    
-    while current < end_timestamp:
-        temp_klines = client.get_historical_klines(
-            symbol=symbol,
-            interval=interval,
-            start_str=current,
-            end_str=min(current + 1000 * 60 * 60 * 24 * 90, end_timestamp) # 90 ngày một lần
-        )
-        if not temp_klines:
-            break
-        klines.extend(temp_klines)
-        # Lấy timestamp cuối cùng và cộng thêm 1ms để tránh trùng lặp
-        current = temp_klines[-1][0] + 1
-        time.sleep(1)  # Tránh tràn request API
-    
-    # Thêm thông tin để gỡ lỗi
-    print(f"Đã tải {len(klines)} nến dữ liệu.")
-    if len(klines) == 0:
-        print("CẢNH BÁO: Không có dữ liệu nào được tải về!")
-        return pd.DataFrame()
-    
-    # Chuyển đổi dữ liệu thành DataFrame
-    df = pd.DataFrame(klines, columns=[
-        'timestamp', 'open', 'high', 'low', 'close', 'volume',
-        'close_time', 'quote_volume', 'trades', 'taker_buy_base',
-        'taker_buy_quote', 'ignored'
-    ])
-    
-    # Chuyển đổi kiểu dữ liệu
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    df['open'] = df['open'].astype(float)
-    df['high'] = df['high'].astype(float)
-    df['low'] = df['low'].astype(float)
-    df['close'] = df['close'].astype(float)
-    df['volume'] = df['volume'].astype(float)
-    
-    df.set_index('timestamp', inplace=True)
-    print(f"Đã xử lý dữ liệu thành DataFrame kích thước {df.shape}")
-    return df
-
-def add_indicators(df):
-    """Thêm các chỉ báo vào dữ liệu"""
-    # Chỉ báo xu hướng
-    df.ta.ema(length=20, append=True, col_names=('ema20',))
-    df.ta.ema(length=50, append=True, col_names=('ema50',))
-    
-    # Chỉ thêm EMA200 nếu có đủ dữ liệu
-    if len(df) >= 200:
-        df.ta.ema(length=200, append=True, col_names=('ema200',))
-    
-    # Chỉ báo dao động
-    df.ta.rsi(length=14, append=True, col_names=('rsi',))
-    df.ta.atr(length=14, append=True, col_names=('atr',))
-    
-    # Thêm chỉ báo khối lượng
-    df.ta.obv(append=True)
-    df['volume_ma5'] = df['volume'].rolling(5).mean()
-    df['volume_ma20'] = df['volume'].rolling(20).mean()
-    
-    # Thêm nến tăng/giảm
-    df['candle_body'] = df['close'] - df['open']
-    df['bullish'] = df['candle_body'] > 0
-    
-    # Thêm nhận diện trạng thái thị trường - kiểm tra nếu có ema200
-    if 'ema200' in df.columns:
-        df['market_trend'] = np.where(
-            (df['ema20'] > df['ema50']) & (df['ema50'] > df['ema200']), 
-            'uptrend',
-            np.where((df['ema20'] < df['ema50']) & (df['ema50'] < df['ema200']), 
-                    'downtrend', 
-                    'sideways')
-        )
-    else:
-        # Chỉ sử dụng ema20 và ema50 nếu không có ema200
-        df['market_trend'] = np.where(
-            df['ema20'] > df['ema50'], 
-            'uptrend',
-            np.where(df['ema20'] < df['ema50'], 
-                    'downtrend', 
-                    'sideways')
-        )
-    
-    # Thêm chỉ báo biến động
-    df['volatility'] = df['atr'] / df['close'] * 100
-    
-    return df
-
-def backtest_strategy(df, initial_balance=1000, risk_per_trade=0.5):
-    """Chiến lược giao dịch cải tiến với quản lý rủi ro tốt hơn"""
-    # Khởi tạo các biến theo dõi
-    balance = initial_balance
-    coin_amount = 0
-    in_position = False
-    trades = []
-    entry_price = 0
-    risk_reward_ratio = 2.0  # Tăng tỷ lệ risk/reward
-    wait_count = 0  # Đếm số nến phải đợi sau khi bán
-    
-    # Thêm biến phí giao dịch và trượt giá
-    fee_rate = 0.001  # 0.1% phí giao dịch
-    slippage = 0.0005  # 0.05% trượt giá
-    
-    # Thêm column volume_change để theo dõi thay đổi khối lượng
-    df['volume_change'] = df['volume'].pct_change()
-    
-    # Lặp qua từng dòng dữ liệu
-    for i in range(200, len(df)):  # Bắt đầu từ nến 200 để có đủ dữ liệu cho các MA dài
-        current = df.iloc[i]
-        previous = df.iloc[i-1]
+    Args:
+        symbol (str): Symbol cần backtest
+        start_date (str): Ngày bắt đầu (YYYY-MM-DD)
+        end_date (str): Ngày kết thúc (YYYY-MM-DD)
+        interval (str): Khung thời gian
+        capital (float): Vốn ban đầu
+        leverage (int): Đòn bẩy
+        risk_per_trade (float): Mức rủi ro mỗi giao dịch
+        plot_results (bool): Vẽ biểu đồ kết quả
         
-        # Đang trong thời gian chờ sau khi bán
-        if wait_count > 0:
-            wait_count -= 1
-            continue
-        
-        # ĐIỀU KIỆN MUA CẢI TIẾN
-        if 'ema200' in df.columns:
-            buy_condition = (
-                # Điều kiện xu hướng
-                (current['close'] > current['ema20']) and 
-                (current['ema20'] > current['ema50']) and
-                (current['ema50'] > current['ema200']) and  # Thêm xu hướng dài hạn
-                (current['market_trend'] == 'uptrend') and  # Chỉ giao dịch trong xu hướng tăng
-                
-                # Lọc theo RSI
-                (current['rsi'] > 40 and current['rsi'] < 70) and
-                
-                # Xác nhận khối lượng
-                (current['volume'] > current['volume_ma5']) and
-                
-                # Điều kiện tín hiệu
-                (
-                    # Cắt lên mạnh mẽ
-                    (previous['ema20'] <= previous['ema50'] and current['ema20'] > current['ema50']) or
-                    
-                    # Pullback và breakout
-                    (previous['close'] < previous['ema20'] and 
-                     current['close'] > current['ema20'] and
-                     current['close'] > previous['high'])
-                ) and
-                
-                # Lọc biến động
-                (current['volatility'] > 0.5 and current['volatility'] < 3.0)
-            )
-        else:
-            # Phiên bản đơn giản hơn khi không có EMA200
-            buy_condition = (
-                # Điều kiện xu hướng đơn giản hơn
-                (current['close'] > current['ema20']) and 
-                (current['ema20'] > current['ema50']) and
-                (current['market_trend'] == 'uptrend') and
-                
-                # Lọc theo RSI
-                (current['rsi'] > 40 and current['rsi'] < 70) and
-                
-                # Xác nhận khối lượng
-                (current['volume'] > current['volume_ma5']) and
-                
-                # Điều kiện tín hiệu
-                (
-                    (previous['ema20'] <= previous['ema50'] and current['ema20'] > current['ema50']) or
-                    (previous['close'] < previous['ema20'] and current['close'] > current['ema20'])
-                ) and
-                
-                # Lọc biến động
-                (current['volatility'] > 0.5 and current['volatility'] < 3.0)
-            )
-        
-        # QUẢN LÝ LỆNH CHẶT CHẼ HƠN
-        if in_position:
-            # Di chuyển SL về breakeven khi đạt 50% target
-            if current['close'] >= entry_price + ((take_profit - entry_price) * 0.5):
-                stop_loss = max(entry_price, stop_loss)  # Breakeven hoặc cao hơn
-            
-            # Điều kiện bán tốt hơn
-            sell_condition = (
-                (current['close'] <= stop_loss) or                     # Stop loss
-                (current['close'] >= take_profit) or                   # Take profit
-                # Đảo chiều với khối lượng tăng
-                (current['close'] < current['ema20'] and 
-                 previous['close'] > previous['ema20'] and
-                 current['volume'] > previous['volume'] * 1.2)  # Khối lượng tăng khi phá vỡ xu hướng
-            )
-        else:
-            sell_condition = False
-        
-        # Xử lý mua
-        if not in_position and buy_condition:
-            price = current['close'] * (1 + slippage)  # Thêm trượt giá khi mua
-            entry_price = price
-            
-            # Tính position size dựa trên ATR
-            risk_amount = balance * risk_per_trade / 100
-            atr_stop = current['atr'] * 2.0  # Tăng khoảng cách stop loss
-            position_size = risk_amount / atr_stop
-            
-            # Đảm bảo không sử dụng quá 20% số dư cho một giao dịch
-            max_position = balance * 0.2
-            if position_size * price > max_position:
-                position_size = max_position / price
-                
-            coin_amount = position_size
-            
-            # Tính stop loss và take profit
-            stop_loss = price - atr_stop
-            take_profit = price + (atr_stop * risk_reward_ratio)
-            
-            # Trừ phí giao dịch
-            fee = position_size * price * fee_rate
-            balance -= position_size * price + fee
-            in_position = True
-            
-            # Ghi nhận giao dịch
-            trades.append({
-                'date': df.index[i],
-                'type': 'BUY',
-                'price': price,
-                'amount': coin_amount,
-                'balance': balance,
-                'stop_loss': stop_loss,
-                'take_profit': take_profit,
-                'fee': fee,
-                'reason': 'NEW_TREND' if previous['ema20'] <= previous['ema50'] else 'PULLBACK'
-            })
-        
-        # Xử lý bán
-        elif in_position and sell_condition:
-            price = current['close'] * (1 - slippage)  # Thêm trượt giá khi bán
-            sell_value = coin_amount * price
-            
-            # Trừ phí giao dịch
-            fee = sell_value * fee_rate
-            balance += sell_value - fee
-            
-            # Xác định lý do bán
-            reason = "UNKNOWN"
-            if price <= stop_loss:
-                reason = "STOP_LOSS"
-            elif price >= take_profit:
-                reason = "TAKE_PROFIT"
-            elif current['close'] < current['ema20'] and previous['close'] > previous['ema20']:
-                reason = "TREND_BREAK"
-            
-            # Ghi nhận giao dịch
-            trades.append({
-                'date': df.index[i],
-                'type': 'SELL',
-                'price': price,
-                'amount': coin_amount,
-                'balance': balance,
-                'fee': fee,
-                'reason': reason,
-                'profit_pct': ((price / entry_price) - 1) * 100
-            })
-            
-            # Reset biến
-            coin_amount = 0
-            in_position = False
-            entry_price = 0
-            
-            # Đợi ít nhất 5 nến sau khi bán trước khi giao dịch tiếp
-            wait_count = 5
-        
-    # Bán nốt coin nếu còn
-    if in_position:
-        price = df.iloc[-1]['close'] * (1 - slippage)
-        sell_value = coin_amount * price
-        fee = sell_value * fee_rate
-        balance += sell_value - fee
-        
-        trades.append({
-            'date': df.index[-1],
-            'type': 'SELL',
-            'price': price,
-            'amount': coin_amount,
-            'balance': balance,
-            'fee': fee,
-            'reason': 'END_OF_PERIOD',
-            'profit_pct': ((price / entry_price) - 1) * 100
-        })
+    Returns:
+        Tuple[pd.DataFrame, Dict]: DataFrame giao dịch và thông tin backtest
+    """
+    print(f"\n{'='*60}")
+    print(f"BACKTEST: {symbol} từ {start_date} đến {end_date}")
+    print(f"{'='*60}")
     
-    # Tạo DataFrame từ danh sách giao dịch
-    trades_df = pd.DataFrame(trades)
+    # Tải dữ liệu
+    data_loader = DataLoader(sandbox=True)
     
-    # Tính lợi nhuận
-    final_balance = balance
-    profit = final_balance - initial_balance
-    profit_percent = (profit / initial_balance) * 100
+    # Tăng thời gian lấy dữ liệu quá khứ cho khung thời gian cao hơn
+    start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+    adjusted_start = (start_date_obj - timedelta(days=60)).strftime("%Y-%m-%d")
     
-    return trades_df, final_balance, profit, profit_percent
-
-def analyze_results(df, trades_df, initial_balance, final_balance):
-    """Phân tích kết quả backtest và tạo thống kê"""
-    # Kiểm tra nếu không có giao dịch
-    if trades_df.empty:
-        return None
-    
-    # Tạo DataFrame các cặp giao dịch mua/bán
-    trades_df['trade_num'] = 0
-    trade_num = 0
-    
-    for i in range(len(trades_df)):
-        if trades_df.iloc[i]['type'] == 'BUY':
-            trade_num += 1
-        trades_df.iloc[i, trades_df.columns.get_loc('trade_num')] = trade_num
-    
-    # Tạo DataFrame cho các cặp giao dịch
-    pairs = []
-    buy_trades = trades_df[trades_df['type'] == 'BUY']
-    sell_trades = trades_df[trades_df['type'] == 'SELL']
-    
-    for _, buy in buy_trades.iterrows():
-        # Tìm giao dịch bán tương ứng
-        sell = sell_trades[sell_trades['trade_num'] == buy['trade_num']]
-        if not sell.empty:
-            sell = sell.iloc[0]
-            entry_date = buy['date']
-            exit_date = sell['date']
-            entry_price = buy['price']
-            exit_price = sell['price']
-            profit_pct = ((exit_price / entry_price) - 1) * 100
-            hold_days = (exit_date - entry_date).days + ((exit_date - entry_date).seconds / 86400)  # Tính theo ngày và giờ
-            
-            pairs.append({
-                'entry_date': entry_date,
-                'exit_date': exit_date,
-                'entry_price': entry_price,
-                'exit_price': exit_price,
-                'profit_pct': profit_pct,
-                'hold_days': hold_days,
-                'is_profit': profit_pct > 0,
-                'exit_reason': sell['reason'] if 'reason' in sell else 'UNKNOWN'
-            })
-    
-    # Tạo DataFrame từ danh sách các cặp
-    pairs_df = pd.DataFrame(pairs)
-    
-    if not pairs_df.empty:
-        # Thêm thống kê
-        win_trades = len(pairs_df[pairs_df['profit_pct'] > 0])
-        loss_trades = len(pairs_df[pairs_df['profit_pct'] <= 0])
-        win_rate = (win_trades / len(pairs_df)) * 100 if len(pairs_df) > 0 else 0
-        avg_profit = pairs_df['profit_pct'].mean() if len(pairs_df) > 0 else 0
-        avg_win = pairs_df[pairs_df['profit_pct'] > 0]['profit_pct'].mean() if win_trades > 0 else 0
-        avg_loss = pairs_df[pairs_df['profit_pct'] <= 0]['profit_pct'].mean() if loss_trades > 0 else 0
-        max_win = pairs_df['profit_pct'].max() if len(pairs_df) > 0 else 0
-        max_loss = pairs_df['profit_pct'].min() if len(pairs_df) > 0 else 0
-        avg_hold_days = pairs_df['hold_days'].mean() if len(pairs_df) > 0 else 0
-        profit = final_balance - initial_balance
-        profit_percent = (profit / initial_balance) * 100
-        
-        # Profit factor
-        total_gains = pairs_df[pairs_df['profit_pct'] > 0]['profit_pct'].sum() if win_trades > 0 else 0
-        total_losses = abs(pairs_df[pairs_df['profit_pct'] <= 0]['profit_pct'].sum()) if loss_trades > 0 else 0
-        profit_factor = total_gains / total_losses if total_losses > 0 else float('inf')
-        
-        # Phân tích lý do thoát lệnh
-        exit_reasons = pairs_df['exit_reason'].value_counts()
-        
-        # In thống kê
-        print("\n===== THỐNG KÊ BACKTEST =====")
-        print(f"Tổng giao dịch: {len(pairs_df)}")
-        print(f"Giao dịch thắng: {win_trades} ({win_rate:.2f}%)")
-        print(f"Giao dịch thua: {loss_trades} ({100-win_rate:.2f}%)")
-        print(f"Lợi nhuận trung bình mỗi giao dịch: {avg_profit:.2f}%")
-        print(f"Lợi nhuận trung bình giao dịch thắng: {avg_win:.2f}%")
-        print(f"Thua lỗ trung bình giao dịch thua: {avg_loss:.2f}%")
-        print(f"Lợi nhuận lớn nhất: {max_win:.2f}%")
-        print(f"Thua lỗ lớn nhất: {max_loss:.2f}%")
-        print(f"Thời gian giữ lệnh trung bình: {avg_hold_days:.2f} ngày")
-        print(f"Profit Factor: {profit_factor:.2f}")
-        print(f"Lợi nhuận ròng: {profit:.2f} ({profit_percent:.2f}%)")
-        print("\nThống kê lý do thoát lệnh:")
-        for reason, count in exit_reasons.items():
-            print(f"- {reason}: {count} giao dịch ({count/len(pairs_df)*100:.1f}%)")
-        
-        return pairs_df
-    
-    return None
-
-def plot_results(df, trades_df, initial_balance=1000):
-    """Vẽ biểu đồ kết quả backtest"""
-    if trades_df.empty:
-        return
-        
-    plt.figure(figsize=(15, 10))
-    
-    # Vẽ giá và các điểm mua/bán
-    plt.subplot(2, 1, 1)
-    plt.plot(df.index, df['close'], label='Giá đóng cửa')
-    
-    buy_signals = trades_df[trades_df['type'] == 'BUY']
-    sell_signals = trades_df[trades_df['type'] == 'SELL']
-    
-    plt.scatter(buy_signals['date'], buy_signals['price'], marker='^', color='green', s=100, label='Mua')
-    plt.scatter(sell_signals['date'], sell_signals['price'], marker='v', color='red', s=100, label='Bán')
-    
-    plt.title('Backtest Kết Quả')
-    plt.ylabel('Giá')
-    plt.legend()
-    
-    # Vẽ số dư tài khoản
-    plt.subplot(2, 1, 2)
-    balance_history = [initial_balance]
-    for i, trade in trades_df.iterrows():
-        balance_history.append(trade['balance'])
-    
-    plt.plot(range(len(balance_history)), balance_history, label='Số dư')
-    plt.axhline(y=initial_balance, color='r', linestyle='--', label='Số dư ban đầu')
-    plt.xlabel('Số giao dịch')
-    plt.ylabel('Số dư')
-    plt.legend()
-    
-    plt.tight_layout()
-    plt.savefig(f'temp/backtest_results_{symbol}_{start_date}_{end_date}.png')
-    plt.show()
-
-def get_higher_timeframe_trend(symbol, interval, start_date, end_date):
-    """Lấy xu hướng từ khung thời gian cao hơn"""
-    higher_intervals = {
-        Client.KLINE_INTERVAL_1MINUTE: Client.KLINE_INTERVAL_15MINUTE,
-        Client.KLINE_INTERVAL_5MINUTE: Client.KLINE_INTERVAL_1HOUR,
-        Client.KLINE_INTERVAL_15MINUTE: Client.KLINE_INTERVAL_4HOUR,
-        Client.KLINE_INTERVAL_1HOUR: Client.KLINE_INTERVAL_4HOUR,
-        Client.KLINE_INTERVAL_4HOUR: Client.KLINE_INTERVAL_1DAY
-    }
-    
-    higher_tf = higher_intervals.get(interval)
-    if higher_tf:
-        try:
-            # Mở rộng phạm vi ngày để có đủ dữ liệu - thêm nhiều ngày hơn
-            start_dt = datetime.strptime(start_date, "%Y-%m-%d") - timedelta(days=200)  # Thay đổi từ 30 lên 200 ngày
-            start_str = start_dt.strftime("%Y-%m-%d")
-            
-            higher_df = get_historical_data(symbol, higher_tf, start_str, end_date)
-            if not higher_df.empty:
-                print(f"Đã tải {len(higher_df)} nến cho khung thời gian cao hơn ({higher_tf})")
-                higher_df = add_indicators(higher_df)
-                return higher_df
-        except Exception as e:
-            print(f"Lỗi khi lấy dữ liệu khung thời gian cao hơn: {e}")
-    return None
-
-def test_strategy(symbol, start_date, end_date, interval):
     try:
-        print(f"Lấy dữ liệu lịch sử {symbol} từ {start_date} đến {end_date}...")
-        df = get_historical_data(symbol, interval, start_date, end_date)
-        
-        if df.empty:
-            print("DỪNG: Không có dữ liệu để backtest!")
-            return
-            
-        # Lấy dữ liệu khung thời gian cao hơn
-        higher_tf_df = get_higher_timeframe_trend(symbol, interval, start_date, end_date)
-        print(f"Đã tải dữ liệu khung thời gian cao hơn: {'Thành công' if higher_tf_df is not None else 'Thất bại'}")
-        
-        # 2. Thêm chỉ báo
-        print("Thêm các chỉ báo...")
-        df = add_indicators(df)
-        print(f"Đã thêm chỉ báo, DataFrame kích thước {df.shape}")
-        
-        # Thêm thông tin từ khung thời gian cao hơn (nếu có)
-        if higher_tf_df is not None:
-            print("Thêm thông tin từ khung thời gian cao hơn...")
-            # Có thể thêm logic hỗ trợ đa khung thời gian ở đây
-            
-        # In ra một vài dòng dữ liệu để kiểm tra
-        print("\nMẫu dữ liệu:")
-        print(df[['close', 'ema20', 'ema50', 'ema200', 'rsi', 'atr', 'market_trend']].tail())
-        
-        # 3. Chạy backtest
-        print("\nChạy backtest...")
-        initial_balance = 10  # USD
-        risk_per_trade = 0.5  # Rủi ro 0.5% số dư mỗi giao dịch
-        
-        trades_df, final_balance, profit, profit_percent = backtest_strategy(
-            df, initial_balance, risk_per_trade
+        # Tải dữ liệu
+        df = data_loader.get_historical_data(symbol, interval, lookback_days=(datetime.strptime(end_date, "%Y-%m-%d") - start_date_obj).days)
+        higher_tf = data_loader.get_historical_data(
+            symbol, 
+            data_loader.get_higher_timeframe(interval), 
+            lookback_days=(datetime.strptime(end_date, "%Y-%m-%d") - datetime.strptime(adjusted_start, "%Y-%m-%d")).days
         )
         
-        print(f"Backtest hoàn tất. Tìm thấy {len(trades_df)} giao dịch.")
+        if df.empty or higher_tf.empty:
+            print(f"Không đủ dữ liệu cho {symbol}")
+            return pd.DataFrame(), {"error": "Không đủ dữ liệu"}
         
-        # 4. Phân tích kết quả
-        print("Phân tích kết quả...")
-        pairs_df = analyze_results(df, trades_df, initial_balance, final_balance)
+        # Lọc theo khoảng thời gian
+        df = df[(df.index >= start_date) & (df.index <= end_date)]
         
-        if trades_df.empty:
-            print("\nKhông tìm thấy giao dịch nào trong khoảng thời gian đã chọn.")
-            print("Thử các giải pháp sau:")
-            print("1. Tăng thời gian backtest")
-            print("2. Điều chỉnh các điều kiện giao dịch cho dễ thỏa mãn hơn")
-            print("3. Kiểm tra lại dữ liệu và chỉ báo")
+        # Thêm chỉ báo
+        df = Indicators.add_signal_indicators(df)
+        higher_tf = Indicators.add_trend_indicators(higher_tf)
         
-        # 5. Lưu kết quả
-        if not trades_df.empty:
-            trades_df.to_csv(f'temp/backtest_trades_{symbol}_{start_date}_{end_date}.csv')
-            if pairs_df is not None:
-                pairs_df.to_csv(f'temp/backtest_pairs_{symbol}_{start_date}_{end_date}.csv')
-            # plot_results(df, trades_df, initial_balance)
-    
+        # Khởi tạo chiến lược và quản lý rủi ro
+        strategy = MomentumStrategy()
+        risk_manager = RiskManager(initial_capital=capital, risk_per_trade=risk_per_trade)
+        
+        # Khởi tạo biến theo dõi
+        balance = capital
+        positions = {}  # symbol -> position details
+        trades = []
+        equity_curve = [balance]
+        
+        # Chạy backtest
+        for i in range(1, len(df)):
+            current_time = df.index[i]
+            
+            # Kiểm tra nếu đang có vị thế, xem có nên thoát không
+            for symbol, position in list(positions.items()):
+                if "partial_exits" not in position:
+                    position["partial_exits"] = [False, False]
+                    
+                # Tạo DataFrame từ dữ liệu đến hiện tại
+                current_df = df.iloc[:i+1].copy()
+                
+                # Kiểm tra thoát lệnh
+                should_exit, exit_reason, exit_price = strategy.should_exit(
+                    current_df,
+                    position["type"],
+                    position["entry_price"],
+                    position["stop_loss"],
+                    position["target1"],
+                    position["target2"],
+                    position["partial_exits"]
+                )
+                
+                if should_exit:
+                    # Tính toán lợi nhuận
+                    exit_price = exit_price or current_df.iloc[-1]["close"]
+                    pnl_percent = 0
+                    
+                    if position["type"] == "LONG":
+                        # Đảm bảo thoát lệnh không bị trượt giá quá xa
+                        if exit_reason == "Stop Loss" and exit_price < position["stop_loss"] * 0.95:
+                            # Nếu có trượt giá nghiêm trọng, hạn chế mức lỗ
+                            exit_price = position["stop_loss"] * 0.95
+                            print(f"WARNING: Stop loss slippage detected, limiting loss at {exit_price}")
+                        
+                        pnl_percent = (exit_price - position["entry_price"]) / position["entry_price"] * 100 * leverage
+                    else:  # SHORT
+                        # Đảm bảo thoát lệnh không bị trượt giá quá xa
+                        if exit_reason == "Stop Loss" and exit_price > position["stop_loss"] * 1.05:
+                            # Nếu có trượt giá nghiêm trọng, hạn chế mức lỗ
+                            exit_price = position["stop_loss"] * 1.05
+                            print(f"WARNING: Stop loss slippage detected, limiting loss at {exit_price}")
+                        
+                        pnl_percent = (position["entry_price"] - exit_price) / position["entry_price"] * 100 * leverage
+                    
+                    # Giới hạn mức lỗ tối đa
+                    if pnl_percent < -100:
+                        logger.warning(f"Extreme loss detected: {pnl_percent:.2f}%. Capping at -100%")
+                        pnl_percent = -100
+                    
+                    pnl_amount = position["size"] * position["entry_price"] * pnl_percent / 100
+                    
+                    # Cập nhật balance
+                    balance += pnl_amount
+                    
+                    # Lưu thông tin giao dịch
+                    trade = {
+                        "symbol": symbol,
+                        "type": position["type"],
+                        "entry_time": position["entry_time"],
+                        "entry_price": position["entry_price"],
+                        "exit_time": current_time,
+                        "exit_price": exit_price,
+                        "size": position["size"],
+                        "profit": pnl_amount,
+                        "profit_percent": pnl_percent,
+                        "reason": exit_reason
+                    }
+                    trades.append(trade)
+                    
+                    print(f"EXIT {position['type']} {symbol} at {exit_price:.4f} | P&L: {pnl_amount:.4f} USDT ({pnl_percent:.2f}%) | Reason: {exit_reason}")
+                    
+                    # Đóng vị thế
+                    del positions[symbol]
+                
+                elif exit_reason and exit_reason.startswith("Partial Exit"):
+                    # Tính toán partial exit
+                    exit_price = exit_price or current_df.iloc[-1]["close"]
+                    close_percent = 0.5 if exit_reason == "Partial Exit Target 1" else 0.3
+                    
+                    # Kích thước đóng
+                    close_size = position["size"] * close_percent
+                    position["size"] -= close_size
+                    
+                    # Tính lợi nhuận
+                    pnl_percent = 0
+                    if position["type"] == "LONG":
+                        pnl_percent = (exit_price - position["entry_price"]) / position["entry_price"] * 100 * leverage
+                    else:  # SHORT
+                        pnl_percent = (position["entry_price"] - exit_price) / position["entry_price"] * 100 * leverage
+                    
+                    pnl_amount = close_size * position["entry_price"] * pnl_percent / 100
+                    
+                    # Cập nhật balance và partial exits
+                    balance += pnl_amount
+                    if exit_reason == "Partial Exit Target 1":
+                        position["partial_exits"][0] = True
+                    else:
+                        position["partial_exits"][1] = True
+                    
+                    print(f"PARTIAL EXIT {position['type']} {symbol} at {exit_price:.4f} | Size: {close_size:.4f} | P&L: {pnl_amount:.4f} USDT ({pnl_percent:.2f}%) | Reason: {exit_reason}")
+            
+            # Tìm cơ hội mở vị thế mới (nếu chưa có)
+            if symbol not in positions:
+                # Tạo DataFrame đến hiện tại
+                current_df = df.iloc[:i+1].copy()
+                
+                # Map xu hướng cao hơn
+                higher_df_subset = higher_tf[higher_tf.index <= current_time]
+                
+                if not higher_df_subset.empty:
+                    # Phân tích
+                    analysis = strategy.analyze(current_df, higher_df_subset)
+                    
+                    if analysis["signal"] in ["LONG", "SHORT"]:
+                        entry_price = current_df.iloc[-1]["close"]
+                        stop_loss = analysis["details"]["stop_loss"]
+                        
+                        # Tính kích thước vị thế
+                        position_details = risk_manager.calculate_position_size(
+                            balance, entry_price, stop_loss, leverage, symbol
+                        )
+                        
+                        if position_details["size"] > 0:
+                            # Mở vị thế mới
+                            positions[symbol] = {
+                                "type": analysis["signal"],
+                                "entry_time": current_time,
+                                "entry_price": entry_price,
+                                "stop_loss": stop_loss,
+                                "target1": analysis["details"]["target1"],
+                                "target2": analysis["details"]["target2"],
+                                "size": position_details["size"],
+                                "partial_exits": [False, False]
+                            }
+                            
+                            print(f"ENTER {analysis['signal']} {symbol} at {entry_price:.4f} | Size: {position_details['size']:.4f} | Stop: {stop_loss:.4f} | Risk: {position_details['risk_amount']:.4f} USDT")
+            
+            # Ghi nhận equity curve
+            equity_curve.append(balance)
+        
+        # Đóng các vị thế còn lại ở cuối backtest
+        last_price = df.iloc[-1]["close"]
+        for symbol, position in list(positions.items()):
+            # Tính toán lợi nhuận
+            pnl_percent = 0
+            if position["type"] == "LONG":
+                pnl_percent = (last_price - position["entry_price"]) / position["entry_price"] * 100 * leverage
+            else:  # SHORT
+                pnl_percent = (position["entry_price"] - last_price) / position["entry_price"] * 100 * leverage
+            
+            pnl_amount = position["size"] * position["entry_price"] * pnl_percent / 100
+            
+            # Cập nhật balance
+            balance += pnl_amount
+            
+            # Lưu thông tin giao dịch
+            trade = {
+                "symbol": symbol,
+                "type": position["type"],
+                "entry_time": position["entry_time"],
+                "entry_price": position["entry_price"],
+                "exit_time": df.index[-1],
+                "exit_price": last_price,
+                "size": position["size"],
+                "profit": pnl_amount,
+                "profit_percent": pnl_percent,
+                "reason": "End of Backtest"
+            }
+            trades.append(trade)
+            
+            print(f"END-OF-TEST EXIT {position['type']} {symbol} at {last_price:.4f} | P&L: {pnl_amount:.4f} USDT ({pnl_percent:.2f}%)")
+        
+        # Tạo DataFrame giao dịch
+        trades_df = pd.DataFrame(trades)
+        
+        # Tính toán thống kê
+        total_trades = len(trades_df)
+        winning_trades = len(trades_df[trades_df["profit"] > 0])
+        losing_trades = len(trades_df[trades_df["profit"] <= 0])
+        win_rate = winning_trades / total_trades if total_trades > 0 else 0
+        
+        total_profit = sum(trades_df["profit"]) if not trades_df.empty else 0
+        profit_percent = (balance - capital) / capital * 100
+        
+        avg_profit = trades_df[trades_df["profit"] > 0]["profit"].mean() if winning_trades > 0 else 0
+        avg_loss = trades_df[trades_df["profit"] <= 0]["profit"].mean() if losing_trades > 0 else 0
+        
+        risk_reward = abs(avg_profit / avg_loss) if avg_loss < 0 else 0
+        
+        # Tính drawdown
+        drawdown_info = calculate_drawdown(equity_curve)
+        
+        # Tạo báo cáo thống kê
+        report = {
+            "symbol": symbol,
+            "period": f"{start_date} to {end_date}",
+            "total_trades": total_trades,
+            "winning_trades": winning_trades,
+            "losing_trades": losing_trades,
+            "win_rate": win_rate,
+            "total_profit": total_profit,
+            "profit_percent": profit_percent,
+            "max_drawdown": drawdown_info["max_drawdown"],
+            "max_drawdown_percent": drawdown_info["max_drawdown_percent"],
+            "avg_profit": avg_profit,
+            "avg_loss": avg_loss,
+            "risk_reward": risk_reward,
+            "final_balance": balance
+        }
+        
+        # In báo cáo
+        print("\n" + "="*30 + " BACKTEST REPORT " + "="*30)
+        print(f"Symbol: {symbol}")
+        print(f"Period: {start_date} to {end_date}")
+        print(f"Initial Balance: {capital} USDT")
+        print(f"Final Balance: {balance:.2f} USDT")
+        print(f"Total Profit: {total_profit:.2f} USDT ({profit_percent:.2f}%)")
+        print(f"Max Drawdown: {drawdown_info['max_drawdown']:.2f} USDT ({drawdown_info['max_drawdown_percent']:.2f}%)")
+        print(f"Total Trades: {total_trades}")
+        print(f"Win Rate: {win_rate*100:.2f}% ({winning_trades}/{total_trades})")
+        print(f"Avg Profit: {avg_profit:.2f} USDT")
+        print(f"Avg Loss: {avg_loss:.2f} USDT")
+        print(f"Risk-Reward Ratio: {risk_reward:.2f}")
+        print("="*75)
+        
+        # Vẽ biểu đồ
+        if plot_results and not trades_df.empty:
+            # Đảm bảo thư mục tồn tại
+            if not os.path.exists("results"):
+                os.makedirs("results")
+                
+            # Tạo DataFrame equity curve
+            equity_df = pd.DataFrame(index=df.index)
+            equity_df['balance'] = capital  # Giá trị ban đầu
+            
+            # Cập nhật equity curve tại thời điểm exit
+            for trade in trades_df.to_dict('records'):
+                exit_time = trade.get('exit_time')
+                if exit_time and pd.notna(exit_time):
+                    idx = equity_df.index.get_indexer([exit_time], method='nearest')[0]
+                    if idx >= 0:
+                        pnl = trade.get('profit', 0)
+                        equity_df.loc[equity_df.index[idx:], 'balance'] += pnl
+            
+            # Vẽ biểu đồ với equity curve
+            plt.figure(figsize=(12, 8))
+            
+            # Panel 1: Giá
+            plt.subplot(3, 1, 1)
+            plt.plot(df.index, df['close'], color='blue')
+            plt.title(f"{symbol} Price")
+            plt.grid(True)
+            
+            # Panel 2: Equity Curve
+            plt.subplot(3, 1, 2)
+            plt.plot(equity_df.index, equity_df['balance'], color='green')
+            plt.axhline(y=capital, color='black', linestyle='--')
+            plt.fill_between(equity_df.index, equity_df['balance'], capital,
+                           where=(equity_df['balance'] >= capital), color='green', alpha=0.3)
+            plt.fill_between(equity_df.index, equity_df['balance'], capital,
+                           where=(equity_df['balance'] < capital), color='red', alpha=0.3)
+            
+            # Đảm bảo trục y hiển thị cả giá trị âm
+            min_balance = min(equity_df['balance'].min(), 0)
+            max_balance = max(equity_df['balance'].max(), capital * 1.1)
+            plt.ylim(min_balance * 0.9, max_balance * 1.1)
+            
+            plt.title("Equity Curve")
+            plt.grid(True)
+            
+            # Panel 3: Drawdown
+            plt.subplot(3, 1, 3)
+            rolling_max = equity_df['balance'].cummax()
+            drawdown = ((equity_df['balance'] - rolling_max) / rolling_max) * 100
+            plt.fill_between(equity_df.index, drawdown, 0, color='red', alpha=0.3)
+            plt.title("Drawdown %")
+            plt.grid(True)
+            
+            plt.tight_layout()
+            plt.savefig(f"results/{symbol}_{start_date}_{end_date}_backtest.png", dpi=150)
+            plt.close()
+            
+            # Lưu trades
+            trades_df.to_csv(f"results/trades_{symbol}_{start_date}_{end_date}.csv")
+        
+        return trades_df, report
+        
     except Exception as e:
-        print(f"\nLỖI khi chạy backtest: {e}")
+        print(f"Error during backtesting: {str(e)}")
         import traceback
         traceback.print_exc()
+        return pd.DataFrame(), {"error": str(e)}
 
-# Đổi hàm main để bắt lỗi tốt hơn
+def main():
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Backtest trading strategies')
+    parser.add_argument('--symbol', type=str, help='Symbol to backtest (e.g., BTCUSDT)')
+    parser.add_argument('--start', type=str, default='2023-01-01', help='Start date (YYYY-MM-DD)')
+    parser.add_argument('--end', type=str, default='2023-08-01', help='End date (YYYY-MM-DD)')
+    parser.add_argument('--interval', type=str, default='5m', help='Time interval (1m, 5m, 15m, 1h, etc.)')
+    parser.add_argument('--capital', type=float, default=INITIAL_CAPITAL, help='Initial capital')
+    parser.add_argument('--leverage', type=int, default=LEVERAGE, help='Leverage')
+    parser.add_argument('--risk', type=float, default=RISK_PER_TRADE, help='Risk per trade (0-1)')
+    parser.add_argument('--all', action='store_true', help='Run on all predefined symbols')
+    
+    args = parser.parse_args()
+    
+    # Thiết lập logging
+    setup_logging()
+    
+    # Tạo directory cho kết quả
+    if not os.path.exists("results"):
+        os.makedirs("results")
+    
+    # Chạy backtest
+    if args.all:
+        # Backtest trên tất cả symbols
+        reports = []
+        for symbol in SYMBOLS:
+            _, report = backtest_strategy(
+                symbol, args.start, args.end, args.interval,
+                args.capital, args.leverage, args.risk, True
+            )
+            reports.append(report)
+            time.sleep(1)  # Tránh rate limit
+            
+        # Tạo báo cáo tổng hợp
+        summary_df = pd.DataFrame(reports)
+        summary_df.to_csv(f"results/summary_{args.start}_{args.end}.csv", index=False)
+        print("\nBacktest completed for all symbols. Summary saved to results folder.")
+    else:
+        # Backtest trên một symbol
+        symbol = args.symbol or SYMBOLS[0]
+        backtest_strategy(
+            symbol, args.start, args.end, args.interval,
+            args.capital, args.leverage, args.risk, True
+        )
+        print(f"\nBacktest completed for {symbol}. Results saved to results folder.")
+
 if __name__ == "__main__":
-    # symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "DOTUSDT", "LINKUSDT", "BCHUSDT", ]
-    symbols = ["PNUTUSDT"]
-    for symbol in symbols:
-        # Thay đổi sang các ngày trong quá khứ
-        start_date = "2025-03-01"
-        end_date = "2025-03-02"
-        interval = Client.KLINE_INTERVAL_1MINUTE  # Thay đổi khung thời gian
-        test_strategy(symbol, start_date, end_date, interval)
+    main()

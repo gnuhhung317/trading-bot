@@ -7,6 +7,7 @@ import time
 import os
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.gridspec as gridspec
 
 if not os.path.exists('temp'):
     os.makedirs('temp')
@@ -176,16 +177,16 @@ def backtest_momentum_strategy(df, higher_tf_df, initial_balance=10, leverage=5,
             else:
                 higher_tf_df[col] = 0 if col in ['adx', 'di_plus', 'di_minus'] else False
     
-    # Map trend from higher timeframe - xử lý an toàn
-    higher_tf_trends = pd.DataFrame(index=df.index)
-    higher_tf_trends['uptrend'] = False
-    higher_tf_trends['downtrend'] = False
-    higher_tf_trends['adx'] = 0
-    higher_tf_trends['di_plus'] = 0
-    higher_tf_trends['di_minus'] = 0
-    
     # Map dữ liệu từ khung thời gian cao với xử lý ngoại lệ
     try:
+        # Đảm bảo higher_tf_trends có các kiểu dữ liệu phù hợp từ đầu
+        higher_tf_trends = pd.DataFrame(index=df.index)
+        higher_tf_trends['uptrend'] = False
+        higher_tf_trends['downtrend'] = False
+        higher_tf_trends['adx'] = 0.0  # Chuyển sang kiểu float thay vì int
+        higher_tf_trends['di_plus'] = 0.0  # Chuyển sang kiểu float
+        higher_tf_trends['di_minus'] = 0.0  # Chuyển sang kiểu float
+        
         for i, row in df.iterrows():
             # Tìm điểm dữ liệu khung thời gian cao gần nhất
             mask = higher_tf_df.index <= i
@@ -194,7 +195,11 @@ def backtest_momentum_strategy(df, higher_tf_df, initial_balance=10, leverage=5,
                 # Chỉ gán giá trị nếu chúng tồn tại trong latest_higher_tf
                 for col in ['uptrend', 'downtrend', 'adx', 'di_plus', 'di_minus']:
                     if col in latest_higher_tf and pd.notna(latest_higher_tf[col]):
-                        higher_tf_trends.loc[i, col] = latest_higher_tf[col]
+                        # Ép kiểu một cách rõ ràng để tránh cảnh báo
+                        if col in ['adx', 'di_plus', 'di_minus']:
+                            higher_tf_trends.loc[i, col] = float(latest_higher_tf[col])
+                        else:
+                            higher_tf_trends.loc[i, col] = bool(latest_higher_tf[col])
     except Exception as e:
         print(f"Lỗi khi map dữ liệu khung thời gian lớn: {str(e)}")
         # Tiếp tục với giá trị mặc định
@@ -427,7 +432,7 @@ def backtest_momentum_strategy(df, higher_tf_df, initial_balance=10, leverage=5,
                     position = None
         
         # ====== ENTRY LOGIC ======
-        if not position and balance > initial_balance*0.1:
+        if not position and balance > initial_balance*0.1 and balance > 0:
             if long_condition or short_condition:
                 position_type = 'LONG' if long_condition else 'SHORT'
                 entry_price = current['close']
@@ -539,51 +544,93 @@ def analyze_results(trades_df, initial_balance, final_balance, profit_percent):
     return trades_df
 
 def plot_trades(df, trades_df, symbol, start_date, end_date):
+    """Vẽ biểu đồ giao dịch và lợi nhuận"""
     if trades_df.empty:
-        print(f"Không có giao dịch nào cho {symbol} để vẽ biểu đồ")
         return
+
+    # Tạo DataFrame để lưu lợi nhuận theo thời gian
+    profit_df = pd.DataFrame(index=df.index)
+    profit_df['cumulative_profit'] = 0.0
+
+    # Thêm profit từ các giao dịch vào thời điểm exit
+    for idx, row in trades_df.iterrows():
+        if pd.notna(row['exit_time']):
+            time_idx = profit_df.index.get_indexer([row['exit_time']], method='nearest')[0]
+            if time_idx >= 0 and time_idx < len(profit_df):
+                profit_df.loc[profit_df.index[time_idx], 'cumulative_profit'] = row['profit']
+
+    profit_df['cumulative_profit'] = profit_df['cumulative_profit'].fillna(0.0)
+    profit_df['cumulative_profit'] = profit_df['cumulative_profit'].cumsum()
     
-    fig, ax = plt.subplots(figsize=(16, 8))
-    df_plot = df.copy()
-    df_plot['Date'] = df_plot.index
-    ax.plot(df_plot.index, df_plot['close'], color='black', alpha=0.7, linewidth=1)
-    ax.plot(df_plot.index, df_plot['ema9'], color='blue', alpha=0.7, linewidth=1, label='EMA9')
-    ax.plot(df_plot.index, df_plot['ema21'], color='orange', alpha=0.7, linewidth=1, label='EMA21')
+    # Vẽ biểu đồ
+    fig = plt.figure(figsize=(14, 10))
+    gs = gridspec.GridSpec(3, 1, height_ratios=[3, 1, 1])
     
-    long_entries = trades_df[trades_df['type'] == 'LONG']
-    if not long_entries.empty:
-        ax.scatter(long_entries['entry_time'], long_entries['entry_price'], color='green', marker='^', s=120, label='LONG Entry')
-        valid_exits = long_entries[long_entries['exit_time'].notna()]
-        if not valid_exits.empty:
-            ax.scatter(valid_exits['exit_time'], valid_exits['exit_price'], color='black', marker='o', s=80, label='LONG Exit')
-            for _, trade in valid_exits.iterrows():
-                ax.plot([trade['entry_time'], trade['exit_time']], [trade['entry_price'], trade['exit_price']], 'g--', alpha=0.7)
+    # Price chart với entry/exit points
+    ax1 = plt.subplot(gs[0])
     
-    short_entries = trades_df[trades_df['type'] == 'SHORT']
-    if not short_entries.empty:
-        ax.scatter(short_entries['entry_time'], short_entries['entry_price'], color='red', marker='v', s=120, label='SHORT Entry')
-        valid_exits = short_entries[short_entries['exit_time'].notna()]
-        if not valid_exits.empty:
-            ax.scatter(valid_exits['exit_time'], valid_exits['exit_price'], color='black', marker='o', s=80, label='SHORT Exit')
-            for _, trade in valid_exits.iterrows():
-                ax.plot([trade['entry_time'], trade['exit_time']], [trade['entry_price'], trade['exit_price']], 'r--', alpha=0.7)
+    # Vẽ đường giá
+    ax1.plot(df.index, df['close'], color='blue', linewidth=1, label='Price')
     
+    # Thêm entry/exit points
     for _, trade in trades_df.iterrows():
-        if 'exit_time' in trade and pd.notna(trade['exit_time']):
-            profit_pct = trade['profit_pct'] if 'profit_pct' in trade else 0
-            color = 'green' if profit_pct > 0 else 'red'
-            ax.annotate(f"{profit_pct:.2f}%", xy=(trade['exit_time'], trade['exit_price']),
-                        xytext=(10, 0), textcoords='offset points', color=color, fontweight='bold')
+        # Entry points
+        if trade['type'] == 'LONG':
+            ax1.scatter(trade['entry_time'], trade['entry_price'], 
+                       marker='^', color='g', s=100, label='Long Entry' if 'Long Entry' not in ax1.get_legend_handles_labels()[1] else '')
+        else:
+            ax1.scatter(trade['entry_time'], trade['entry_price'], 
+                       marker='v', color='r', s=100, label='Short Entry' if 'Short Entry' not in ax1.get_legend_handles_labels()[1] else '')
+        
+        # Exit points với profit/loss annotation
+        profit_pct = trade['profit_pct']
+        color = 'g' if profit_pct > 0 else 'r'
+        ax1.scatter(trade['exit_time'], trade['exit_price'], 
+                   marker='X', color=color, s=100, label='Exit' if 'Exit' not in ax1.get_legend_handles_labels()[1] else '')
+        
+        # Thêm annotation cho profit/loss
+        ax1.annotate(f'{profit_pct:.1f}%', 
+                    xy=(trade['exit_time'], trade['exit_price']),
+                    xytext=(10, 10), textcoords='offset points',
+                    color=color)
     
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M'))
-    plt.xticks(rotation=45)
-    plt.title(f'Biểu đồ giao dịch {symbol}: {start_date} đến {end_date}')
-    plt.legend(loc='upper left')
-    plt.grid(True, alpha=0.3)
+    ax1.set_title(f'Price Chart - {symbol}')
+    ax1.grid(True, alpha=0.3)
+    ax1.set_ylabel('Price')
+    ax1.legend()
+    
+    # Volume chart
+    ax2 = plt.subplot(gs[1], sharex=ax1)
+    ax2.bar(df.index, df['volume'], color='blue', alpha=0.5)
+    ax2.set_title('Volume')
+    ax2.grid(True, alpha=0.3)
+    
+    # Profit chart
+    ax3 = plt.subplot(gs[2], sharex=ax1)
+    ax3.plot(profit_df.index, profit_df['cumulative_profit'], color='blue', linewidth=1.5)
+    ax3.axhline(y=0, color='black', linestyle='-', alpha=0.2)
+    ax3.fill_between(profit_df.index, profit_df['cumulative_profit'], 0, 
+                     where=(profit_df['cumulative_profit'] >= 0), color='green', alpha=0.3)
+    ax3.fill_between(profit_df.index, profit_df['cumulative_profit'], 0, 
+                     where=(profit_df['cumulative_profit'] < 0), color='red', alpha=0.3)
+    
+    # Thêm các điểm profit/loss trên đường equity
+    for _, trade in trades_df.iterrows():
+        if pd.notna(trade['exit_time']):
+            cumulative_profit = profit_df.loc[profit_df.index <= trade['exit_time'], 'cumulative_profit'].iloc[-1]
+            color = 'g' if trade['profit'] > 0 else 'r'
+            ax3.scatter(trade['exit_time'], cumulative_profit, color=color, s=50)
+            
+    ax3.set_title('Cumulative P&L')
+    ax3.set_ylabel('Profit/Loss')
+    ax3.grid(True, linestyle='--', alpha=0.5)
+    
+    # Định dạng chung
     plt.tight_layout()
-    plt.savefig(f'temp/trades_chart_{symbol}_{start_date}_{end_date}.png', dpi=300)
-    print(f"Đã lưu biểu đồ giao dịch tại: temp/trades_chart_{symbol}_{start_date}_{end_date}.png")
+    filename = f'temp/trades_chart_{symbol}_{start_date}_{end_date}.png'
+    plt.savefig(filename, dpi=150, bbox_inches='tight')
     plt.close()
+    print(f"Đã lưu biểu đồ giao dịch tại: {filename}")
 
 def test_strategy(start_date, end_date, interval, top_symbols):
     results_summary = []
@@ -671,8 +718,9 @@ def test_strategy(start_date, end_date, interval, top_symbols):
         print(f"Đã lưu bảng thống kê tại: temp/momentum_summary_{start_date}_{end_date}.csv")
 
 if __name__ == "__main__":
-    start_date = "2025-02-01"
-    end_date = "2025-03-2"
+    start_date = "2025-03-02"
+    end_date = "2025-03-03"
     interval = Client.KLINE_INTERVAL_5MINUTE
-    symbols = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'SOLUSDT', 'BNBUSDT', 'DOGEUSDT']
+    # symbols = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'SOLUSDT', 'BNBUSDT', 'DOGEUSDT']
+    symbols = ['ETHUSDT']
     test_strategy(start_date, end_date, interval, symbols)
