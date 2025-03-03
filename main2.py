@@ -14,7 +14,12 @@ load_dotenv()
 API_KEY = os.getenv("BINANCE_API_KEY", "")
 API_SECRET = os.getenv("BINANCE_API_SECRET", "")
 client = Client(API_KEY, API_SECRET)
-
+# Danh sách coin và tham số
+COINS = {
+    "ETHUSDT": {"leverage": 5, "quantity_precision": 4},
+    "SOLUSDT": {"leverage": 5, "quantity_precision": 3},
+    "BNBUSDT": {"leverage": 5, "quantity_precision": 3},
+}
 # Thiết lập tham số giao dịch
 SYMBOL = "ETHUSDT"  # Cặp giao dịch Futures
 TIMEFRAME = "5m"      # Khung thời gian nhỏ
@@ -24,8 +29,9 @@ RISK_PER_TRADE = 0.02  # 2% rủi ro mỗi lệnh
 QUANTITY_PRECISION = 4  # Số chữ số thập phân cho lượng coin
 
 # Khởi tạo biến toàn cục
-position = None
-client.futures_change_leverage(symbol=SYMBOL, leverage=LEVERAGE)  # Thiết lập đòn bẩy
+positions = {}
+for symbol in COINS:
+    client.futures_change_leverage(symbol=symbol, leverage=COINS[symbol]["leverage"])
 futures_account = client.futures_account()
 INITIAL_BALANCE = float(futures_account['totalWalletBalance'])  # Số dư USDT từ tài khoản Futures
 balance = INITIAL_BALANCE
@@ -118,108 +124,76 @@ def check_exit_conditions(position, current_price, df):
         return any(exit_conditions)
     return False
 
-# Hàm đặt lệnh mua/bán trên Binance Futures
-def place_futures_order(side, quantity):
+def place_futures_order(symbol, side, quantity):
     try:
-        order = client.futures_create_order(
-            symbol=SYMBOL,
-            side=side,
-            type=FUTURE_ORDER_TYPE_MARKET,
-            quantity=quantity
-        )
-        print(f"Đặt lệnh Futures {side} thành công: {order}")
+        order = client.futures_create_order(symbol=symbol, side=side, type=FUTURE_ORDER_TYPE_MARKET, quantity=quantity)
+        print(f"Đặt lệnh Futures {side} cho {symbol} thành công: {order}")
         return order
     except Exception as e:
-        print(f"Lỗi khi đặt lệnh Futures: {e}")
+        print(f"Lỗi khi đặt lệnh Futures cho {symbol}: {e}")
         return None
 
 # Hàm đặt stop-loss trên Binance Futures
-def place_futures_stop_loss(side, quantity, stop_price):
+def place_futures_stop_loss(symbol, side, quantity, stop_price):
     try:
-        order = client.futures_create_order(
-            symbol=SYMBOL,
-            side=side,
-            type=FUTURE_ORDER_TYPE_STOP_MARKET,
-            quantity=quantity,
-            stopPrice=str(stop_price)
-        )
-        print(f"Đặt stop-loss Futures thành công: {order}")
+        order = client.futures_create_order(symbol=symbol, side=side, type=FUTURE_ORDER_TYPE_STOP_MARKET, quantity=quantity, stopPrice=str(stop_price))
+        print(f"Đặt stop-loss Futures cho {symbol} thành công: {order}")
         return order
     except Exception as e:
-        print(f"Lỗi khi đặt stop-loss Futures: {e}")
+        print(f"Lỗi khi đặt stop-loss Futures cho {symbol}: {e}")
         return None
 
 # Logic giao dịch chính
 def trading_loop():
-    global position, balance
-
+    global positions, balance
     while True:
         try:
-            # Lấy thời gian hiện tại
             now = datetime.now()
-            # Tính thời gian đến khi cây nến 5 phút tiếp theo đóng
             seconds_to_next_candle = (5 - (now.minute % 5)) * 60 - now.second
             if seconds_to_next_candle > 0:
                 print(f"Đợi {seconds_to_next_candle} giây đến cây nến 5 phút tiếp theo...")
                 time.sleep(seconds_to_next_candle)
-            # Lấy dữ liệu mới nhất
-            df = get_historical_data(SYMBOL, TIMEFRAME)
-            higher_tf_df = get_historical_data(SYMBOL, HIGHER_TIMEFRAME)
-            df, higher_tf_df = prepare_data(df, higher_tf_df)
 
-            # Lấy giá hiện tại từ Futures
-            current_price = float(client.futures_symbol_ticker(symbol=SYMBOL)["price"])
-            # Cập nhật số dư từ tài khoản Futures
             futures_account = client.futures_account()
             balance = float(futures_account['totalWalletBalance'])
-            print(f"Giá hiện tại: {current_price}, Số dư Futures: {balance} USDT")
 
-            # Kiểm tra thoát lệnh nếu đang có vị thế
-            if position:
-                if check_exit_conditions(position, current_price, df):
-                    side = SIDE_SELL if position['type'] == "LONG" else SIDE_BUY
-                    place_futures_order(side, position['size'])
-                    profit = (current_price - position['entry_price']) * position['size'] * (1 if position['type'] == 'LONG' else -1)
-                    print(f"Thoát lệnh {position['type']} tại {current_price}, Lợi nhuận: {profit}")
-                    position = None
+            for symbol in COINS:
+                df = get_historical_data(symbol, TIMEFRAME)
+                higher_tf_df = get_historical_data(symbol, HIGHER_TIMEFRAME)
+                df, higher_tf_df = prepare_data(df, higher_tf_df)
+                current_price = float(client.futures_symbol_ticker(symbol=symbol)["price"])
+                print(f"{symbol} - Giá hiện tại: {current_price}, Số dư: {balance} USDT")
 
-            # Kiểm tra vào lệnh nếu chưa có vị thế
-            if not position and balance > INITIAL_BALANCE * 0.1:
-                signal = check_entry_conditions(df, higher_tf_df, balance)
-                if signal:
-                    # Tính kích thước vị thế dựa trên rủi ro
-                    atr = df['atr14'].iloc[-1]
-                    entry_price = current_price
-                    stop_loss = entry_price - atr * 1.5 if signal == "LONG" else entry_price + atr * 1.5
-                    risk_per_r = abs(entry_price - stop_loss)
-                    risk_amount = balance * RISK_PER_TRADE
-                    position_size = (risk_amount / risk_per_r) * LEVERAGE
-                    position_size = round(position_size, QUANTITY_PRECISION)
+                if symbol in positions and check_exit_conditions(positions[symbol], current_price, df):
+                    side = SIDE_SELL if positions[symbol]['type'] == "LONG" else SIDE_BUY
+                    place_futures_order(symbol, side, positions[symbol]['size'])
+                    profit = (current_price - positions[symbol]['entry_price']) * positions[symbol]['size'] * (1 if positions[symbol]['type'] == 'LONG' else -1)
+                    print(f"Thoát lệnh {positions[symbol]['type']} cho {symbol} tại {current_price}, Lợi nhuận: {profit}")
+                    del positions[symbol]
 
-                    # Kiểm tra số dư đủ để đặt lệnh
-                    if position_size * entry_price <= balance * LEVERAGE:
-                        side = SIDE_BUY if signal == "LONG" else SIDE_SELL
-                        place_futures_order(side, position_size)
-                        place_futures_stop_loss(SIDE_SELL if signal == "LONG" else SIDE_BUY, position_size, stop_loss)
+                if symbol not in positions and balance > INITIAL_BALANCE * 0.1:
+                    signal = check_entry_conditions(df, higher_tf_df, balance)
+                    if signal:
+                        atr = df['atr14'].iloc[-1]
+                        entry_price = current_price
+                        stop_loss = entry_price - atr * 1.5 if signal == "LONG" else entry_price + atr * 1.5
+                        risk_per_r = abs(entry_price - stop_loss)
+                        risk_amount = balance * RISK_PER_TRADE
+                        position_size = (risk_amount / risk_per_r) * COINS[symbol]["leverage"]
+                        position_size = round(position_size, COINS[symbol]["quantity_precision"])
 
-                        position = {
-                            'type': signal,
-                            'entry_price': entry_price,
-                            'stop_loss': stop_loss,
-                            'size': position_size,
-                            'risk_per_r': risk_amount
-                        }
-                        print(f"Vào lệnh {signal} tại {entry_price}, SL: {stop_loss}, Size: {position_size}")
-                    else:
-                        print("Số dư không đủ để đặt lệnh!")
-
-            # Nghỉ 60 giây trước khi kiểm tra lại
-            # time.sleep(300)
+                        if position_size * entry_price <= balance * COINS[symbol]["leverage"]:
+                            side = SIDE_BUY if signal == "LONG" else SIDE_SELL
+                            place_futures_order(symbol, side, position_size)
+                            place_futures_stop_loss(symbol, SIDE_SELL if signal == "LONG" else SIDE_BUY, position_size, stop_loss)
+                            positions[symbol] = {'type': signal, 'entry_price': entry_price, 'stop_loss': stop_loss, 'size': position_size, 'risk_per_r': risk_amount}
+                            print(f"Vào lệnh {signal} cho {symbol} tại {entry_price}, SL: {stop_loss}, Size: {position_size}")
+                        else:
+                            print(f"Số dư không đủ để đặt lệnh cho {symbol}!")
 
         except Exception as e:
             print(f"Lỗi trong vòng lặp giao dịch: {e}")
             time.sleep(60)
-
 # Chạy chương trình
 if __name__ == "__main__":
     print("Bắt đầu giao dịch Futures thời gian thực...")

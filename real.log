@@ -1,0 +1,5 @@
+2025-03-03 15:56:53,294 - ERROR - Lỗi trong vòng lặp: HTTPSConnectionPool(host='fapi.binance.com', port=443): Read timed out. (read timeout=10)
+2025-03-03 17:31:21,103 - ERROR - Lỗi trong vòng lặp: unsupported operand type(s) for /: 'float' and 'NoneType'
+2025-03-03 17:41:21,456 - ERROR - Lỗi khi đồng bộ vị thế: name 'STOP_LOSS_PERCENT' is not defined
+2025-03-03 17:45:01,201 - ERROR - 1000PEPEUSDT - Lỗi vào lệnh: APIError(code=-2019): Margin is insufficient.
+2025-03-03 18:00:01,415 - ERROR - Lỗi trong vòng lặp: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).

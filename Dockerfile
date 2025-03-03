@@ -1,19 +1,18 @@
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Cài đặt ntpdate để đồng bộ thời gian
-RUN apt-get update && apt-get install -y ntpdate \
-    && ntpdate pool.ntp.org \
-    && apt-get remove -y ntpdate \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
-
-# Cập nhật pip
-RUN pip install --upgrade pip
+RUN apt-get update && apt-get install -y \
+    gcc \
+    ntpdate \
+    && rm -rf /var/lib/apt/lists/* 
 
 COPY requirements.txt .
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-CMD ["python", "main2.py"]
+
+ENV PYTHONUNBUFFERED=1
+
+CMD ["sh", "-c", "ntpdate pool.ntp.org && python main3.py"]
