@@ -7,3 +7,11 @@
 2025-03-03 20:05:01,255 - ERROR - 1000PEPEUSDT - Lỗi vào lệnh: APIError(code=-2019): Margin is insufficient.
 2025-03-03 20:05:02,313 - ERROR - ETHUSDT - Lỗi vào lệnh: APIError(code=-4164): Order's notional must be no smaller than 20 (unless you choose reduce only).
 2025-03-03 20:05:03,504 - ERROR - BOMEUSDT - Lỗi vào lệnh: APIError(code=-2019): Margin is insufficient.
+2025-03-03 23:35:01,656 - ERROR - Lỗi gửi tin nhắn Telegram: 404 Client Error: Not Found for url: https://api.telegram.org/bot%227778286300:AAFJJLwD76H8hW59dD3fueVKaR2GE89L1-M%22%20%20#%20Thay%20b%E1%BA%B1ng%20token%20c%E1%BB%A7a%20bot%20Telegram/sendMessage
+2025-03-03 23:35:02,271 - ERROR - Lỗi trong vòng lặp: APIError(code=-1111): Precision is over the maximum defined for this asset.
+2025-03-03 23:35:03,035 - ERROR - Lỗi gửi tin nhắn Telegram: 404 Client Error: Not Found for url: https://api.telegram.org/bot%227778286300:AAFJJLwD76H8hW59dD3fueVKaR2GE89L1-M%22%20%20#%20Thay%20b%E1%BA%B1ng%20token%20c%E1%BB%A7a%20bot%20Telegram/sendMessage
+2025-03-03 23:40:01,315 - ERROR - Lỗi gửi tin nhắn Telegram: 404 Client Error: Not Found for url: https://api.telegram.org/bot7778286300:AAFJJLwD76H8hW59dD3fueVKaR2GE89L1-M%20%20#%20Thay%20b%E1%BA%B1ng%20token%20c%E1%BB%A7a%20bot%20Telegram/sendMessage
+2025-03-03 23:40:01,895 - ERROR - Lỗi trong vòng lặp: APIError(code=-1111): Precision is over the maximum defined for this asset.
+2025-03-03 23:40:02,665 - ERROR - Lỗi gửi tin nhắn Telegram: 404 Client Error: Not Found for url: https://api.telegram.org/bot7778286300:AAFJJLwD76H8hW59dD3fueVKaR2GE89L1-M%20%20#%20Thay%20b%E1%BA%B1ng%20token%20c%E1%BB%A7a%20bot%20Telegram/sendMessage
+2025-03-03 23:42:54,856 - ERROR - ADAUSDT - Lỗi vào lệnh: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
+2025-03-03 23:53:05,534 - ERROR - Lỗi gửi tin nhắn Telegram: 404 Client Error: Not Found for url: https://api.telegram.org/bot7778286300:AAFJJLwD76H8hW59dD3fueVKaR2GE89L1-M%20%20#%20Thay%20b%E1%BA%B1ng%20token%20c%E1%BB%A7a%20bot%20Telegram/sendMessage

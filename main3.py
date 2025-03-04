@@ -23,11 +23,11 @@ client = Client(API_KEY, API_SECRET)
 COINS = {
     "1000PEPEUSDT": {"leverage": 5, "quantity_precision": 0},
     # "BTCUSDT": {"leverage": 20, "quantity_precision": 3},
-    "ETHUSDT": {"leverage": 5, "quantity_precision": 3},
+    "ETHUSDT": {"leverage": 15, "quantity_precision": 2},
     # "SOLUSDT": {"leverage": 7, "quantity_precision": 1},
-    "XRPUSDT": {"leverage": 5, "quantity_precision": 1},
+    "XRPUSDT": {"leverage": 12, "quantity_precision": 1},
     "BOMEUSDT": {"leverage": 5, "quantity_precision": 0},
-    "ADAUSDT": {"leverage": 5, "quantity_precision": 0},
+    "ADAUSDT": {"leverage": 12, "quantity_precision": 0},
     # "ALCHUSDT": {"leverage": 5, "quantity_precision": 1},
     # "BNBUSDT": {"leverage": 15, "quantity_precision": 1},
 }
@@ -418,7 +418,9 @@ def trading_loop():
                 f"Time: {now.strftime('%Y-%m-%d %H:%M:%S')}\n"
                 f"Total Balance: {total_balance:.4f}\n"
                 f"Unrealized PnL: {unrealized_pnl:.4f}\n"
-                f"Total Equity: {total_equity:.4f}"
+                f"Total Equity: {total_equity:.4f}\n"
+                f"Available Balance: {balance:.4f}\n"
+                f"Open Positions: {sum(len(positions[symbol]) for symbol in COINS)}"
             )
             send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, message)
 
@@ -507,5 +509,6 @@ def sync_positions_from_binance():
         send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, f"Lỗi khi đồng bộ vị thế: {e}")
 
 if __name__ == "__main__":
+    # send_telegram_message(TELEGRAM_TOKEN,TELEGRAM_CHAT_ID,"hi anh em")
     sync_positions_from_binance()
     trading_loop()
