@@ -572,9 +572,108 @@ def test_multi_coin_strategy(start_date, end_date, interval):
             print("Không có giao dịch nào được thực hiện!")
     except Exception as e:
         print(f"Lỗi khi chạy backtest: {str(e)}")
+def fetch_and_filter_usdt_coins(client, min_volume=1000000, min_volatility=0.02, days=7):
+    """
+    Lấy và lọc các cặp USDT phù hợp với chiến lược trading.
+    
+    Parameters:
+    - client: Binance Client instance
+    - min_volume: Volume trung bình tối thiểu (USDT) trong 7 ngày
+    - min_volatility: Độ biến động tối thiểu (theo ATR/close)
+    - days: Số ngày để phân tích dữ liệu
+    
+    Returns:
+    - filtered_coins: Dict chứa thông tin các coin được chọn
+    """
+    print("Đang kéo danh sách các cặp USDT từ Binance...")
+    
+    # Lấy tất cả thông tin ticker
+    tickers = client.get_ticker()
+    usdt_pairs = [ticker for ticker in tickers if ticker['symbol'].endswith('USDT')]
+    
+    # Tính thời gian bắt đầu
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=days)
+    start_str = start_date.strftime("%Y-%m-%d")
+    end_str = end_date.strftime("%Y-%m-%d")
+    
+    filtered_coins = {}
+    print(f"Lọc {len(usdt_pairs)} cặp USDT dựa trên volume và volatility...")
+    
+    for pair in usdt_pairs:
+        symbol = pair['symbol']
+        try:
+            # Lấy dữ liệu lịch sử 1h trong 7 ngày
+            df = get_historical_data(symbol, '1h', start_str, end_str)
+            
+            if df.empty or len(df) < 24:  # Đảm bảo có đủ dữ liệu
+                continue
+                
+            # Tính các chỉ số
+            df['atr'] = ta.atr(df['high'], df['low'], df['close'], length=14)
+            avg_volume = df['quote_volume'].mean()  # Volume bằng USDT
+            avg_volatility = (df['atr'] / df['close']).mean()  # Độ biến động chuẩn hóa
+            price = float(pair['lastPrice'])
+            
+            # Lấy thông tin precision từ exchange info
+            exchange_info = client.get_symbol_info(symbol)
+            quantity_precision = int(1/float(exchange_info['filters'][1]['stepSize'])) #fix
+            min_size = float(exchange_info['filters'][1]['minQty'])  # LOT_SIZE filter
+            
+            # Kiểm tra điều kiện lọc
+            if (avg_volume >= min_volume and 
+                avg_volatility >= min_volatility and 
+                price > 0):  # Loại bỏ các coin giá quá thấp
+                filtered_coins[symbol] = {
+                    "leverage": 5,  # Đòn bẩy mặc định
+                    "quantity_precision": quantity_precision,
+                    "min_size": min_size,
+                    "avg_volume": avg_volume,
+                    "avg_volatility": avg_volatility,
+                    "price": price
+                }
+                print(f"Đã chọn {symbol}: Volume = {avg_volume:,.0f} USDT, Volatility = {avg_volatility:.4f}")
+                
+        except Exception as e:
+            print(f"Lỗi khi xử lý {symbol}: {str(e)}")
+            continue
+    
+    # Sắp xếp theo volume và lấy top coin
+    sorted_coins = dict(sorted(filtered_coins.items(), 
+                             key=lambda x: x[1]['avg_volume'], 
+                             reverse=True))
+    
+    print(f"\nĐã lọc được {len(sorted_coins)} cặp USDT phù hợp.")
+    return sorted_coins
 
+def test_filtered_coins(start_date, end_date, interval, num_coins=10):
+    """Chạy backtest với các coin được lọc."""
+    # Khởi tạo client
+    api_key = "YOUR_API_KEY"
+    api_secret = "YOUR_API_SECRET"
+    client = Client(api_key, api_secret)
+    
+    # Lấy và lọc coins
+    filtered_coins = fetch_and_filter_usdt_coins(client)
+    selected_coins = dict(list(filtered_coins.items())[:num_coins])  # Lấy top N coins
+    
+    print(f"\nĐã chọn {len(selected_coins)} coin để backtest:")
+    for symbol, info in selected_coins.items():
+        print(f"- {symbol}: Volume = {info['avg_volume']:,.0f} USDT, "
+              f"Volatility = {info['avg_volatility']:.4f}")
+    
+    # Cập nhật COINS trong chiến lược
+    global COINS
+    COINS = selected_coins
+    
+    # Chạy backtest với các coin đã chọn
+    test_multi_coin_strategy(start_date, end_date, interval)
+
+# Sử dụng hàm
 if __name__ == "__main__":
-    start_date = "2025-03-04"  # Sử dụng dữ liệu quá khứ để backtest
+    start_date = "2025-03-04"  # Điều chỉnh ngày để có dữ liệu
     end_date = "2025-03-05"
     interval = Client.KLINE_INTERVAL_5MINUTE
-    test_multi_coin_strategy(start_date, end_date, interval)
+    
+    # Chạy test với top 10 coin
+    test_filtered_coins(start_date, end_date, interval, num_coins=30)

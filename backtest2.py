@@ -228,7 +228,7 @@ def backtest_momentum_strategy(df, higher_tf_df, initial_balance=10, leverage=20
         
         # Secondary conditions - at least 1 must be true
         long_secondary = [
-            current['rsi14'] < 70,                              # Not overbought
+            current['rsi14'] < 80,                              # Not overbought
             current['volume_increase'],                         # Volume confirmation
             current['macd'] > 0                                 # MACD is positive
         ]
@@ -252,7 +252,7 @@ def backtest_momentum_strategy(df, higher_tf_df, initial_balance=10, leverage=20
         ]
         
         short_secondary = [
-            current['rsi14'] > 30,                              # Not oversold
+            current['rsi14'] > 20,                              # Not oversold
             current['volume_increase'],                         # Volume confirmation
             current['macd'] < 0                                 # MACD is negative
         ]
@@ -305,7 +305,7 @@ def backtest_momentum_strategy(df, higher_tf_df, initial_balance=10, leverage=20
                     }
                     trades.append(trade)
                     balance += trade['profit']
-                    print(f"Partial exit (30%): {trade}")  # Debug print
+                    # print(f"Partial exit (30%): {trade}")  # Debug print
                 
                 # Second partial exit at 2.5R
                 elif r_multiple >= 2.5 and position['first_target_hit'] and not position['second_target_hit']:
@@ -326,7 +326,7 @@ def backtest_momentum_strategy(df, higher_tf_df, initial_balance=10, leverage=20
                     }
                     trades.append(trade)
                     balance += trade['profit']
-                    print(f"Partial exit (50%): {trade}")  # Debug print
+                    # print(f"Partial exit (50%): {trade}")  # Debug print
                 
                 # Exit conditions 
                 exit_conditions = [
@@ -354,7 +354,7 @@ def backtest_momentum_strategy(df, higher_tf_df, initial_balance=10, leverage=20
                     trades.append(trade)
                     balance += trade['profit']
                     position = None
-                    print(f"Final exit: {trade}")  # Debug print
+                    # print(f"Final exit: {trade}")  # Debug print
             
             # ====== EXIT LOGIC - SHORT ======
             else:  # SHORT position
@@ -387,7 +387,7 @@ def backtest_momentum_strategy(df, higher_tf_df, initial_balance=10, leverage=20
                     }
                     trades.append(trade)
                     balance += trade['profit']
-                    print(f"Partial exit (30%): {trade}")  # Debug print
+                    # print(f"Partial exit (30%): {trade}")  # Debug print
                 
                 # Second partial exit at 2.5R
                 elif r_multiple >= 2.5 and position['first_target_hit'] and not position['second_target_hit']:
@@ -408,7 +408,7 @@ def backtest_momentum_strategy(df, higher_tf_df, initial_balance=10, leverage=20
                     }
                     trades.append(trade)
                     balance += trade['profit']
-                    print(f"Partial exit (50%): {trade}")  # Debug print
+                    # print(f"Partial exit (50%): {trade}")  # Debug print
                 
                 exit_conditions = [
                     current_price >= position['stop_loss'],
@@ -435,7 +435,7 @@ def backtest_momentum_strategy(df, higher_tf_df, initial_balance=10, leverage=20
                     trades.append(trade)
                     balance += trade['profit']
                     position = None
-                    print(f"Final exit: {trade}")  # Debug print
+                    # print(f"Final exit: {trade}")  # Debug print
         
         # ====== ENTRY LOGIC ======
         if not position and balance > initial_balance*0.1 and balance > 0:
@@ -724,19 +724,27 @@ def test_strategy(start_date, end_date, interval, top_symbols):
         print(f"Đã lưu bảng thống kê tại: temp/momentum_summary_{start_date}_{end_date}.csv")
 
 if __name__ == "__main__":
-    start_date = "2025-03-03"
+    start_date = "2025-02-28"
     end_date = "2025-03-05"
     interval = Client.KLINE_INTERVAL_5MINUTE
     # symbols = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'SOLUSDT', 'BNBUSDT', 'DOGEUSDT']
     symbols = [
-    # "1000PEPEUSDT",
-
-    "ETHUSDT",      # Giữ nguyên, coin lớn ổn định
-    "XRPUSDT",          # Giữ nguyên, biến động trung bình
-    "ADAUSDT",        # Giữ nguyên, ổn định trung bình
-    # "SOLUSDT     # Thêm, coin lớn, biến động cao
-    "NEARUSDT"  ,   # Thêm, layer-1, tiềm năng tăng trưởng
-    "LINKUSDT"       # Thêm, utility coin, ổn định
-
+'AAVEUSDT', 
+'LINKUSDT', 
+'PEPEUSDT', 
+'VANAUSDT', 
+'TAOUSDT',	
+'TIAUSDT',	
+'RAYUSDT',	
+'SUIUSDT',	
+'MKRUSDT',	
+'LTCUSDT',	
+'ENAUSDT',	
+'NEARUSDT', 
+'RUNEUSDT', 
+'BNXUSDT',	
     ]
     test_strategy(start_date, end_date, interval, symbols)
+
+
+

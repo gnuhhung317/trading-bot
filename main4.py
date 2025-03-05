@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import os
 import logging
 import requests
-
+import sys
 load_dotenv()
 
 # Cấu hình cơ bản
@@ -17,13 +17,21 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 client = Client(API_KEY, API_SECRET)
 
-COINS = {
-    "ETHUSDT": {"leverage": 6, "quantity_precision": 3, "min_size": 0.001},     # Giữ nguyên, coin lớn ổn định
-    "XRPUSDT": {"leverage": 6, "quantity_precision": 1, "min_size": 0.1},         # Giữ nguyên, biến động trung bình
-    "ADAUSDT": {"leverage": 6, "quantity_precision": 0, "min_size": 1},         # Giữ nguyên, ổn định trung bình
-    # "SOLUSDT": {"leverage": 6, "quantity_precision": 0, "min_size": 1},      # Thêm, coin lớn, biến động cao
-    "NEARUSDT": {"leverage": 6, "quantity_precision": 0, "min_size": 1},      # Thêm, layer-1, tiềm năng tăng trưởng
-    "LINKUSDT": {"leverage": 6, "quantity_precision": 2, "min_size": 0.01}       # Thêm, utility coin, ổn định
+COINS ={
+    "XRPUSDT": {"leverage": 20, "quantity_precision": 1, "min_size": 0.1},         # Giữ nguyên, biến động trung bình
+    "ETHUSDT": {"leverage": 20, "quantity_precision": 3, "min_size": 0.001},     # Giữ nguyên, coin lớn ổn định
+    'AAVEUSDT': {'leverage': 20, 'quantity_precision': 1, 'min_size': 0.1},
+    'LINKUSDT': {'leverage': 20, 'quantity_precision': 2, 'min_size': 0.01},
+    # 'PEPEUSDT': {'leverage': 20, 'quantity_precision': 1, 'min_size': 1.0},
+    'VANAUSDT': {'leverage': 20, 'quantity_precision': 2, 'min_size': 0.01},
+    'TAOUSDT': {'leverage': 20, 'quantity_precision': 3, 'min_size': 0.001},
+    'TIAUSDT': {'leverage': 20, 'quantity_precision': 0, 'min_size': 1},
+    # 'SUIUSDT': {'leverage': 20, 'quantity_precision': 10, 'min_size': 0.1},
+    'MKRUSDT': {'leverage': 20, 'quantity_precision': 3, 'min_size': 0.001},
+    'LTCUSDT': {'leverage': 20, 'quantity_precision': 3, 'min_size': 0.001},
+    'ENAUSDT': {'leverage': 20, 'quantity_precision': 0, 'min_size': 1},
+    'NEARUSDT': {'leverage': 20, 'quantity_precision': 0, 'min_size': 1},
+    'BNXUSDT': {'leverage': 6, 'quantity_precision': 1, 'min_size': 0.1}
 }
 
 TIMEFRAME = '5m'
@@ -56,7 +64,9 @@ def send_telegram_message(message):
             logging.info(f"Gửi tin nhắn Telegram thành công: {message[:50]}...")
             return response.json()
         except Exception as e:
-            logging.error(f"Lỗi gửi tin nhắn Telegram (lần {attempt+1}): {e}")
+            exc_type, exc_obj, tb = sys.exc_info()
+            line_number = tb.tb_lineno
+            logging.error(f"Lỗi gửi tin nhắn Telegram (lần {attempt+1}): {e} - {line_number}")
             time.sleep(2)
     logging.critical("Telegram không hoạt động sau 3 lần thử!")
     return None
@@ -74,7 +84,9 @@ def get_historical_data(symbol, interval, limit=1000):
             logging.debug(f"Lấy dữ liệu {symbol} ({interval}) thành công, {len(df)} nến")
             return df
         except Exception as e:
-            logging.error(f"Lỗi lấy dữ liệu {symbol} (lần {attempt+1}): {e}")
+            exc_type, exc_obj, tb = sys.exc_info()
+            line_number = tb.tb_lineno
+            logging.error(f"Lỗi lấy dữ liệu {symbol} (lần {attempt+1}): {e} - {line_number}")
             time.sleep(1)
     send_telegram_message(f"Lỗi lấy dữ liệu {symbol}: Không thể tải sau 3 lần thử")
     return pd.DataFrame()
@@ -242,11 +254,13 @@ def enter_position(symbol, signal):
             send_telegram_message(message)
 
     except ValueError as e:
-        logging.error(f"{symbol} - Lỗi dữ liệu khi enter position {symbol}-{signal}: {e}")
-        send_telegram_message(f"{symbol} - Lỗi dữ liệu khi enter position {symbol}-{signal}: {e}")
+        logging.error(f"{symbol} - Lỗi dữ liệu khi enter position {symbol}-{signal}: {e} - {line_number}")
+        send_telegram_message(f"{symbol} - Lỗi dữ liệu khi enter position {symbol}-{signal}: {e} - {line_number}")
     except Exception as e:
-        logging.error(f"{symbol} - Lỗi khi enter position {symbol}-{signal}: {e}")
-        send_telegram_message(f"{symbol} - Lỗi khi enter position {symbol}-{signal}: {e}")
+        exc_type, exc_obj, tb = sys.exc_info()
+        line_number = tb.tb_lineno
+        logging.error(f"{symbol} - Lỗi khi enter position {symbol}-{signal}: {e} - {line_number}")
+        send_telegram_message(f"{symbol} - Lỗi khi enter position {symbol}-{signal}: {e} - {line_number}")
 
 def manage_positions(symbol, df, higher_tf_df):
     global balance, trades
@@ -515,11 +529,14 @@ def sync_positions_from_binance():
                     }
                     positions[symbol].append(position_dict)
                     logging.info(f"Đồng bộ {symbol}: {position_type}, Size={abs(amt)}, Entry={entry_price}")
+                    logging.info(f"{position_dict}")
         
         logging.info(f"Đồng bộ vị thế từ Binance thành công. Balance: {balance}")
     except Exception as e:
-        logging.error(f"Lỗi khi đồng bộ vị thế: {e}")
-        send_telegram_message(f"Lỗi khi đồng bộ vị thế: {e}")
+        exc_type, exc_obj, tb = sys.exc_info()
+        line_number = tb.tb_lineno
+        logging.error(f"Lỗi khi đồng bộ vị thế: {e} - {line_number}")
+        send_telegram_message(f"Lỗi khi đồng bộ vị thế: {e} - {line_number}")
         balance = balance if balance is not None else 0  # Đảm bảo balance không bị None
 
 def send_periodic_report():
@@ -584,26 +601,34 @@ def trading_loop():
             
             total_positions = sum(len(positions[symbol]) for symbol in COINS)
             for symbol in COINS:
-                df = get_historical_data(symbol, TIMEFRAME)
-                df = add_signal_indicators(df)
-                higher_tf_df = get_historical_data(symbol, HIGHER_TIMEFRAME)
-                higher_tf_df = add_trend_indicators(higher_tf_df)
-                
-                if positions[symbol]:
-                    manage_positions(symbol, df, higher_tf_df)
-                
-                if balance > initial_balance * STOP_LOSS_THRESHOLD and total_positions < MAX_POSITIONS:
-                    signal = check_entry_conditions(df, higher_tf_df,symbol=symbol)
-                    if signal and not positions[symbol]:
-                        enter_position(symbol, signal)
+                try: 
+                    df = get_historical_data(symbol, TIMEFRAME)
+                    df = add_signal_indicators(df)
+                    higher_tf_df = get_historical_data(symbol, HIGHER_TIMEFRAME)
+                    higher_tf_df = add_trend_indicators(higher_tf_df)
+                    
+                    if positions[symbol]:
+                        manage_positions(symbol, df, higher_tf_df)
+                    
+                    if balance > initial_balance * STOP_LOSS_THRESHOLD and total_positions < MAX_POSITIONS:
+                        signal = check_entry_conditions(df, higher_tf_df,symbol=symbol)
+                        if signal and not positions[symbol]:
+                            enter_position(symbol, signal)
+                except Exception as e:
+                    exc_type, exc_obj, tb = sys.exc_info()
+                    line_number = tb.tb_lineno
+                    logging.error(f"Lỗi trong vòng lặp với {symbol}: {e} - {line_number}")
+                    send_telegram_message(f"Lỗi trong vòng lặp với {symbol}: {e} - {line_number}")
             
             if (now - last_report_time).total_seconds() >= 3600:
                 send_periodic_report()
                 last_report_time = now
         
         except Exception as e:
-            logging.error(f"Lỗi trong vòng lặp chính: {e}")
-            send_telegram_message(f"Lỗi trong vòng lặp chính: {e}")
+            exc_type, exc_obj, tb = sys.exc_info()
+            line_number = tb.tb_lineno
+            logging.error(f"Lỗi trong vòng lặp chính: {e} - {line_number}")
+            send_telegram_message(f"Lỗi trong vòng lặp chính: {e} - {line_number}")
             time.sleep(60)
 
 if __name__ == "__main__":
@@ -613,8 +638,10 @@ if __name__ == "__main__":
             client.futures_change_leverage(symbol=symbol, leverage=COINS[symbol]["leverage"])
             logging.info(f"Đặt leverage {COINS[symbol]['leverage']} cho {symbol}")
         except Exception as e:
-            logging.error(f"Lỗi đặt leverage cho {symbol}: {e}")
-            send_telegram_message(f"Lỗi đặt leverage cho {symbol}: {e}")
+            exc_type, exc_obj, tb = sys.exc_info()
+            line_number = tb.tb_lineno
+            logging.error(f"Lỗi đặt leverage cho {symbol}: {e} - {line_number}")
+            send_telegram_message(f"Lỗi đặt leverage cho {symbol}: {e} - {line_number}")
     
     logging.info("Bắt đầu bot giao dịch...")
     send_telegram_message("Bot giao dịch đã khởi động!")

@@ -1,21 +1,34 @@
-1month
-DOGEUSDT: Giao dịch: 272, Lợi nhuận: 1.0818 USDT, Tỷ lệ thắng: 41.54%
-ETHUSDT: Giao dịch: 322, Lợi nhuận: 18.0493 USDT, Tỷ lệ thắng: 51.24%
-XRPUSDT: Giao dịch: 292, Lợi nhuận: 5.0621 USDT, Tỷ lệ thắng: 40.07%
-BOMEUSDT: Giao dịch: 276, Lợi nhuận: 0.0110 USDT, Tỷ lệ thắng: 44.57%
-ADAUSDT: Giao dịch: 291, Lợi nhuận: -1.0688 USDT, Tỷ lệ thắng: 40.21%
-SOLUSDT: Giao dịch: 325, Lợi nhuận: 15.2566 USDT, Tỷ lệ thắng: 48.31%
-NEARUSDT: Giao dịch: 313, Lợi nhuận: 13.6555 USDT, Tỷ lệ thắng: 48.24%
-PEPEUSDT: Giao dịch: 291, Lợi nhuận: 0.0001 USDT, Tỷ lệ thắng: 37.11%
-LINKUSDT: Giao dịch: 274, Lợi nhuận: 4.1606 USDT, Tỷ lệ thắng: 39.78%
-3 month
-DOGEUSDT: Giao dịch: 937, Lợi nhuận: 167.9409 USDT, Tỷ lệ thắng: 41.62%
-ETHUSDT: Giao dịch: 1098, Lợi nhuận: 2358.3506 USDT, Tỷ lệ thắng: 51.91%
-XRPUSDT: Giao dịch: 925, Lợi nhuận: 789.7494 USDT, Tỷ lệ thắng: 43.24%
-BOMEUSDT: Giao dịch: 959, Lợi nhuận: 1.7869 USDT, Tỷ lệ thắng: 42.65%
-ADAUSDT: Giao dịch: 951, Lợi nhuận: -97.5505 USDT, Tỷ lệ thắng: 39.96%
-SOLUSDT: Giao dịch: 945, Lợi nhuận: 936.8715 USDT, Tỷ lệ thắng: 42.65%
-NEARUSDT: Giao dịch: 954, Lợi nhuận: 1553.1086 USDT, Tỷ lệ thắng: 44.86%
-PEPEUSDT: Giao dịch: 906, Lợi nhuận: 0.0081 USDT, Tỷ lệ thắng: 37.31%
-LINKUSDT: Giao dịch: 992, Lợi nhuận: 496.4759 USDT, Tỷ lệ thắng: 45.06%
-
+COINS = {
+    "ETHUSDT": {"leverage": 5, "quantity_precision": 3, "min_size": 0.001},
+    "XRPUSDT": {"leverage": 5, "quantity_precision": 1, "min_size": 0.1},
+    "TRUMPUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},
+    "SOLUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},
+    "NEARUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},
+    "LINKUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "ADAUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},
+    "SUIUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "LTCUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "PEPEUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},
+    "KAITOUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "PNUTUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "HBARUSDT": {"leverage": 5, "quantity_precision": 1, "min_size": 0.1},
+    "RUNEUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "SUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "WIFUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "SHELLUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "BERAUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "TAOUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "ENAUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "WLDUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "APTUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "TSTUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "AAVEUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "MKRUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "BNXUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "XLMUSDT": {"leverage": 5, "quantity_precision": 1, "min_size": 0.1},
+    "NEIROUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "ACTUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "TIAUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "RAYUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01},
+    "VANAUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01}
+}
