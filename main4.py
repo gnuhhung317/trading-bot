@@ -195,8 +195,13 @@ def enter_position(symbol, signal):
         # Kiểm tra giới hạn margin 30%
         if current_margin_used + new_margin > max_margin_per_coin:
             logging.warning(f"{symbol} - Vượt quá giới hạn margin 30% ({current_margin_used + new_margin:.2f} > {max_margin_per_coin:.2f})")
-            return
-        
+            new_margin = max_margin_per_coin-current_margin_used
+            if new_margin <= 0:
+                return
+        size = new_margin * COINS[symbol]["leverage"] / entry_price
+        size = round(size, COINS[symbol]["quantity_precision"])
+        if COINS[symbol]["quantity_precision"] == 0:
+            size = int(size)
         # Thực hiện lệnh thị trường
         side = 'BUY' if signal == 'LONG' else 'SELL'
         order = client.futures_create_order(symbol=symbol, side=side, type='MARKET', quantity=size)
