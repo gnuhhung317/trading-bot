@@ -54,11 +54,29 @@ trades = []
 initial_balance = None
 balance = None
 
-def round_to_precision(symbol,size):
-    size = round(size, COINS[symbol]["quantity_precision"])
-    if COINS[symbol]["quantity_precision"] == 0:
-        size = int(size)
-    return size
+def get_symbol_precision(symbol):
+    try:
+        exchange_info = client.futures_exchange_info()
+        for s in exchange_info['symbols']:
+            if s['symbol'] == symbol:
+                return s['pricePrecision']
+                
+        logging.warning(f"Không tìm thấy thông tin precision cho {symbol}")
+        return 0
+    except Exception as e:
+        logging.error(f"Lỗi lấy precision cho {symbol}: {e}")
+        return 0
+for symbol in COINS:
+    COINS[symbol]['price_precision'] = get_symbol_precision(symbol=symbol)
+def round_to_precision(symbol, size, value_type='quantity'):
+    if value_type == 'quantity':
+        precision = COINS[symbol]["quantity_precision"]
+    elif value_type == 'price':
+        precision = COINS[symbol]["price_precision"]
+    rounded_value = round(size, precision)
+    if precision == 0:
+        rounded_value = int(rounded_value)
+    return rounded_value
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "HTML"}
@@ -282,14 +300,17 @@ def manage_positions(symbol, df, higher_tf_df):
         if position['type'] == 'LONG':
             if r_multiple > 0.7 and not position['breakeven_activated']:
                 position['stop_loss'] = position['entry_price']
+                position['stop_loss'] = round_to_precision(symbol=symbol, size=position['stop_loss'], value_type='price')
                 position['breakeven_activated'] = True
                 logging.info(f"{symbol} - Breakeven activated at {position['entry_price']}")
             
             if r_multiple > 1:
                 trail_factor = min(1.5, 1 + r_multiple * 0.1)
                 new_stop = current_price - atr * trail_factor
+                new_stop = round_to_precision(symbol=symbol, size=new_stop, value_type='price')
                 if new_stop > position['stop_loss']:
                     position['stop_loss'] = new_stop
+
                     client.futures_cancel_all_open_orders(symbol=symbol)
                     client.futures_create_order(
                         symbol=symbol, side='SELL', type='STOP_MARKET',
@@ -392,12 +413,14 @@ def manage_positions(symbol, df, higher_tf_df):
         else:  # SHORT
             if r_multiple > 0.7 and not position['breakeven_activated']:
                 position['stop_loss'] = position['entry_price']
+                position['stop_loss'] = round_to_precision(symbol=symbol, size=position['stop_loss'], value_type='price')
                 position['breakeven_activated'] = True
                 logging.info(f"{symbol} - Breakeven activated at {position['entry_price']}")
             
             if r_multiple > 1:
                 trail_factor = min(1.5, 1 + r_multiple * 0.1)
                 new_stop = current_price + atr * trail_factor
+                new_stop = round_to_precision(symbol=symbol, size=new_stop, value_type='price')
                 if new_stop < position['stop_loss']:
                     position['stop_loss'] = new_stop
                     client.futures_cancel_all_open_orders(symbol=symbol)
