@@ -137,15 +137,24 @@ def check_entry_conditions(df, higher_tf_df,symbol):
     return signal
 
 def enter_position(symbol, signal):
-    global balance
     try:
+        # Lấy thông tin tài khoản
         account_info = client.futures_account()
-        available_margin = float(account_info['availableBalance'])
-        risk_amount = balance * RISK_PER_TRADE
+        total_wallet_balance = float(account_info['totalWalletBalance'])  # Tổng số dư tài khoản
+        available_margin = float(account_info['availableBalance'])      # Margin khả dụng
+        max_margin_per_coin = total_wallet_balance * 0.3                # Giới hạn 30% tổng tài khoản
+        
+        # Tính số tiền rủi ro dựa trên margin khả dụng
+        risk_amount = available_margin * RISK_PER_TRADE
         if available_margin < risk_amount:
             logging.warning(f"{symbol} - Không đủ margin khả dụng ({available_margin} < {risk_amount})")
             return
         
+        # Tính tổng margin đang sử dụng cho symbol
+        position_info = client.futures_position_information(symbol=symbol)
+        current_margin_used = sum(float(pos['initialMargin']) for pos in position_info if pos['symbol'] == symbol)
+        
+        # Lấy dữ liệu lịch sử và thêm chỉ báo
         df = get_historical_data(symbol, TIMEFRAME)
         df.name = symbol  # Gán tên để logging
         df = add_signal_indicators(df)
@@ -153,17 +162,20 @@ def enter_position(symbol, signal):
             logging.warning(f"{symbol} - Không có dữ liệu để vào lệnh")
             return
         
+        # Lấy thông tin giá hiện tại và ATR
         current = df.iloc[-1]
         entry_price = float(client.futures_symbol_ticker(symbol=symbol)['price'])
         atr = current['atr14']
         
+        # Tính stop loss dựa trên tín hiệu
         if signal == 'LONG':
             recent_low = df['low'].iloc[-5:].min()
             stop_loss = recent_low - atr * 0.3 if recent_low < entry_price * 0.99 else entry_price - atr * 1.5
-        else:
+        else:  # SHORT
             recent_high = df['high'].iloc[-5:].max()
             stop_loss = recent_high + atr * 0.3 if recent_high > entry_price * 1.01 else entry_price + atr * 1.5
         
+        # Tính kích thước lệnh
         risk_per_r = abs(entry_price - stop_loss)
         size = (risk_amount / risk_per_r) * COINS[symbol]["leverage"]
         max_size = available_margin * COINS[symbol]["leverage"] / entry_price * (1 - TAKER_FEE * 2)  # Trừ phí
@@ -172,13 +184,24 @@ def enter_position(symbol, signal):
         if COINS[symbol]["quantity_precision"] == 0:
             size = int(size)
         
+        # Kiểm tra kích thước lệnh tối thiểu
         if size < COINS[symbol]["min_size"]:
             logging.warning(f"{symbol} - Size ({size}) nhỏ hơn min_size ({COINS[symbol]['min_size']})")
             return
         
+        # Tính margin cho lệnh mới
+        new_margin = (size * entry_price) / COINS[symbol]["leverage"]
+        
+        # Kiểm tra giới hạn margin 30%
+        if current_margin_used + new_margin > max_margin_per_coin:
+            logging.warning(f"{symbol} - Vượt quá giới hạn margin 30% ({current_margin_used + new_margin:.2f} > {max_margin_per_coin:.2f})")
+            return
+        
+        # Thực hiện lệnh thị trường
         side = 'BUY' if signal == 'LONG' else 'SELL'
         order = client.futures_create_order(symbol=symbol, side=side, type='MARKET', quantity=size)
         if order and order['status'] == 'FILLED':
+            # Lưu thông tin vị thế
             position = {
                 'id': order['orderId'],
                 'type': signal,
@@ -192,6 +215,8 @@ def enter_position(symbol, signal):
                 'second_target_hit': False
             }
             positions[symbol].append(position)
+            
+            # Đặt lệnh stop loss
             stop_order = client.futures_create_order(
                 symbol=symbol,
                 side='SELL' if signal == 'LONG' else 'BUY',
@@ -200,6 +225,8 @@ def enter_position(symbol, signal):
                 quantity=position['size']
             )
             logging.info(f"{symbol} - Vào lệnh {signal}: Price={entry_price}, SL={stop_loss}, Size={size}, OrderID={order['orderId']}")
+            
+            # Gửi thông báo Telegram
             message = (
                 f"<b>{symbol} - {signal} Order</b>\n"
                 f"Time: {position['entry_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
@@ -208,9 +235,13 @@ def enter_position(symbol, signal):
                 f"Stop Loss: {stop_loss:.4f}"
             )
             send_telegram_message(message)
+
+    except ValueError as e:
+        logging.error(f"{symbol} - Lỗi dữ liệu khi enter position {symbol}-{signal}: {e}")
+        send_telegram_message(f"{symbol} - Lỗi dữ liệu khi enter position {symbol}-{signal}: {e}")
     except Exception as e:
-        logging.error(f"{symbol} - Lỗi vào lệnh: {e}")
-        send_telegram_message(f"{symbol} - Lỗi vào lệnh: {e}")
+        logging.error(f"{symbol} - Lỗi khi enter position {symbol}-{signal}: {e}")
+        send_telegram_message(f"{symbol} - Lỗi khi enter position {symbol}-{signal}: {e}")
 
 def manage_positions(symbol, df, higher_tf_df):
     global balance, trades
