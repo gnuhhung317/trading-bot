@@ -19,18 +19,16 @@ api_secret = "YOUR_API_SECRET"
 client = Client(api_key, api_secret)
 
 # Định nghĩa các tham số chiến lược
+
 COINS = {
-    "DOGEUSDT": {"leverage": 5, "quantity_precision": 0},    # Giữ nguyên, meme coin biến động cao
-    "ETHUSDT": {"leverage": 15, "quantity_precision": 2},     # Giữ nguyên, coin lớn ổn định
-    "XRPUSDT": {"leverage": 5, "quantity_precision": 1},      # Giữ nguyên, biến động trung bình
-    "BOMEUSDT": {"leverage": 5, "quantity_precision": 0},     # Giữ nguyên, meme coin giá thấp
-    "ADAUSDT": {"leverage": 5, "quantity_precision": 0},      # Giữ nguyên, ổn định trung bình
-    "SOLUSDT": {"leverage": 5, "quantity_precision": 1},     # Thêm, coin lớn, biến động cao
-    "MATICUSDT": {"leverage": 5, "quantity_precision": 1},    # Thêm, layer-2, biến động trung bình
-    "NEARUSDT": {"leverage": 5, "quantity_precision": 1},     # Thêm, layer-1, tiềm năng tăng trưởng
-    "PEPEUSDT": {"leverage": 5, "quantity_precision": 0},     # Thêm, meme coin, biến động rất cao
-    "LINKUSDT": {"leverage": 5, "quantity_precision": 1}      # Thêm, utility coin, ổn định
+    "ETHUSDT": {"leverage": 5, "quantity_precision": 3, "min_size": 0.001},     # Giữ nguyên, coin lớn ổn định
+    "XRPUSDT": {"leverage": 5, "quantity_precision": 1, "min_size": 0.1},         # Giữ nguyên, biến động trung bình
+    "ADAUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},         # Giữ nguyên, ổn định trung bình
+    # "SOLUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},      # Thêm, coin lớn, biến động cao
+    "NEARUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},      # Thêm, layer-1, tiềm năng tăng trưởng
+    "LINKUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01}       # Thêm, utility coin, ổn định
 }
+
 
 TIMEFRAME = '5m'
 HIGHER_TIMEFRAME = '1h'
@@ -576,7 +574,7 @@ def test_multi_coin_strategy(start_date, end_date, interval):
         print(f"Lỗi khi chạy backtest: {str(e)}")
 
 if __name__ == "__main__":
-    start_date = "2025-01-04"  # Sử dụng dữ liệu quá khứ để backtest
+    start_date = "2025-03-04"  # Sử dụng dữ liệu quá khứ để backtest
     end_date = "2025-03-05"
     interval = Client.KLINE_INTERVAL_5MINUTE
     test_multi_coin_strategy(start_date, end_date, interval)

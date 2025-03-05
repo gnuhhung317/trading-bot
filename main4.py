@@ -18,12 +18,12 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 client = Client(API_KEY, API_SECRET)
 
 COINS = {
-    "ETHUSDT": {"leverage": 5, "quantity_precision": 3, "min_size": 0.001},     # Giữ nguyên, coin lớn ổn định
-    "XRPUSDT": {"leverage": 5, "quantity_precision": 1, "min_size": 0.1},         # Giữ nguyên, biến động trung bình
-    "ADAUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},         # Giữ nguyên, ổn định trung bình
-    # "SOLUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},      # Thêm, coin lớn, biến động cao
-    "NEARUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},      # Thêm, layer-1, tiềm năng tăng trưởng
-    "LINKUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01}       # Thêm, utility coin, ổn định
+    "ETHUSDT": {"leverage": 10, "quantity_precision": 3, "min_size": 0.001},     # Giữ nguyên, coin lớn ổn định
+    "XRPUSDT": {"leverage": 10, "quantity_precision": 1, "min_size": 0.1},         # Giữ nguyên, biến động trung bình
+    "ADAUSDT": {"leverage": 10, "quantity_precision": 0, "min_size": 1},         # Giữ nguyên, ổn định trung bình
+    # "SOLUSDT": {"leverage": 10, "quantity_precision": 0, "min_size": 1},      # Thêm, coin lớn, biến động cao
+    "NEARUSDT": {"leverage": 10, "quantity_precision": 0, "min_size": 1},      # Thêm, layer-1, tiềm năng tăng trưởng
+    "LINKUSDT": {"leverage": 10, "quantity_precision": 2, "min_size": 0.01}       # Thêm, utility coin, ổn định
 }
 
 TIMEFRAME = '5m'
@@ -169,6 +169,8 @@ def enter_position(symbol, signal):
         max_size = available_margin * COINS[symbol]["leverage"] / entry_price * (1 - TAKER_FEE * 2)  # Trừ phí
         size = min(size, max_size)
         size = round(size, COINS[symbol]["quantity_precision"])
+        if COINS[symbol]["quantity_precision"] == 0:
+            size = int(size)
         
         if size < COINS[symbol]["min_size"]:
             logging.warning(f"{symbol} - Size ({size}) nhỏ hơn min_size ({COINS[symbol]['min_size']})")
@@ -454,6 +456,8 @@ def sync_positions_from_binance():
             symbol = pos.get('symbol')
             if symbol in COINS:
                 amt = float(pos.get('positionAmt', 0))
+                if COINS[symbol]["quantity_precision"] == 0:
+                    amt = int(amt)
                 if abs(amt) > 0:
                     position_type = 'LONG' if amt > 0 else 'SHORT'
                     entry_price = float(pos.get('entryPrice', 0))
@@ -479,7 +483,7 @@ def sync_positions_from_binance():
         logging.info(f"Đồng bộ vị thế từ Binance thành công. Balance: {balance}")
     except Exception as e:
         logging.error(f"Lỗi khi đồng bộ vị thế: {e}")
-        send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, f"Lỗi khi đồng bộ vị thế: {e}")
+        send_telegram_message(f"Lỗi khi đồng bộ vị thế: {e}")
         balance = balance if balance is not None else 0  # Đảm bảo balance không bị None
 
 def send_periodic_report():

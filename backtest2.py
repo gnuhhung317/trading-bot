@@ -672,7 +672,7 @@ def test_strategy(start_date, end_date, interval, top_symbols):
             higher_tf_df = add_trend_indicators(higher_tf_df)
             
             trades_df, final_balance, profit, profit_percent = backtest_momentum_strategy(
-                df, higher_tf_df, initial_balance=10, leverage=50, risk_per_trade=0.02
+                df, higher_tf_df, initial_balance=10, leverage=10, risk_per_trade=0.02
             )
             
             if not trades_df.empty:
@@ -725,15 +725,18 @@ def test_strategy(start_date, end_date, interval, top_symbols):
 
 if __name__ == "__main__":
     start_date = "2025-03-03"
-    end_date = "2025-03-04"
+    end_date = "2025-03-05"
     interval = Client.KLINE_INTERVAL_5MINUTE
     # symbols = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'SOLUSDT', 'BNBUSDT', 'DOGEUSDT']
     symbols = [
     # "1000PEPEUSDT",
-    "ETHUSDT",
-    "XRPUSDT",
-    "BOMEUSDT",
-    "ADAUSDT",
-    
+
+    "ETHUSDT",      # Giữ nguyên, coin lớn ổn định
+    "XRPUSDT",          # Giữ nguyên, biến động trung bình
+    "ADAUSDT",        # Giữ nguyên, ổn định trung bình
+    # "SOLUSDT     # Thêm, coin lớn, biến động cao
+    "NEARUSDT"  ,   # Thêm, layer-1, tiềm năng tăng trưởng
+    "LINKUSDT"       # Thêm, utility coin, ổn định
+
     ]
     test_strategy(start_date, end_date, interval, symbols)
