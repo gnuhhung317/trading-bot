@@ -415,6 +415,13 @@ def manage_positions(symbol, df, higher_tf_df):
 def sync_positions_from_binance():
     global balance, initial_balance
     try:
+        # Lấy thông tin tài khoản trước để đảm bảo balance hợp lệ
+        account_info = client.futures_account()
+        balance = float(account_info.get('availableBalance', 0))  # Mặc định 0 nếu lỗi
+        if initial_balance is None:
+            initial_balance = balance
+        logging.info(f"Khởi tạo balance: {balance}")
+
         all_positions = client.futures_position_information()
         positions.clear()
         positions.update({symbol: [] for symbol in COINS})
@@ -426,14 +433,18 @@ def sync_positions_from_binance():
                 if abs(amt) > 0:
                     position_type = 'LONG' if amt > 0 else 'SHORT'
                     entry_price = float(pos.get('entryPrice', 0))
+                    stop_loss = entry_price * (1 - 0.02) if position_type == 'LONG' else entry_price * (1 + 0.02)
+                    risk_amount = balance * RISK_PER_TRADE if balance > 0 else 0.01  # Tránh chia cho 0
+                    risk_per_r = abs(entry_price - stop_loss) / risk_amount if risk_amount > 0 else 1
+                    
                     position_dict = {
                         'id': None,
                         'type': position_type,
                         'entry_time': pd.to_datetime(pos.get('updateTime', 0), unit='ms'),
                         'entry_price': entry_price,
-                        'stop_loss': entry_price - 0.02 * entry_price if position_type == 'LONG' else entry_price + 0.02 * entry_price,
+                        'stop_loss': stop_loss,
                         'size': abs(amt),
-                        'risk_per_r': balance * RISK_PER_TRADE,
+                        'risk_per_r': risk_amount,
                         'breakeven_activated': False,
                         'first_target_hit': False,
                         'second_target_hit': False
@@ -441,15 +452,12 @@ def sync_positions_from_binance():
                     positions[symbol].append(position_dict)
                     logging.info(f"Đồng bộ {symbol}: {position_type}, Size={abs(amt)}, Entry={entry_price}")
         
-        account_info = client.futures_account()
-        balance = float(account_info['availableBalance'])
-        if initial_balance is None:
-            initial_balance = balance
         logging.info(f"Đồng bộ vị thế từ Binance thành công. Balance: {balance}")
     except Exception as e:
         logging.error(f"Lỗi khi đồng bộ vị thế: {e}")
-        send_telegram_message(f"Lỗi khi đồng bộ vị thế: {e}")
-
+        send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, f"Lỗi khi đồng bộ vị thế: {e}")
+        balance = balance if balance is not None else 0  # Đảm bảo balance không bị None
+        
 def send_periodic_report():
     if not trades:
         logging.info("Không có giao dịch nào để báo cáo")
