@@ -33,7 +33,7 @@ COINS = {
 }
 
 TIMEFRAME = '5m'
-HIGHER_TIMEFRAME = '1h'
+HIGHER_TIMEFRAME = '4h'
 RISK_PER_TRADE = 0.02
 STOP_LOSS_THRESHOLD = 0.1
 
@@ -166,7 +166,7 @@ def enter_position(symbol, signal):
         risk_amount = balance * RISK_PER_TRADE
         size = (risk_amount / risk_per_r) * COINS[symbol]["leverage"]
         size = min(balance* COINS[symbol]["leverage"]/entry_price*0.2,size)
-        size = max(size,5.1/entry_price)
+        # size = max(size,5.1/entry_price)
         size = round(size,COINS[symbol]["quantity_precision"])
 
         side = 'BUY' if signal=='LONG' else 'SELL'
@@ -185,6 +185,13 @@ def enter_position(symbol, signal):
                 'second_target_hit': False
             }
             positions[symbol].append(position)
+            stop_order = client.futures_create_order(
+                symbol=symbol,
+                side='SELL' if signal == 'LONG' else 'BUY',
+                type='STOP_MARKET',
+                stopPrice=position['stop_loss'],
+                quantity=position['size']
+            )
             logging.info(f"{symbol} - Vào lệnh {signal} tại {entry_price}, SL: {stop_loss}, Size: {size}, OrderID: {order['orderId']}")
             print(f"{symbol} - Vào lệnh {signal} tại {entry_price}, SL: {stop_loss}, Size: {size}, OrderID: {order['orderId']}")
 
@@ -406,7 +413,7 @@ def trading_loop():
             seconds_to_next_candle = (5 - (now.minute % 5)) * 60 - now.second
             if seconds_to_next_candle > 0:
                 print(f"sleep {seconds_to_next_candle} seconds")
-                time.sleep(seconds_to_next_candle)
+                # time.sleep(seconds_to_next_candle)
             
             account_info = client.futures_account()
             total_balance = float(account_info['totalWalletBalance'])

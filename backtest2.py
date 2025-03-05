@@ -51,7 +51,7 @@ def get_higher_timeframe_data(symbol, interval, start_date, end_date):
     if interval == Client.KLINE_INTERVAL_15MINUTE or interval == Client.KLINE_INTERVAL_30MINUTE:
         higher_interval = Client.KLINE_INTERVAL_4HOUR
     else:
-        higher_interval = Client.KLINE_INTERVAL_1HOUR
+        higher_interval = Client.KLINE_INTERVAL_4HOUR
     
     print(f"Tải dữ liệu khung thời gian {higher_interval} cho {symbol}...")
     return get_historical_data(symbol, higher_interval, adjusted_start, end_date)
@@ -672,7 +672,7 @@ def test_strategy(start_date, end_date, interval, top_symbols):
             higher_tf_df = add_trend_indicators(higher_tf_df)
             
             trades_df, final_balance, profit, profit_percent = backtest_momentum_strategy(
-                df, higher_tf_df, initial_balance=10, leverage=5, risk_per_trade=0.02
+                df, higher_tf_df, initial_balance=10, leverage=50, risk_per_trade=0.02
             )
             
             if not trades_df.empty:

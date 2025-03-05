@@ -1,17 +1,84 @@
-2025-03-03 15:56:53,294 - ERROR - Lỗi trong vòng lặp: HTTPSConnectionPool(host='fapi.binance.com', port=443): Read timed out. (read timeout=10)
-2025-03-03 17:31:21,103 - ERROR - Lỗi trong vòng lặp: unsupported operand type(s) for /: 'float' and 'NoneType'
-2025-03-03 17:41:21,456 - ERROR - Lỗi khi đồng bộ vị thế: name 'STOP_LOSS_PERCENT' is not defined
-2025-03-03 17:45:01,201 - ERROR - 1000PEPEUSDT - Lỗi vào lệnh: APIError(code=-2019): Margin is insufficient.
-2025-03-03 18:00:01,415 - ERROR - Lỗi trong vòng lặp: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
-2025-03-03 19:05:03,657 - ERROR - BOMEUSDT - Lỗi vào lệnh: APIError(code=-2019): Margin is insufficient.
-2025-03-03 20:05:01,255 - ERROR - 1000PEPEUSDT - Lỗi vào lệnh: APIError(code=-2019): Margin is insufficient.
-2025-03-03 20:05:02,313 - ERROR - ETHUSDT - Lỗi vào lệnh: APIError(code=-4164): Order's notional must be no smaller than 20 (unless you choose reduce only).
-2025-03-03 20:05:03,504 - ERROR - BOMEUSDT - Lỗi vào lệnh: APIError(code=-2019): Margin is insufficient.
-2025-03-03 23:35:01,656 - ERROR - Lỗi gửi tin nhắn Telegram: 404 Client Error: Not Found for url: https://api.telegram.org/bot%227778286300:AAFJJLwD76H8hW59dD3fueVKaR2GE89L1-M%22%20%20#%20Thay%20b%E1%BA%B1ng%20token%20c%E1%BB%A7a%20bot%20Telegram/sendMessage
-2025-03-03 23:35:02,271 - ERROR - Lỗi trong vòng lặp: APIError(code=-1111): Precision is over the maximum defined for this asset.
-2025-03-03 23:35:03,035 - ERROR - Lỗi gửi tin nhắn Telegram: 404 Client Error: Not Found for url: https://api.telegram.org/bot%227778286300:AAFJJLwD76H8hW59dD3fueVKaR2GE89L1-M%22%20%20#%20Thay%20b%E1%BA%B1ng%20token%20c%E1%BB%A7a%20bot%20Telegram/sendMessage
-2025-03-03 23:40:01,315 - ERROR - Lỗi gửi tin nhắn Telegram: 404 Client Error: Not Found for url: https://api.telegram.org/bot7778286300:AAFJJLwD76H8hW59dD3fueVKaR2GE89L1-M%20%20#%20Thay%20b%E1%BA%B1ng%20token%20c%E1%BB%A7a%20bot%20Telegram/sendMessage
-2025-03-03 23:40:01,895 - ERROR - Lỗi trong vòng lặp: APIError(code=-1111): Precision is over the maximum defined for this asset.
-2025-03-03 23:40:02,665 - ERROR - Lỗi gửi tin nhắn Telegram: 404 Client Error: Not Found for url: https://api.telegram.org/bot7778286300:AAFJJLwD76H8hW59dD3fueVKaR2GE89L1-M%20%20#%20Thay%20b%E1%BA%B1ng%20token%20c%E1%BB%A7a%20bot%20Telegram/sendMessage
-2025-03-03 23:42:54,856 - ERROR - ADAUSDT - Lỗi vào lệnh: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
-2025-03-03 23:53:05,534 - ERROR - Lỗi gửi tin nhắn Telegram: 404 Client Error: Not Found for url: https://api.telegram.org/bot7778286300:AAFJJLwD76H8hW59dD3fueVKaR2GE89L1-M%20%20#%20Thay%20b%E1%BA%B1ng%20token%20c%E1%BB%A7a%20bot%20Telegram/sendMessage
+2025-03-05 09:07:14,636 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
+2025-03-05 09:07:14,810 - INFO - Đồng bộ 1000PEPEUSDT: SHORT, Size: 6848.0, Entry: 0.0067740068925
+2025-03-05 09:07:15,015 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:07:15,188 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
+2025-03-05 09:07:32,142 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
+2025-03-05 09:07:32,316 - INFO - Đồng bộ 1000PEPEUSDT: SHORT, Size: 6848.0, Entry: 0.0067740068925
+2025-03-05 09:07:32,528 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:07:32,740 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
+2025-03-05 09:07:32,915 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:09:14,843 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
+2025-03-05 09:09:15,052 - INFO - Đồng bộ 1000PEPEUSDT: SHORT, Size: 6848.0, Entry: 0.0067740068925
+2025-03-05 09:09:15,235 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:09:15,402 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
+2025-03-05 09:09:15,618 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:10:30,016 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
+2025-03-05 09:10:30,273 - INFO - Đồng bộ 1000PEPEUSDT: SHORT, Size: 6848.0, Entry: 0.0067740068925
+2025-03-05 09:10:30,549 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:10:30,885 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
+2025-03-05 09:10:31,011 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:11:01,129 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
+2025-03-05 09:11:01,353 - INFO - Đồng bộ 1000PEPEUSDT: SHORT, Size: 6848.0, Entry: 0.0067740068925
+2025-03-05 09:11:01,562 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:11:01,775 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
+2025-03-05 09:11:01,917 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:11:49,632 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
+2025-03-05 09:11:49,856 - INFO - Đồng bộ 1000PEPEUSDT: SHORT, Size: 6848.0, Entry: 0.0067740068925
+2025-03-05 09:11:50,118 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:11:50,414 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
+2025-03-05 09:11:50,657 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:12:04,309 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
+2025-03-05 09:12:04,529 - INFO - Đồng bộ 1000PEPEUSDT: SHORT, Size: 6848.0, Entry: 0.0067740068925
+2025-03-05 09:12:04,754 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:12:04,957 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
+2025-03-05 09:12:05,192 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:21:17,356 - ERROR - Lỗi trong vòng lặp: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
+2025-03-05 09:22:18,716 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
+2025-03-05 09:22:18,884 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:22:19,064 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
+2025-03-05 09:22:19,199 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:22:24,540 - ERROR - Lỗi trong vòng lặp: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
+2025-03-05 09:23:25,923 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
+2025-03-05 09:23:26,090 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:23:26,264 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
+2025-03-05 09:23:26,395 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:26:00,288 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
+2025-03-05 09:26:00,452 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:26:00,646 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
+2025-03-05 09:26:00,783 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:26:01,099 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
+2025-03-05 09:26:01,270 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:26:01,445 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
+2025-03-05 09:26:01,580 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:26:09,968 - ERROR - Lỗi khi trading coin XRPUSDT: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
+2025-03-05 09:27:00,864 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:27:01,060 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
+2025-03-05 09:27:01,188 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:27:07,801 - ERROR - Lỗi khi trading coin XRPUSDT: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
+2025-03-05 09:27:26,315 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:27:26,516 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
+2025-03-05 09:27:26,656 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:27:28,108 - ERROR - Lỗi khi trading coin XRPUSDT: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
+2025-03-05 09:27:38,303 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:27:38,489 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
+2025-03-05 09:27:38,621 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:27:40,079 - ERROR - Lỗi khi trading coin XRPUSDT: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
+2025-03-05 09:27:53,407 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:27:53,592 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
+2025-03-05 09:27:53,733 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:27:55,157 - ERROR - Lỗi khi trading coin XRPUSDT: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
+2025-03-05 09:29:04,952 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:29:05,080 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
+2025-03-05 09:29:05,166 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:29:05,361 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:29:05,475 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
+2025-03-05 09:29:05,557 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:29:06,492 - ERROR - Lỗi khi trading coin XRPUSDT: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
+2025-03-05 09:29:23,311 - ERROR - Lỗi trong vòng lặp: 'profit'
+2025-03-05 09:31:24,670 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:31:24,862 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
+2025-03-05 09:31:25,010 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:31:25,409 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
+2025-03-05 09:31:25,694 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
+2025-03-05 09:31:25,826 - INFO - Đồng bộ vị thế từ Binance thành công!
+2025-03-05 09:31:27,712 - ERROR - Lỗi khi trading coin XRPUSDT: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
