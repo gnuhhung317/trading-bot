@@ -18,12 +18,12 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 client = Client(API_KEY, API_SECRET)
 
 COINS = {
-    "ETHUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.001},     # Giữ nguyên, coin lớn ổn định
-    "XRPUSDT": {"leverage": 5, "quantity_precision": 1, "min_size": 1},         # Giữ nguyên, biến động trung bình
+    "ETHUSDT": {"leverage": 5, "quantity_precision": 3, "min_size": 0.001},     # Giữ nguyên, coin lớn ổn định
+    "XRPUSDT": {"leverage": 5, "quantity_precision": 1, "min_size": 0.1},         # Giữ nguyên, biến động trung bình
     "ADAUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},         # Giữ nguyên, ổn định trung bình
-    "SOLUSDT": {"leverage": 5, "quantity_precision": 1, "min_size": 0.01},      # Thêm, coin lớn, biến động cao
-    "NEARUSDT": {"leverage": 5, "quantity_precision": 1, "min_size": 0.1},      # Thêm, layer-1, tiềm năng tăng trưởng
-    "LINKUSDT": {"leverage": 5, "quantity_precision": 1, "min_size": 0.1}       # Thêm, utility coin, ổn định
+    # "SOLUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},      # Thêm, coin lớn, biến động cao
+    "NEARUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},      # Thêm, layer-1, tiềm năng tăng trưởng
+    "LINKUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01}       # Thêm, utility coin, ổn định
 }
 
 TIMEFRAME = '5m'
@@ -515,7 +515,6 @@ def send_periodic_report():
 def trading_loop():
     global balance, initial_balance
     last_report_time = datetime.now()
-    sync_positions_from_binance()  # Đồng bộ lúc khởi động
     
     while True:
         try:
@@ -523,6 +522,7 @@ def trading_loop():
             seconds_to_next_candle = (5 - (now.minute % 5)) * 60 - now.second
             if seconds_to_next_candle > 0:
                 logging.debug(f"Đợi {seconds_to_next_candle} giây đến nến tiếp theo")
+                sync_positions_from_binance()  # Đồng bộ lúc khởi động
                 time.sleep(seconds_to_next_candle)
             
             account_info = client.futures_account()
