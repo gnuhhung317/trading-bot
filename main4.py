@@ -18,12 +18,12 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 client = Client(API_KEY, API_SECRET)
 
 COINS = {
-    "ETHUSDT": {"leverage": 10, "quantity_precision": 3, "min_size": 0.001},     # Giữ nguyên, coin lớn ổn định
-    "XRPUSDT": {"leverage": 10, "quantity_precision": 1, "min_size": 0.1},         # Giữ nguyên, biến động trung bình
-    "ADAUSDT": {"leverage": 10, "quantity_precision": 0, "min_size": 1},         # Giữ nguyên, ổn định trung bình
-    # "SOLUSDT": {"leverage": 10, "quantity_precision": 0, "min_size": 1},      # Thêm, coin lớn, biến động cao
-    "NEARUSDT": {"leverage": 10, "quantity_precision": 0, "min_size": 1},      # Thêm, layer-1, tiềm năng tăng trưởng
-    "LINKUSDT": {"leverage": 10, "quantity_precision": 2, "min_size": 0.01}       # Thêm, utility coin, ổn định
+    "ETHUSDT": {"leverage": 6, "quantity_precision": 3, "min_size": 0.001},     # Giữ nguyên, coin lớn ổn định
+    "XRPUSDT": {"leverage": 6, "quantity_precision": 1, "min_size": 0.1},         # Giữ nguyên, biến động trung bình
+    "ADAUSDT": {"leverage": 6, "quantity_precision": 0, "min_size": 1},         # Giữ nguyên, ổn định trung bình
+    # "SOLUSDT": {"leverage": 6, "quantity_precision": 0, "min_size": 1},      # Thêm, coin lớn, biến động cao
+    "NEARUSDT": {"leverage": 6, "quantity_precision": 0, "min_size": 1},      # Thêm, layer-1, tiềm năng tăng trưởng
+    "LINKUSDT": {"leverage": 6, "quantity_precision": 2, "min_size": 0.01}       # Thêm, utility coin, ổn định
 }
 
 TIMEFRAME = '5m'
