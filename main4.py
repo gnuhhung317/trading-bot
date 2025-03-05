@@ -54,6 +54,11 @@ trades = []
 initial_balance = None
 balance = None
 
+def round_to_precision(symbol,size):
+    size = round(size, COINS[symbol]["quantity_precision"])
+    if COINS[symbol]["quantity_precision"] == 0:
+        size = int(size)
+    return size
 def send_telegram_message(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "HTML"}
@@ -192,9 +197,7 @@ def enter_position(symbol, signal):
         size = (risk_amount / risk_per_r) * COINS[symbol]["leverage"]
         max_size = available_margin * COINS[symbol]["leverage"] / entry_price * (1 - TAKER_FEE * 2)  # Trừ phí
         size = min(size, max_size)
-        size = round(size, COINS[symbol]["quantity_precision"])
-        if COINS[symbol]["quantity_precision"] == 0:
-            size = int(size)
+        size = round_to_precision(symbol=symbol,size=size)
         
         # Kiểm tra kích thước lệnh tối thiểu
         if size < COINS[symbol]["min_size"]:
@@ -297,6 +300,8 @@ def manage_positions(symbol, df, higher_tf_df):
             
             if r_multiple >= 1.5 and not position['first_target_hit']:
                 exit_size = position['size'] * 0.3
+                exit_size = round_to_precision(symbol=symbol,size=exit_size)
+
                 if exit_size >= COINS[symbol]["min_size"]:
                     order = client.futures_create_order(
                         symbol=symbol, side='SELL', type='MARKET', 
@@ -325,6 +330,8 @@ def manage_positions(symbol, df, higher_tf_df):
                         send_telegram_message(message)
             elif r_multiple >= 2.5 and position['first_target_hit'] and not position['second_target_hit']:
                 exit_size = position['size'] * 0.5
+                exit_size = round_to_precision(symbol=symbol,size=exit_size)
+
                 if exit_size >= COINS[symbol]["min_size"]:
                     order = client.futures_create_order(
                         symbol=symbol, side='SELL', type='MARKET', 
@@ -403,6 +410,8 @@ def manage_positions(symbol, df, higher_tf_df):
             
             if r_multiple >= 1.5 and not position['first_target_hit']:
                 exit_size = position['size'] * 0.3
+                exit_size = round_to_precision(symbol=symbol,size=exit_size)
+
                 if exit_size >= COINS[symbol]["min_size"]:
                     order = client.futures_create_order(
                         symbol=symbol, side='BUY', type='MARKET', 
@@ -431,6 +440,8 @@ def manage_positions(symbol, df, higher_tf_df):
                         send_telegram_message(message)
             elif r_multiple >= 2.5 and position['first_target_hit'] and not position['second_target_hit']:
                 exit_size = position['size'] * 0.5
+                exit_size = round_to_precision(symbol=symbol,size=exit_size)
+
                 if exit_size >= COINS[symbol]["min_size"]:
                     order = client.futures_create_order(
                         symbol=symbol, side='BUY', type='MARKET', 
@@ -580,7 +591,7 @@ def trading_loop():
             if seconds_to_next_candle > 0:
                 logging.debug(f"Đợi {seconds_to_next_candle} giây đến nến tiếp theo")
                 sync_positions_from_binance()  # Đồng bộ lúc khởi động
-                time.sleep(seconds_to_next_candle)
+                # time.sleep(seconds_to_next_candle)
             
             account_info = client.futures_account()
             balance = float(account_info['availableBalance'])
