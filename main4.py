@@ -22,7 +22,6 @@ COINS = {
     "XRPUSDT": {"leverage": 5, "quantity_precision": 1, "min_size": 1},         # Giữ nguyên, biến động trung bình
     "ADAUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},         # Giữ nguyên, ổn định trung bình
     "SOLUSDT": {"leverage": 5, "quantity_precision": 1, "min_size": 0.01},      # Thêm, coin lớn, biến động cao
-    "MATICUSDT": {"leverage": 5, "quantity_precision": 1, "min_size": 1},       # Thêm, layer-2, biến động trung bình
     "NEARUSDT": {"leverage": 5, "quantity_precision": 1, "min_size": 0.1},      # Thêm, layer-1, tiềm năng tăng trưởng
     "LINKUSDT": {"leverage": 5, "quantity_precision": 1, "min_size": 0.1}       # Thêm, utility coin, ổn định
 }
@@ -115,7 +114,7 @@ def add_trend_indicators(df):
     df['downtrend'] = (df['close'] < df['ema50']) & (df['ema50_slope'] < -0.05)
     return df
 
-def check_entry_conditions(df, higher_tf_df):
+def check_entry_conditions(df, higher_tf_df,symbol):
     if df.empty or higher_tf_df.empty:
         logging.warning("Dữ liệu rỗng, bỏ qua kiểm tra điều kiện vào lệnh")
         return None
@@ -134,7 +133,7 @@ def check_entry_conditions(df, higher_tf_df):
     
     signal = 'LONG' if long_condition else 'SHORT' if short_condition else None
     if signal:
-        logging.info(f"Tín hiệu vào lệnh {signal} cho {df.name}")
+        logging.info(f"Tín hiệu vào lệnh {signal} cho")
     return signal
 
 def enter_position(symbol, signal):
@@ -531,7 +530,7 @@ def trading_loop():
                     manage_positions(symbol, df, higher_tf_df)
                 
                 if balance > initial_balance * STOP_LOSS_THRESHOLD and total_positions < MAX_POSITIONS:
-                    signal = check_entry_conditions(df, higher_tf_df)
+                    signal = check_entry_conditions(df, higher_tf_df,symbol=symbol)
                     if signal and not positions[symbol]:
                         enter_position(symbol, signal)
             

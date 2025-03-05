@@ -28,3 +28,17 @@
 2025-03-05 10:38:23,044 - INFO - Đồng bộ XRPUSDT: SHORT, Size=0.6, Entry=2.311094214876
 2025-03-05 10:38:23,044 - INFO - Đồng bộ ADAUSDT: LONG, Size=27.0, Entry=0.9743703703704
 2025-03-05 10:38:23,044 - INFO - Đồng bộ vị thế từ Binance thành công. Balance: 1.92709187
+2025-03-05 11:31:22,823 - INFO - Đặt leverage 5 cho ETHUSDT
+2025-03-05 11:31:22,953 - INFO - Đặt leverage 5 cho XRPUSDT
+2025-03-05 11:31:23,090 - INFO - Đặt leverage 5 cho ADAUSDT
+2025-03-05 11:31:23,231 - INFO - Đặt leverage 5 cho SOLUSDT
+2025-03-05 11:31:23,353 - ERROR - Lỗi đặt leverage cho MATICUSDT: APIError(code=-4141): Symbol is closed.
+2025-03-05 11:31:24,390 - INFO - Gửi tin nhắn Telegram thành công: Lỗi đặt leverage cho MATICUSDT: APIError(code=-414...
+2025-03-05 11:31:24,521 - INFO - Đặt leverage 5 cho NEARUSDT
+2025-03-05 11:31:24,650 - INFO - Đặt leverage 5 cho LINKUSDT
+2025-03-05 11:31:24,650 - INFO - Bắt đầu bot giao dịch...
+2025-03-05 11:31:25,672 - INFO - Gửi tin nhắn Telegram thành công: Bot giao dịch đã khởi động!...
+2025-03-05 11:31:25,809 - INFO - Khởi tạo balance: 0.89398298
+2025-03-05 11:31:25,955 - INFO - Đồng bộ XRPUSDT: SHORT, Size=0.6, Entry=2.311094214876
+2025-03-05 11:31:25,955 - INFO - Đồng bộ ADAUSDT: LONG, Size=27.0, Entry=0.9743703703704
+2025-03-05 11:31:25,955 - INFO - Đồng bộ vị thế từ Binance thành công. Balance: 0.89398298
