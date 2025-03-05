@@ -20,12 +20,16 @@ client = Client(api_key, api_secret)
 
 # Định nghĩa các tham số chiến lược
 COINS = {
-    "DOGEUSDT": {"leverage": 5, "quantity_precision": 0},
-
-    "ETHUSDT": {"leverage": 15, "quantity_precision": 2},
-    "XRPUSDT": {"leverage": 5, "quantity_precision": 1},
-    "BOMEUSDT": {"leverage": 5, "quantity_precision": 0},
-    "ADAUSDT": {"leverage": 5, "quantity_precision": 0},
+    "DOGEUSDT": {"leverage": 5, "quantity_precision": 0},    # Giữ nguyên, meme coin biến động cao
+    "ETHUSDT": {"leverage": 15, "quantity_precision": 2},     # Giữ nguyên, coin lớn ổn định
+    "XRPUSDT": {"leverage": 5, "quantity_precision": 1},      # Giữ nguyên, biến động trung bình
+    "BOMEUSDT": {"leverage": 5, "quantity_precision": 0},     # Giữ nguyên, meme coin giá thấp
+    "ADAUSDT": {"leverage": 5, "quantity_precision": 0},      # Giữ nguyên, ổn định trung bình
+    "SOLUSDT": {"leverage": 5, "quantity_precision": 1},     # Thêm, coin lớn, biến động cao
+    "MATICUSDT": {"leverage": 5, "quantity_precision": 1},    # Thêm, layer-2, biến động trung bình
+    "NEARUSDT": {"leverage": 5, "quantity_precision": 1},     # Thêm, layer-1, tiềm năng tăng trưởng
+    "PEPEUSDT": {"leverage": 5, "quantity_precision": 0},     # Thêm, meme coin, biến động rất cao
+    "LINKUSDT": {"leverage": 5, "quantity_precision": 1}      # Thêm, utility coin, ổn định
 }
 
 TIMEFRAME = '5m'
@@ -118,13 +122,13 @@ def check_entry_conditions(df, higher_tf_df, current_idx):
 
     long_primary = [current['ema9'] > current['ema21'], 
                     current['ema_cross_up'] or current['macd_cross_up'] or current['breakout_up']]
-    long_secondary = [current['rsi14'] < 70, current['volume_increase'], current['macd'] > 0]
+    long_secondary = [current['rsi14'] < 80, current['volume_increase'], current['macd'] > 0]
     long_condition = (all(long_primary) and any(long_secondary) and 
                       (higher_current['uptrend'] or (higher_current['adx'] > 25 and higher_current['di_plus'] > higher_current['di_minus'])))
 
     short_primary = [current['ema9'] < current['ema21'], 
                      current['ema_cross_down'] or current['macd_cross_down'] or current['breakout_down']]
-    short_secondary = [current['rsi14'] > 30, current['volume_increase'], current['macd'] < 0]
+    short_secondary = [current['rsi14'] > 20, current['volume_increase'], current['macd'] < 0]
     short_condition = (all(short_primary) and any(short_secondary) and 
                        (higher_current['downtrend'] or (higher_current['adx'] > 25 and higher_current['di_minus'] > higher_current['di_plus'])))
 
@@ -572,7 +576,7 @@ def test_multi_coin_strategy(start_date, end_date, interval):
         print(f"Lỗi khi chạy backtest: {str(e)}")
 
 if __name__ == "__main__":
-    start_date = "2024-02-04"  # Sử dụng dữ liệu quá khứ để backtest
-    end_date = "2024-03-05"
+    start_date = "2025-01-04"  # Sử dụng dữ liệu quá khứ để backtest
+    end_date = "2025-03-05"
     interval = Client.KLINE_INTERVAL_5MINUTE
     test_multi_coin_strategy(start_date, end_date, interval)

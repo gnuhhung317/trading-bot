@@ -8,3 +8,23 @@
 2025-03-05 09:55:39,381 - INFO - Gửi tin nhắn Telegram thành công: Bot giao dịch đã khởi động!...
 2025-03-05 09:55:39,501 - ERROR - Lỗi khi đồng bộ vị thế: unsupported operand type(s) for *: 'NoneType' and 'float'
 2025-03-05 09:55:40,521 - INFO - Gửi tin nhắn Telegram thành công: Lỗi khi đồng bộ vị thế: unsupported operand type(s...
+2025-03-05 10:38:17,466 - INFO - Đặt leverage 5 cho DOGEUSDT
+2025-03-05 10:38:17,596 - INFO - Đặt leverage 15 cho ETHUSDT
+2025-03-05 10:38:17,734 - INFO - Đặt leverage 5 cho XRPUSDT
+2025-03-05 10:38:17,863 - INFO - Đặt leverage 5 cho BOMEUSDT
+2025-03-05 10:38:17,990 - ERROR - Lỗi đặt leverage cho ADAUSDT: APIError(code=-2028): Leverage is smaller than permitted: insufficient margin balance.
+2025-03-05 10:38:19,061 - INFO - Gửi tin nhắn Telegram thành công: Lỗi đặt leverage cho ADAUSDT: APIError(code=-2028)...
+2025-03-05 10:38:19,191 - INFO - Đặt leverage 10 cho SOLUSDT
+2025-03-05 10:38:19,313 - ERROR - Lỗi đặt leverage cho MATICUSDT: APIError(code=-4141): Symbol is closed.
+2025-03-05 10:38:20,332 - INFO - Gửi tin nhắn Telegram thành công: Lỗi đặt leverage cho MATICUSDT: APIError(code=-414...
+2025-03-05 10:38:20,463 - INFO - Đặt leverage 5 cho NEARUSDT
+2025-03-05 10:38:20,586 - ERROR - Lỗi đặt leverage cho PEPEUSDT: APIError(code=-1121): Invalid symbol.
+2025-03-05 10:38:21,602 - INFO - Gửi tin nhắn Telegram thành công: Lỗi đặt leverage cho PEPEUSDT: APIError(code=-1121...
+2025-03-05 10:38:21,752 - INFO - Đặt leverage 5 cho LINKUSDT
+2025-03-05 10:38:21,752 - INFO - Bắt đầu bot giao dịch...
+2025-03-05 10:38:22,772 - INFO - Gửi tin nhắn Telegram thành công: Bot giao dịch đã khởi động!...
+2025-03-05 10:38:22,920 - INFO - Khởi tạo balance: 1.92709187
+2025-03-05 10:38:23,044 - INFO - Đồng bộ BOMEUSDT: SHORT, Size=7144.0, Entry=0.0016520713886
+2025-03-05 10:38:23,044 - INFO - Đồng bộ XRPUSDT: SHORT, Size=0.6, Entry=2.311094214876
+2025-03-05 10:38:23,044 - INFO - Đồng bộ ADAUSDT: LONG, Size=27.0, Entry=0.9743703703704
+2025-03-05 10:38:23,044 - INFO - Đồng bộ vị thế từ Binance thành công. Balance: 1.92709187

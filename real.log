@@ -1,84 +1,20 @@
-2025-03-05 09:07:14,636 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
-2025-03-05 09:07:14,810 - INFO - Đồng bộ 1000PEPEUSDT: SHORT, Size: 6848.0, Entry: 0.0067740068925
-2025-03-05 09:07:15,015 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:07:15,188 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
-2025-03-05 09:07:32,142 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
-2025-03-05 09:07:32,316 - INFO - Đồng bộ 1000PEPEUSDT: SHORT, Size: 6848.0, Entry: 0.0067740068925
-2025-03-05 09:07:32,528 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:07:32,740 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
-2025-03-05 09:07:32,915 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:09:14,843 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
-2025-03-05 09:09:15,052 - INFO - Đồng bộ 1000PEPEUSDT: SHORT, Size: 6848.0, Entry: 0.0067740068925
-2025-03-05 09:09:15,235 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:09:15,402 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
-2025-03-05 09:09:15,618 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:10:30,016 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
-2025-03-05 09:10:30,273 - INFO - Đồng bộ 1000PEPEUSDT: SHORT, Size: 6848.0, Entry: 0.0067740068925
-2025-03-05 09:10:30,549 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:10:30,885 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
-2025-03-05 09:10:31,011 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:11:01,129 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
-2025-03-05 09:11:01,353 - INFO - Đồng bộ 1000PEPEUSDT: SHORT, Size: 6848.0, Entry: 0.0067740068925
-2025-03-05 09:11:01,562 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:11:01,775 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
-2025-03-05 09:11:01,917 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:11:49,632 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
-2025-03-05 09:11:49,856 - INFO - Đồng bộ 1000PEPEUSDT: SHORT, Size: 6848.0, Entry: 0.0067740068925
-2025-03-05 09:11:50,118 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:11:50,414 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
-2025-03-05 09:11:50,657 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:12:04,309 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
-2025-03-05 09:12:04,529 - INFO - Đồng bộ 1000PEPEUSDT: SHORT, Size: 6848.0, Entry: 0.0067740068925
-2025-03-05 09:12:04,754 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:12:04,957 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
-2025-03-05 09:12:05,192 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:21:17,356 - ERROR - Lỗi trong vòng lặp: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
-2025-03-05 09:22:18,716 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
-2025-03-05 09:22:18,884 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:22:19,064 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
-2025-03-05 09:22:19,199 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:22:24,540 - ERROR - Lỗi trong vòng lặp: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
-2025-03-05 09:23:25,923 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
-2025-03-05 09:23:26,090 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:23:26,264 - INFO - Đồng bộ ADAUSDT: SHORT, Size: 1.0, Entry: 0.7876
-2025-03-05 09:23:26,395 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:26:00,288 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
-2025-03-05 09:26:00,452 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:26:00,646 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
-2025-03-05 09:26:00,783 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:26:01,099 - INFO - Đồng bộ BOMEUSDT: SHORT, Size: 7068.0, Entry: 0.0016414153933
-2025-03-05 09:26:01,270 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:26:01,445 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
-2025-03-05 09:26:01,580 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:26:09,968 - ERROR - Lỗi khi trading coin XRPUSDT: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
-2025-03-05 09:27:00,864 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:27:01,060 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
-2025-03-05 09:27:01,188 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:27:07,801 - ERROR - Lỗi khi trading coin XRPUSDT: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
-2025-03-05 09:27:26,315 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:27:26,516 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
-2025-03-05 09:27:26,656 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:27:28,108 - ERROR - Lỗi khi trading coin XRPUSDT: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
-2025-03-05 09:27:38,303 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:27:38,489 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
-2025-03-05 09:27:38,621 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:27:40,079 - ERROR - Lỗi khi trading coin XRPUSDT: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
-2025-03-05 09:27:53,407 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:27:53,592 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
-2025-03-05 09:27:53,733 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:27:55,157 - ERROR - Lỗi khi trading coin XRPUSDT: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
-2025-03-05 09:29:04,952 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:29:05,080 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
-2025-03-05 09:29:05,166 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:29:05,361 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:29:05,475 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
-2025-03-05 09:29:05,557 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:29:06,492 - ERROR - Lỗi khi trading coin XRPUSDT: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
-2025-03-05 09:29:23,311 - ERROR - Lỗi trong vòng lặp: 'profit'
-2025-03-05 09:31:24,670 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:31:24,862 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
-2025-03-05 09:31:25,010 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:31:25,409 - INFO - Đồng bộ XRPUSDT: SHORT, Size: 0.6, Entry: 2.311094214876
-2025-03-05 09:31:25,694 - INFO - Đồng bộ ADAUSDT: LONG, Size: 13.0, Entry: 0.9682
-2025-03-05 09:31:25,826 - INFO - Đồng bộ vị thế từ Binance thành công!
-2025-03-05 09:31:27,712 - ERROR - Lỗi khi trading coin XRPUSDT: APIError(code=-4164): Order's notional must be no smaller than 5 (unless you choose reduce only).
+1month
+DOGEUSDT: Giao dịch: 272, Lợi nhuận: 1.0818 USDT, Tỷ lệ thắng: 41.54%
+ETHUSDT: Giao dịch: 322, Lợi nhuận: 18.0493 USDT, Tỷ lệ thắng: 51.24%
+XRPUSDT: Giao dịch: 292, Lợi nhuận: 5.0621 USDT, Tỷ lệ thắng: 40.07%
+BOMEUSDT: Giao dịch: 276, Lợi nhuận: 0.0110 USDT, Tỷ lệ thắng: 44.57%
+ADAUSDT: Giao dịch: 291, Lợi nhuận: -1.0688 USDT, Tỷ lệ thắng: 40.21%
+SOLUSDT: Giao dịch: 325, Lợi nhuận: 15.2566 USDT, Tỷ lệ thắng: 48.31%
+NEARUSDT: Giao dịch: 313, Lợi nhuận: 13.6555 USDT, Tỷ lệ thắng: 48.24%
+PEPEUSDT: Giao dịch: 291, Lợi nhuận: 0.0001 USDT, Tỷ lệ thắng: 37.11%
+LINKUSDT: Giao dịch: 274, Lợi nhuận: 4.1606 USDT, Tỷ lệ thắng: 39.78%
+3 month
+DOGEUSDT: Giao dịch: 937, Lợi nhuận: 167.9409 USDT, Tỷ lệ thắng: 41.62%
+ETHUSDT: Giao dịch: 1098, Lợi nhuận: 2358.3506 USDT, Tỷ lệ thắng: 51.91%
+XRPUSDT: Giao dịch: 925, Lợi nhuận: 789.7494 USDT, Tỷ lệ thắng: 43.24%
+BOMEUSDT: Giao dịch: 959, Lợi nhuận: 1.7869 USDT, Tỷ lệ thắng: 42.65%
+ADAUSDT: Giao dịch: 951, Lợi nhuận: -97.5505 USDT, Tỷ lệ thắng: 39.96%
+SOLUSDT: Giao dịch: 945, Lợi nhuận: 936.8715 USDT, Tỷ lệ thắng: 42.65%
+NEARUSDT: Giao dịch: 954, Lợi nhuận: 1553.1086 USDT, Tỷ lệ thắng: 44.86%
+PEPEUSDT: Giao dịch: 906, Lợi nhuận: 0.0081 USDT, Tỷ lệ thắng: 37.31%
+LINKUSDT: Giao dịch: 992, Lợi nhuận: 496.4759 USDT, Tỷ lệ thắng: 45.06%
