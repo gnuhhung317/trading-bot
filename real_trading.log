@@ -42,3 +42,8 @@
 2025-03-05 11:31:25,955 - INFO - Đồng bộ XRPUSDT: SHORT, Size=0.6, Entry=2.311094214876
 2025-03-05 11:31:25,955 - INFO - Đồng bộ ADAUSDT: LONG, Size=27.0, Entry=0.9743703703704
 2025-03-05 11:31:25,955 - INFO - Đồng bộ vị thế từ Binance thành công. Balance: 0.89398298
+2025-03-05 13:03:31,436 - ERROR - Lỗi đặt leverage cho ETHUSDT: APIError(code=-2015): Invalid API-key, IP, or permissions for action
+2025-03-05 13:03:32,756 - INFO - Gửi tin nhắn Telegram thành công: Lỗi đặt leverage cho ETHUSDT: APIError(code=-2015)...
+2025-03-05 13:03:32,859 - ERROR - Lỗi đặt leverage cho XRPUSDT: APIError(code=-2015): Invalid API-key, IP, or permissions for action
+2025-03-05 13:03:33,978 - INFO - Gửi tin nhắn Telegram thành công: Lỗi đặt leverage cho XRPUSDT: APIError(code=-2015)...
+2025-03-05 13:03:34,092 - ERROR - Lỗi đặt leverage cho ADAUSDT: APIError(code=-2015): Invalid API-key, IP, or permissions for action

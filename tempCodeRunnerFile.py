@@ -1,1 +1,1 @@
-1000PEPEUSDT
+send_telegram_message

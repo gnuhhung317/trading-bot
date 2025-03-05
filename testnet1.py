@@ -11,11 +11,11 @@ import requests
 load_dotenv()
 
 # Cấu hình cơ bản
-API_KEY = os.getenv("BINANCE_API_KEY", "")
-API_SECRET = os.getenv("BINANCE_API_SECRET", "")
+API_KEY = os.getenv("TESTNET_API_KEY", "")
+API_SECRET = os.getenv("TESTNET_API_SECRET", "")
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
-client = Client(API_KEY, API_SECRET)
+client = Client(API_KEY, API_SECRET,testnet=True)
 
 COINS = {
     "ETHUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.001},     # Giữ nguyên, coin lớn ổn định
@@ -35,7 +35,7 @@ TAKER_FEE = 0.0004  # 0.04% phí taker
 
 # Logging
 logging.basicConfig(
-    filename='real_trading.log',
+    filename='test_trading.log',
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     encoding='utf-8'
@@ -238,24 +238,19 @@ def manage_positions(symbol, df, higher_tf_df):
                     client.futures_cancel_all_open_orders(symbol=symbol)
                     client.futures_create_order(
                         symbol=symbol, side='SELL', type='STOP_MARKET',
-                        stopPrice=new_stop, quantity=position['size'],
-                        reduceOnly=True  # Thêm reduceOnly cho trailing stop
+                        stopPrice=new_stop, quantity=position['size']
                     )
                     logging.info(f"{symbol} - Trailing stop updated to {new_stop}")
             
             if r_multiple >= 1.5 and not position['first_target_hit']:
                 exit_size = position['size'] * 0.3
                 if exit_size >= COINS[symbol]["min_size"]:
-                    order = client.futures_create_order(
-                        symbol=symbol, side='SELL', type='MARKET', 
-                        quantity=exit_size, reduceOnly=True  # Thêm reduceOnly cho thoát 30%
-                    )
+                    order = client.futures_create_order(symbol=symbol, side='SELL', type='MARKET', quantity=exit_size)
                     if order and order['status'] == 'FILLED':
                         position['size'] -= exit_size
                         position['first_target_hit'] = True
                         trade = {
-                            'type': 'LONG (Partial 30%)', 'entry_time': position['entry_time'], 
-                            'exit_time': datetime.now(),
+                            'type': 'LONG (Partial 30%)', 'entry_time': position['entry_time'], 'exit_time': datetime.now(),
                             'entry_price': position['entry_price'], 'exit_price': current_price,
                             'profit': (current_price - position['entry_price']) * exit_size * (1 - TAKER_FEE)
                         }
@@ -274,16 +269,12 @@ def manage_positions(symbol, df, higher_tf_df):
             elif r_multiple >= 2.5 and position['first_target_hit'] and not position['second_target_hit']:
                 exit_size = position['size'] * 0.5
                 if exit_size >= COINS[symbol]["min_size"]:
-                    order = client.futures_create_order(
-                        symbol=symbol, side='SELL', type='MARKET', 
-                        quantity=exit_size, reduceOnly=True  # Thêm reduceOnly cho thoát 50%
-                    )
+                    order = client.futures_create_order(symbol=symbol, side='SELL', type='MARKET', quantity=exit_size)
                     if order and order['status'] == 'FILLED':
                         position['size'] -= exit_size
                         position['second_target_hit'] = True
                         trade = {
-                            'type': 'LONG (Partial 50%)', 'entry_time': position['entry_time'], 
-                            'exit_time': datetime.now(),
+                            'type': 'LONG (Partial 50%)', 'entry_time': position['entry_time'], 'exit_time': datetime.now(),
                             'entry_price': position['entry_price'], 'exit_price': current_price,
                             'profit': (current_price - position['entry_price']) * exit_size * (1 - TAKER_FEE)
                         }
@@ -306,10 +297,7 @@ def manage_positions(symbol, df, higher_tf_df):
             ]
             if any(exit_conditions):
                 client.futures_cancel_all_open_orders(symbol=symbol)
-                order = client.futures_create_order(
-                    symbol=symbol, side='SELL', type='MARKET', 
-                    quantity=position['size'], reduceOnly=True  # Thêm reduceOnly cho thoát toàn bộ
-                )
+                order = client.futures_create_order(symbol=symbol, side='SELL', type='MARKET', quantity=position['size'])
                 if order and order['status'] == 'FILLED':
                     exit_price = current_price if current_price > position['stop_loss'] else position['stop_loss']
                     trade = {
@@ -344,24 +332,19 @@ def manage_positions(symbol, df, higher_tf_df):
                     client.futures_cancel_all_open_orders(symbol=symbol)
                     client.futures_create_order(
                         symbol=symbol, side='BUY', type='STOP_MARKET',
-                        stopPrice=new_stop, quantity=position['size'],
-                        reduceOnly=True  # Thêm reduceOnly cho trailing stop
+                        stopPrice=new_stop, quantity=position['size']
                     )
                     logging.info(f"{symbol} - Trailing stop updated to {new_stop}")
             
             if r_multiple >= 1.5 and not position['first_target_hit']:
                 exit_size = position['size'] * 0.3
                 if exit_size >= COINS[symbol]["min_size"]:
-                    order = client.futures_create_order(
-                        symbol=symbol, side='BUY', type='MARKET', 
-                        quantity=exit_size, reduceOnly=True  # Thêm reduceOnly cho thoát 30%
-                    )
+                    order = client.futures_create_order(symbol=symbol, side='BUY', type='MARKET', quantity=exit_size)
                     if order and order['status'] == 'FILLED':
                         position['size'] -= exit_size
                         position['first_target_hit'] = True
                         trade = {
-                            'type': 'SHORT (Partial 30%)', 'entry_time': position['entry_time'], 
-                            'exit_time': datetime.now(),
+                            'type': 'SHORT (Partial 30%)', 'entry_time': position['entry_time'], 'exit_time': datetime.now(),
                             'entry_price': position['entry_price'], 'exit_price': current_price,
                             'profit': (position['entry_price'] - current_price) * exit_size * (1 - TAKER_FEE)
                         }
@@ -380,16 +363,12 @@ def manage_positions(symbol, df, higher_tf_df):
             elif r_multiple >= 2.5 and position['first_target_hit'] and not position['second_target_hit']:
                 exit_size = position['size'] * 0.5
                 if exit_size >= COINS[symbol]["min_size"]:
-                    order = client.futures_create_order(
-                        symbol=symbol, side='BUY', type='MARKET', 
-                        quantity=exit_size, reduceOnly=True  # Thêm reduceOnly cho thoát 50%
-                    )
+                    order = client.futures_create_order(symbol=symbol, side='BUY', type='MARKET', quantity=exit_size)
                     if order and order['status'] == 'FILLED':
                         position['size'] -= exit_size
                         position['second_target_hit'] = True
                         trade = {
-                            'type': 'SHORT (Partial 50%)', 'entry_time': position['entry_time'], 
-                            'exit_time': datetime.now(),
+                            'type': 'SHORT (Partial 50%)', 'entry_time': position['entry_time'], 'exit_time': datetime.now(),
                             'entry_price': position['entry_price'], 'exit_price': current_price,
                             'profit': (position['entry_price'] - current_price) * exit_size * (1 - TAKER_FEE)
                         }
@@ -412,10 +391,7 @@ def manage_positions(symbol, df, higher_tf_df):
             ]
             if any(exit_conditions):
                 client.futures_cancel_all_open_orders(symbol=symbol)
-                order = client.futures_create_order(
-                    symbol=symbol, side='BUY', type='MARKET', 
-                    quantity=position['size'], reduceOnly=True  # Thêm reduceOnly cho thoát toàn bộ
-                )
+                order = client.futures_create_order(symbol=symbol, side='BUY', type='MARKET', quantity=position['size'])
                 if order and order['status'] == 'FILLED':
                     exit_price = current_price if current_price < position['stop_loss'] else position['stop_loss']
                     trade = {
@@ -436,6 +412,7 @@ def manage_positions(symbol, df, higher_tf_df):
                         f"Profit: {trade['profit']:.4f}"
                     )
                     send_telegram_message(message)
+
 def sync_positions_from_binance():
     global balance, initial_balance
     try:
@@ -479,7 +456,7 @@ def sync_positions_from_binance():
         logging.info(f"Đồng bộ vị thế từ Binance thành công. Balance: {balance}")
     except Exception as e:
         logging.error(f"Lỗi khi đồng bộ vị thế: {e}")
-        send_telegram_message(TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, f"Lỗi khi đồng bộ vị thế: {e}")
+        send_telegram_message(f"Lỗi khi đồng bộ vị thế: {e}")
         balance = balance if balance is not None else 0  # Đảm bảo balance không bị None
 
 def send_periodic_report():
@@ -523,7 +500,7 @@ def trading_loop():
             seconds_to_next_candle = (5 - (now.minute % 5)) * 60 - now.second
             if seconds_to_next_candle > 0:
                 logging.debug(f"Đợi {seconds_to_next_candle} giây đến nến tiếp theo")
-                time.sleep(seconds_to_next_candle)
+                # time.sleep(seconds_to_next_candle)
             
             account_info = client.futures_account()
             balance = float(account_info['availableBalance'])
