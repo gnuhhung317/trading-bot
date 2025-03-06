@@ -19,22 +19,23 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 client = Client(API_KEY, API_SECRET)
 
 COINS = {
-    "XRPUSDT": {"leverage": 10, "quantity_precision": 1, "min_size": 0.1},  # Giảm đòn bẩy
-    "ETHUSDT": {"leverage": 10, "quantity_precision": 3, "min_size": 0.001},
-    'AAVEUSDT': {'leverage': 10, 'quantity_precision': 1, 'min_size': 0.1},
-    'LINKUSDT': {'leverage': 10, 'quantity_precision': 2, 'min_size': 0.01},
-    'VANAUSDT': {'leverage': 10, 'quantity_precision': 2, 'min_size': 0.01},
-    'TAOUSDT': {'leverage': 10, 'quantity_precision': 3, 'min_size': 0.001},
-    'TIAUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1},
-    'MKRUSDT': {'leverage': 10, 'quantity_precision': 3, 'min_size': 0.001},
-    'LTCUSDT': {'leverage': 10, 'quantity_precision': 3, 'min_size': 0.001},
-    'ENAUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1},
-    'NEARUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1},
-    'BNXUSDT': {'leverage': 6, 'quantity_precision': 1, 'min_size': 0.1}
+    # "XRPUSDT": {"leverage": 10, "quantity_precision": 1, "min_size": 0.1},  # Giảm đòn bẩy
+    # "ETHUSDT": {"leverage": 10, "quantity_precision": 3, "min_size": 0.001},
+    # 'AAVEUSDT': {'leverage': 10, 'quantity_precision': 1, 'min_size': 0.1},
+    # 'LINKUSDT': {'leverage': 10, 'quantity_precision': 2, 'min_size': 0.01},
+    # 'VANAUSDT': {'leverage': 10, 'quantity_precision': 2, 'min_size': 0.01},
+    # 'TAOUSDT': {'leverage': 10, 'quantity_precision': 3, 'min_size': 0.001},
+    # 'TIAUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1},
+    # 'MKRUSDT': {'leverage': 10, 'quantity_precision': 3, 'min_size': 0.001},
+    # 'LTCUSDT': {'leverage': 10, 'quantity_precision': 3, 'min_size': 0.001},
+    # 'ENAUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1},
+    # 'NEARUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1},
+    # 'BNXUSDT': {'leverage': 6, 'quantity_precision': 1, 'min_size': 0.1}
+    'REZUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1}
 }
 
 TIMEFRAME = '5m'
-HIGHER_TIMEFRAME = '4h'
+HIGHER_TIMEFRAME = '1h'
 RISK_PER_TRADE = 0.01  # Giảm xuống 1%
 STOP_LOSS_THRESHOLD = 0.1
 MAX_POSITIONS = 5
@@ -196,7 +197,6 @@ def enter_position(symbol, signal):
         current_margin_used = sum(float(pos['initialMargin']) for pos in position_info if pos['symbol'] == symbol)
         
         df = get_historical_data(symbol, TIMEFRAME)
-        df.name = symbol
         df = add_signal_indicators(df)
         if df.empty:
             logging.warning(f"{symbol} - Không có dữ liệu để vào lệnh")
@@ -247,14 +247,6 @@ def enter_position(symbol, signal):
             }
             positions[symbol].append(position)
             
-            stop_order = client.futures_create_order(
-                symbol=symbol,
-                side='SELL' if signal == 'LONG' else 'BUY',
-                type='STOP_MARKET',
-                stopPrice=position['stop_loss'],
-                quantity=position['size'],
-                reduceOnly=True
-            )
             logging.info(f"{symbol} - Vào lệnh {signal}: Price={entry_price}, SL={stop_loss}, Size={size}, OrderID={order['orderId']}")
             message = (
                 f"<b>{symbol} - {signal} Order</b>\n"
@@ -270,7 +262,6 @@ def enter_position(symbol, signal):
         line_number = tb.tb_lineno
         logging.error(f"{symbol} - Lỗi khi enter position {symbol}-{signal}: {e} - {line_number}")
         send_telegram_message(f"{symbol} - Lỗi khi enter position {symbol}-{signal}: {e} - {line_number}")
-
 def manage_positions(symbol, df, higher_tf_df):
     global balance, trades
     if df.empty or higher_tf_df.empty:
@@ -280,20 +271,24 @@ def manage_positions(symbol, df, higher_tf_df):
     current = df.iloc[-1]
     current_price = float(client.futures_symbol_ticker(symbol=symbol)['price'])
     atr = current['atr14']
+    volume_ma10 = current.get('volume_ma10', 0)  # Giả sử có volume_ma10, nếu không thì mặc định là 0
     
     for i, position in enumerate(positions[symbol][:]):
         profit = (current_price - position['entry_price']) * position['size'] * (1 if position['type'] == 'LONG' else -1)
         r_multiple = profit / position['risk_per_r'] if position['risk_per_r'] != 0 else 0
+        time_in_position = (datetime.now() - position['entry_time']).total_seconds() / 3600  # Tính giờ
         
         if position['type'] == 'LONG':
-            if r_multiple > 0.5 and not position['breakeven_activated']:  # Sớm hơn
+            # **Đặt stop loss về hòa vốn khi R > 1 (thay vì 0.5 để tránh thoát sớm)**
+            if r_multiple > 1 and not position.get('breakeven_activated', False):
                 position['stop_loss'] = position['entry_price']
                 position['stop_loss'] = round_to_precision(symbol=symbol, size=position['stop_loss'], value_type='price')
                 position['breakeven_activated'] = True
                 logging.info(f"{symbol} - Breakeven activated at {position['entry_price']}")
             
-            if r_multiple > 1:
-                new_stop = current_price - atr * 2  # Tăng khoảng cách trailing stop
+            # **Trailing stop dựa trên EMA21 (thay vì ATR cố định để theo sát xu hướng)**
+            if r_multiple > 1 and 'ema21' in current:
+                new_stop = current['ema21']
                 new_stop = round_to_precision(symbol=symbol, size=new_stop, value_type='price')
                 if new_stop > position['stop_loss']:
                     position['stop_loss'] = new_stop
@@ -303,10 +298,11 @@ def manage_positions(symbol, df, higher_tf_df):
                         stopPrice=new_stop, quantity=position['size'],
                         reduceOnly=True
                     )
-                    logging.info(f"{symbol} - Trailing stop updated to {new_stop}")
+                    logging.info(f"{symbol} - Trailing stop updated to {new_stop} (EMA21)")
             
-            if r_multiple >= 2 and not position['first_target_hit']:  # 2R
-                exit_size = position['size'] * 0.2  # Giảm xuống 20%
+            # **Thoát lệnh một phần tại các mức R cao hơn để tối ưu hóa lợi nhuận**
+            if r_multiple >= 2 and not position.get('first_target_hit', False):
+                exit_size = position['size'] * 0.2  # 20% tại 2R
                 exit_size = round_to_precision(symbol=symbol, size=exit_size)
                 if exit_size >= COINS[symbol]["min_size"]:
                     order = client.futures_create_order(
@@ -317,16 +313,16 @@ def manage_positions(symbol, df, higher_tf_df):
                         position['size'] -= exit_size
                         position['first_target_hit'] = True
                         trade = {
-                            'type': 'LONG (Partial 20%)', 'entry_time': position['entry_time'],
+                            'type': 'LONG (Partial 20% at 2R)', 'entry_time': position['entry_time'],
                             'exit_time': datetime.now(),
                             'entry_price': position['entry_price'], 'exit_price': current_price,
                             'profit': (current_price - position['entry_price']) * exit_size * (1 - TAKER_FEE)
                         }
                         trades.append(trade)
                         balance += trade['profit']
-                        logging.info(f"{symbol} - Thoát 20% LONG tại {current_price}, Profit: {trade['profit']}")
+                        logging.info(f"{symbol} - Thoát 20% LONG tại {current_price} (2R), Profit: {trade['profit']}")
                         message = (
-                            f"<b>{symbol} - LONG Partial Exit (20%)</b>\n"
+                            f"<b>{symbol} - LONG Partial Exit (20% at 2R)</b>\n"
                             f"Time: {trade['exit_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
                             f"Entry Price: {position['entry_price']:.4f}\n"
                             f"Exit Price: {current_price:.4f}\n"
@@ -334,8 +330,9 @@ def manage_positions(symbol, df, higher_tf_df):
                             f"Profit: {trade['profit']:.4f}"
                         )
                         send_telegram_message(message)
-            elif r_multiple >= 3 and position['first_target_hit'] and not position['second_target_hit']:  # 3R
-                exit_size = position['size'] * 0.3  # 30%
+            
+            elif r_multiple >= 4 and position.get('first_target_hit', False) and not position.get('second_target_hit', False):
+                exit_size = position['size'] * 0.3  # 30% tại 4R
                 exit_size = round_to_precision(symbol=symbol, size=exit_size)
                 if exit_size >= COINS[symbol]["min_size"]:
                     order = client.futures_create_order(
@@ -346,16 +343,16 @@ def manage_positions(symbol, df, higher_tf_df):
                         position['size'] -= exit_size
                         position['second_target_hit'] = True
                         trade = {
-                            'type': 'LONG (Partial 30%)', 'entry_time': position['entry_time'],
+                            'type': 'LONG (Partial 30% at 4R)', 'entry_time': position['entry_time'],
                             'exit_time': datetime.now(),
                             'entry_price': position['entry_price'], 'exit_price': current_price,
                             'profit': (current_price - position['entry_price']) * exit_size * (1 - TAKER_FEE)
                         }
                         trades.append(trade)
                         balance += trade['profit']
-                        logging.info(f"{symbol} - Thoát 30% LONG tại {current_price}, Profit: {trade['profit']}")
+                        logging.info(f"{symbol} - Thoát 30% LONG tại {current_price} (4R), Profit: {trade['profit']}")
                         message = (
-                            f"<b>{symbol} - LONG Partial Exit (30%)</b>\n"
+                            f"<b>{symbol} - LONG Partial Exit (30% at 4R)</b>\n"
                             f"Time: {trade['exit_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
                             f"Entry Price: {position['entry_price']:.4f}\n"
                             f"Exit Price: {current_price:.4f}\n"
@@ -364,9 +361,46 @@ def manage_positions(symbol, df, higher_tf_df):
                         )
                         send_telegram_message(message)
             
+            elif r_multiple >= 6 and position.get('second_target_hit', False) and not position.get('third_target_hit', False):
+                exit_size = position['size'] * 0.3  # 30% tại 6R
+                exit_size = round_to_precision(symbol=symbol, size=exit_size)
+                if exit_size >= COINS[symbol]["min_size"]:
+                    order = client.futures_create_order(
+                        symbol=symbol, side='SELL', type='MARKET',
+                        quantity=exit_size, reduceOnly=True
+                    )
+                    if order and order['status'] == 'FILLED':
+                        position['size'] -= exit_size
+                        position['third_target_hit'] = True
+                        trade = {
+                            'type': 'LONG (Partial 30% at 6R)', 'entry_time': position['entry_time'],
+                            'exit_time': datetime.now(),
+                            'entry_price': position['entry_price'], 'exit_price': current_price,
+                            'profit': (current_price - position['entry_price']) * exit_size * (1 - TAKER_FEE)
+                        }
+                        trades.append(trade)
+                        balance += trade['profit']
+                        logging.info(f"{symbol} - Thoát 30% LONG tại {current_price} (6R), Profit: {trade['profit']}")
+                        message = (
+                            f"<b>{symbol} - LONG Partial Exit (30% at 6R)</b>\n"
+                            f"Time: {trade['exit_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
+                            f"Entry Price: {position['entry_price']:.4f}\n"
+                            f"Exit Price: {current_price:.4f}\n"
+                            f"Size: {exit_size:.4f}\n"
+                            f"Profit: {trade['profit']:.4f}"
+                        )
+                        send_telegram_message(message)
+            
+            # **Điều kiện thoát lệnh (bao gồm cắt lỗ sớm và thoát khi xu hướng yếu)**
             exit_conditions = [
-                current_price <= position['stop_loss'], current['ema_cross_down'], current['macd_cross_down'],
-                current['rsi14'] > 70, not higher_tf_df['uptrend'].iloc[-1] and r_multiple > 0, r_multiple >= 5
+                current_price <= position['stop_loss'],  # Chạm stop loss
+                current.get('ema_cross_down', False),  # EMA9 cắt xuống EMA21
+                current.get('macd_cross_down', False),  # MACD cắt xuống
+                current.get('rsi14', 0) > 70,  # RSI quá mua
+                not higher_tf_df['uptrend'].iloc[-1] and r_multiple > 1,  # Xu hướng 4h không còn và R > 1
+                r_multiple >= 10,  # Lãi lớn (giữ vị thế còn lại chạy dài hạn)
+                r_multiple < -1 and time_in_position > 2,  # Lỗ quá 1R sau 2 giờ
+                current.get('volume', 0) < volume_ma10 * 0.5 and r_multiple > 0  # Volume giảm mạnh khi có lãi
             ]
             if any(exit_conditions):
                 client.futures_cancel_all_open_orders(symbol=symbol)
@@ -394,15 +428,18 @@ def manage_positions(symbol, df, higher_tf_df):
                         f"Profit: {trade['profit']:.4f}"
                     )
                     send_telegram_message(message)
+        
         else:  # SHORT
-            if r_multiple > 0.5 and not position['breakeven_activated']:
+            # **Đặt stop loss về hòa vốn khi R > 1**
+            if r_multiple > 1 and not position.get('breakeven_activated', False):
                 position['stop_loss'] = position['entry_price']
                 position['stop_loss'] = round_to_precision(symbol=symbol, size=position['stop_loss'], value_type='price')
                 position['breakeven_activated'] = True
                 logging.info(f"{symbol} - Breakeven activated at {position['entry_price']}")
             
-            if r_multiple > 1:
-                new_stop = current_price + atr * 2
+            # **Trailing stop dựa trên EMA21**
+            if r_multiple > 1 and 'ema21' in current:
+                new_stop = current['ema21']
                 new_stop = round_to_precision(symbol=symbol, size=new_stop, value_type='price')
                 if new_stop < position['stop_loss']:
                     position['stop_loss'] = new_stop
@@ -412,10 +449,11 @@ def manage_positions(symbol, df, higher_tf_df):
                         stopPrice=new_stop, quantity=position['size'],
                         reduceOnly=True
                     )
-                    logging.info(f"{symbol} - Trailing stop updated to {new_stop}")
+                    logging.info(f"{symbol} - Trailing stop updated to {new_stop} (EMA21)")
             
-            if r_multiple >= 2 and not position['first_target_hit']:
-                exit_size = position['size'] * 0.2
+            # **Thoát lệnh một phần cho SHORT**
+            if r_multiple >= 2 and not position.get('first_target_hit', False):
+                exit_size = position['size'] * 0.2  # 20% tại 2R
                 exit_size = round_to_precision(symbol=symbol, size=exit_size)
                 if exit_size >= COINS[symbol]["min_size"]:
                     order = client.futures_create_order(
@@ -426,16 +464,16 @@ def manage_positions(symbol, df, higher_tf_df):
                         position['size'] -= exit_size
                         position['first_target_hit'] = True
                         trade = {
-                            'type': 'SHORT (Partial 20%)', 'entry_time': position['entry_time'],
+                            'type': 'SHORT (Partial 20% at 2R)', 'entry_time': position['entry_time'],
                             'exit_time': datetime.now(),
                             'entry_price': position['entry_price'], 'exit_price': current_price,
                             'profit': (position['entry_price'] - current_price) * exit_size * (1 - TAKER_FEE)
                         }
                         trades.append(trade)
                         balance += trade['profit']
-                        logging.info(f"{symbol} - Thoát 20% SHORT tại {current_price}, Profit: {trade['profit']}")
+                        logging.info(f"{symbol} - Thoát 20% SHORT tại {current_price} (2R), Profit: {trade['profit']}")
                         message = (
-                            f"<b>{symbol} - SHORT Partial Exit (20%)</b>\n"
+                            f"<b>{symbol} - SHORT Partial Exit (20% at 2R)</b>\n"
                             f"Time: {trade['exit_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
                             f"Entry Price: {position['entry_price']:.4f}\n"
                             f"Exit Price: {current_price:.4f}\n"
@@ -443,8 +481,9 @@ def manage_positions(symbol, df, higher_tf_df):
                             f"Profit: {trade['profit']:.4f}"
                         )
                         send_telegram_message(message)
-            elif r_multiple >= 3 and position['first_target_hit'] and not position['second_target_hit']:
-                exit_size = position['size'] * 0.3
+            
+            elif r_multiple >= 4 and position.get('first_target_hit', False) and not position.get('second_target_hit', False):
+                exit_size = position['size'] * 0.3  # 30% tại 4R
                 exit_size = round_to_precision(symbol=symbol, size=exit_size)
                 if exit_size >= COINS[symbol]["min_size"]:
                     order = client.futures_create_order(
@@ -455,16 +494,16 @@ def manage_positions(symbol, df, higher_tf_df):
                         position['size'] -= exit_size
                         position['second_target_hit'] = True
                         trade = {
-                            'type': 'SHORT (Partial 30%)', 'entry_time': position['entry_time'],
+                            'type': 'SHORT (Partial 30% at 4R)', 'entry_time': position['entry_time'],
                             'exit_time': datetime.now(),
                             'entry_price': position['entry_price'], 'exit_price': current_price,
                             'profit': (position['entry_price'] - current_price) * exit_size * (1 - TAKER_FEE)
                         }
                         trades.append(trade)
                         balance += trade['profit']
-                        logging.info(f"{symbol} - Thoát 30% SHORT tại {current_price}, Profit: {trade['profit']}")
+                        logging.info(f"{symbol} - Thoát 30% SHORT tại {current_price} (4R), Profit: {trade['profit']}")
                         message = (
-                            f"<b>{symbol} - SHORT Partial Exit (30%)</b>\n"
+                            f"<b>{symbol} - SHORT Partial Exit (30% at 4R)</b>\n"
                             f"Time: {trade['exit_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
                             f"Entry Price: {position['entry_price']:.4f}\n"
                             f"Exit Price: {current_price:.4f}\n"
@@ -473,9 +512,46 @@ def manage_positions(symbol, df, higher_tf_df):
                         )
                         send_telegram_message(message)
             
+            elif r_multiple >= 6 and position.get('second_target_hit', False) and not position.get('third_target_hit', False):
+                exit_size = position['size'] * 0.3  # 30% tại 6R
+                exit_size = round_to_precision(symbol=symbol, size=exit_size)
+                if exit_size >= COINS[symbol]["min_size"]:
+                    order = client.futures_create_order(
+                        symbol=symbol, side='BUY', type='MARKET',
+                        quantity=exit_size, reduceOnly=True
+                    )
+                    if order and order['status'] == 'FILLED':
+                        position['size'] -= exit_size
+                        position['third_target_hit'] = True
+                        trade = {
+                            'type': 'SHORT (Partial 30% at 6R)', 'entry_time': position['entry_time'],
+                            'exit_time': datetime.now(),
+                            'entry_price': position['entry_price'], 'exit_price': current_price,
+                            'profit': (position['entry_price'] - current_price) * exit_size * (1 - TAKER_FEE)
+                        }
+                        trades.append(trade)
+                        balance += trade['profit']
+                        logging.info(f"{symbol} - Thoát 30% SHORT tại {current_price} (6R), Profit: {trade['profit']}")
+                        message = (
+                            f"<b>{symbol} - SHORT Partial Exit (30% at 6R)</b>\n"
+                            f"Time: {trade['exit_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
+                            f"Entry Price: {position['entry_price']:.4f}\n"
+                            f"Exit Price: {current_price:.4f}\n"
+                            f"Size: {exit_size:.4f}\n"
+                            f"Profit: {trade['profit']:.4f}"
+                        )
+                        send_telegram_message(message)
+            
+            # **Điều kiện thoát lệnh cho SHORT**
             exit_conditions = [
-                current_price >= position['stop_loss'], current['ema_cross_up'], current['macd_cross_up'],
-                current['rsi14'] < 30, not higher_tf_df['downtrend'].iloc[-1] and r_multiple > 0, r_multiple >= 5
+                current_price >= position['stop_loss'],  # Chạm stop loss
+                current.get('ema_cross_up', False),  # EMA9 cắt lên EMA21
+                current.get('macd_cross_up', False),  # MACD cắt lên
+                current.get('rsi14', 0) < 30,  # RSI quá bán
+                not higher_tf_df['downtrend'].iloc[-1] and r_multiple > 1,  # Xu hướng 4h không còn và R > 1
+                r_multiple >= 10,  # Lãi lớn
+                r_multiple < -1 and time_in_position > 2,  # Lỗ quá 1R sau 2 giờ
+                current.get('volume', 0) < volume_ma10 * 0.5 and r_multiple > 0  # Volume giảm mạnh khi có lãi
             ]
             if any(exit_conditions):
                 client.futures_cancel_all_open_orders(symbol=symbol)
@@ -503,7 +579,6 @@ def manage_positions(symbol, df, higher_tf_df):
                         f"Profit: {trade['profit']:.4f}"
                     )
                     send_telegram_message(message)
-
 def sync_positions_from_binance():
     global balance, initial_balance
     try:
