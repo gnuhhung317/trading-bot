@@ -21,17 +21,22 @@ client = Client(api_key, api_secret)
 # Định nghĩa các tham số chiến lược
 
 COINS = {
-    "ETHUSDT": {"leverage": 5, "quantity_precision": 3, "min_size": 0.001},     # Giữ nguyên, coin lớn ổn định
-    "XRPUSDT": {"leverage": 5, "quantity_precision": 1, "min_size": 0.1},         # Giữ nguyên, biến động trung bình
-    "ADAUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},         # Giữ nguyên, ổn định trung bình
-    # "SOLUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},      # Thêm, coin lớn, biến động cao
-    "NEARUSDT": {"leverage": 5, "quantity_precision": 0, "min_size": 1},      # Thêm, layer-1, tiềm năng tăng trưởng
-    "LINKUSDT": {"leverage": 5, "quantity_precision": 2, "min_size": 0.01}       # Thêm, utility coin, ổn định
+    "XRPUSDT": {"leverage": 10, "quantity_precision": 1, "min_size": 0.1},  # Giảm đòn bẩy
+    "ETHUSDT": {"leverage": 10, "quantity_precision": 3, "min_size": 0.001},
+    'AAVEUSDT': {'leverage': 10, 'quantity_precision': 1, 'min_size': 0.1},
+    'LINKUSDT': {'leverage': 10, 'quantity_precision': 2, 'min_size': 0.01},
+    'VANAUSDT': {'leverage': 10, 'quantity_precision': 2, 'min_size': 0.01},
+    'TAOUSDT': {'leverage': 10, 'quantity_precision': 3, 'min_size': 0.001},
+    'TIAUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1},
+    'MKRUSDT': {'leverage': 10, 'quantity_precision': 3, 'min_size': 0.001},
+    'LTCUSDT': {'leverage': 10, 'quantity_precision': 3, 'min_size': 0.001},
+    'ENAUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1},
+    'NEARUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1},
+    'BNXUSDT': {'leverage': 6, 'quantity_precision': 1, 'min_size': 0.1}
 }
 
-
 TIMEFRAME = '5m'
-HIGHER_TIMEFRAME = '1h'
+HIGHER_TIMEFRAME = '15m'
 RISK_PER_TRADE = 0.02  # Rủi ro 2% mỗi giao dịch
 STOP_LOSS_THRESHOLD = 0.1  # Dừng bot nếu mất 90% vốn
 INITIAL_BALANCE = 10  # Số dư ban đầu
@@ -654,24 +659,24 @@ def test_filtered_coins(start_date, end_date, interval, num_coins=10):
     client = Client(api_key, api_secret)
     
     # Lấy và lọc coins
-    filtered_coins = fetch_and_filter_usdt_coins(client)
-    selected_coins = dict(list(filtered_coins.items())[:num_coins])  # Lấy top N coins
+    # filtered_coins = fetch_and_filter_usdt_coins(client)
+    # selected_coins = dict(list(filtered_coins.items())[:num_coins])  # Lấy top N coins
     
-    print(f"\nĐã chọn {len(selected_coins)} coin để backtest:")
-    for symbol, info in selected_coins.items():
-        print(f"- {symbol}: Volume = {info['avg_volume']:,.0f} USDT, "
-              f"Volatility = {info['avg_volatility']:.4f}")
+    # print(f"\nĐã chọn {len(selected_coins)} coin để backtest:")
+    # for symbol, info in selected_coins.items():
+        # print(f"- {symbol}: Volume = {info['avg_volume']:,.0f} USDT, "
+            #   f"Volatility = {info['avg_volatility']:.4f}")
     
     # Cập nhật COINS trong chiến lược
     global COINS
-    COINS = selected_coins
+    # COINS = selected_coins
     
     # Chạy backtest với các coin đã chọn
     test_multi_coin_strategy(start_date, end_date, interval)
 
 # Sử dụng hàm
 if __name__ == "__main__":
-    start_date = "2025-03-04"  # Điều chỉnh ngày để có dữ liệu
+    start_date = "2025-01-04"  # Điều chỉnh ngày để có dữ liệu
     end_date = "2025-03-05"
     interval = Client.KLINE_INTERVAL_5MINUTE
     

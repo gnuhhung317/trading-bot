@@ -724,26 +724,21 @@ def test_strategy(start_date, end_date, interval, top_symbols):
         print(f"Đã lưu bảng thống kê tại: temp/momentum_summary_{start_date}_{end_date}.csv")
 
 if __name__ == "__main__":
-    start_date = "2025-02-28"
-    end_date = "2025-03-05"
+    start_date = "2025-03-04"
+    end_date = "2025-03-07"
     interval = Client.KLINE_INTERVAL_5MINUTE
     # symbols = ['BTCUSDT', 'ETHUSDT', 'XRPUSDT', 'SOLUSDT', 'BNBUSDT', 'DOGEUSDT']
-    symbols = [
-'AAVEUSDT', 
-'LINKUSDT', 
-'PEPEUSDT', 
-'VANAUSDT', 
-'TAOUSDT',	
-'TIAUSDT',	
-'RAYUSDT',	
-'SUIUSDT',	
-'MKRUSDT',	
-'LTCUSDT',	
-'ENAUSDT',	
-'NEARUSDT', 
-'RUNEUSDT', 
-'BNXUSDT',	
-    ]
+    symbols = {
+        "XRPUSDT",  # Giảm đòn bẩy
+        "ETHUSDT",
+        'AAVEUSDT',
+        'LINKUSDT',
+        'VANAUSDT',
+        'TAOUSDT',
+        'TIAUSDT',        'MKRUSDT',
+        'LTCUSDT',
+        'ENAUSDT',        'NEARUSDT',        'BNXUSDT'
+    }
     test_strategy(start_date, end_date, interval, symbols)
 
 

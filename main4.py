@@ -137,7 +137,7 @@ def add_signal_indicators(df):
     df['breakout_up'] = (df['close'] > df['high_5'].shift(1)) & (df['close'].shift(1) <= df['high_5'].shift(2))
     df['breakout_down'] = (df['close'] < df['low_5'].shift(1)) & (df['close'].shift(1) >= df['low_5'].shift(2))
     df['volume_ma10'] = df['volume'].rolling(10).mean()
-    df['volume_increase'] = df['volume'] > df['volume_ma10'] * 1.5  # Tăng yêu cầu volume
+    df['volume_increase'] = df['volume'] > df['volume_ma10'] * 1. # điều kiện volume
     return df
 
 def add_trend_indicators(df):
@@ -163,12 +163,12 @@ def check_entry_conditions(df, higher_tf_df, symbol):
     long_primary = [current['ema9'] > current['ema21'], current['ema_cross_up'] or current['macd_cross_up'] or current['breakout_up']]
     long_secondary = [current['rsi14'] < 70, current['volume_increase'], current['macd'] > 0, current['adx'] > 25]  # Thêm ADX
     long_condition = (all(long_primary) and all(long_secondary) and 
-                      (higher_current['uptrend'] or (higher_current['adx'] > 25 and higher_current['di_plus'] > higher_current['di_minus'])))
+                      (higher_current['uptrend'] or (higher_current['adx'] > 20 and higher_current['di_plus'] > higher_current['di_minus'])))
     
     short_primary = [current['ema9'] < current['ema21'], current['ema_cross_down'] or current['macd_cross_down'] or current['breakout_down']]
     short_secondary = [current['rsi14'] > 30, current['volume_increase'], current['macd'] < 0, current['adx'] > 25]  # Thêm ADX
     short_condition = (all(short_primary) and all(short_secondary) and 
-                       (higher_current['downtrend'] or (higher_current['adx'] > 25 and higher_current['di_minus'] > higher_current['di_plus'])))
+                       (higher_current['downtrend'] or (higher_current['adx'] > 20 and higher_current['di_minus'] > higher_current['di_plus'])))
     
     signal = 'LONG' if long_condition else 'SHORT' if short_condition else None
     if signal:
