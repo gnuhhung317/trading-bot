@@ -19,19 +19,19 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 client = Client(API_KEY, API_SECRET)
 
 COINS = {
-    # "XRPUSDT": {"leverage": 10, "quantity_precision": 1, "min_size": 0.1},  # Giảm đòn bẩy
-    # "ETHUSDT": {"leverage": 10, "quantity_precision": 3, "min_size": 0.001},
-    # 'AAVEUSDT': {'leverage': 10, 'quantity_precision': 1, 'min_size': 0.1},
-    # 'LINKUSDT': {'leverage': 10, 'quantity_precision': 2, 'min_size': 0.01},
-    # 'VANAUSDT': {'leverage': 10, 'quantity_precision': 2, 'min_size': 0.01},
-    # 'TAOUSDT': {'leverage': 10, 'quantity_precision': 3, 'min_size': 0.001},
-    # 'TIAUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1},
-    # 'MKRUSDT': {'leverage': 10, 'quantity_precision': 3, 'min_size': 0.001},
-    # 'LTCUSDT': {'leverage': 10, 'quantity_precision': 3, 'min_size': 0.001},
-    # 'ENAUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1},
-    # 'NEARUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1},
-    # 'BNXUSDT': {'leverage': 6, 'quantity_precision': 1, 'min_size': 0.1}
-    'REZUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1}
+    "XRPUSDT": {"leverage": 10, "quantity_precision": 1, "min_size": 0.1},  # Giảm đòn bẩy
+    "ETHUSDT": {"leverage": 10, "quantity_precision": 3, "min_size": 0.001},
+    'AAVEUSDT': {'leverage': 10, 'quantity_precision': 1, 'min_size': 0.1},
+    'LINKUSDT': {'leverage': 10, 'quantity_precision': 2, 'min_size': 0.01},
+    'VANAUSDT': {'leverage': 10, 'quantity_precision': 2, 'min_size': 0.01},
+    'TAOUSDT': {'leverage': 10, 'quantity_precision': 3, 'min_size': 0.001},
+    'TIAUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1},
+    'MKRUSDT': {'leverage': 10, 'quantity_precision': 3, 'min_size': 0.001},
+    'LTCUSDT': {'leverage': 10, 'quantity_precision': 3, 'min_size': 0.001},
+    'ENAUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1},
+    'NEARUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1},
+    'BNXUSDT': {'leverage': 6, 'quantity_precision': 1, 'min_size': 0.1}
+    # 'REZUSDT': {'leverage': 10, 'quantity_precision': 0, 'min_size': 1}
 }
 
 TIMEFRAME = '5m'
