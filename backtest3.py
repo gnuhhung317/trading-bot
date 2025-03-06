@@ -651,34 +651,13 @@ def fetch_and_filter_usdt_coins(client, min_volume=1000000, min_volatility=0.02,
     print(f"\nĐã lọc được {len(sorted_coins)} cặp USDT phù hợp.")
     return sorted_coins
 
-def test_filtered_coins(start_date, end_date, interval, num_coins=10):
-    """Chạy backtest với các coin được lọc."""
-    # Khởi tạo client
-    api_key = "YOUR_API_KEY"
-    api_secret = "YOUR_API_SECRET"
-    client = Client(api_key, api_secret)
-    
-    # Lấy và lọc coins
-    # filtered_coins = fetch_and_filter_usdt_coins(client)
-    # selected_coins = dict(list(filtered_coins.items())[:num_coins])  # Lấy top N coins
-    
-    # print(f"\nĐã chọn {len(selected_coins)} coin để backtest:")
-    # for symbol, info in selected_coins.items():
-        # print(f"- {symbol}: Volume = {info['avg_volume']:,.0f} USDT, "
-            #   f"Volatility = {info['avg_volatility']:.4f}")
-    
-    # Cập nhật COINS trong chiến lược
-    global COINS
-    # COINS = selected_coins
-    
-    # Chạy backtest với các coin đã chọn
-    test_multi_coin_strategy(start_date, end_date, interval)
+
 
 # Sử dụng hàm
 if __name__ == "__main__":
-    start_date = "2025-01-04"  # Điều chỉnh ngày để có dữ liệu
-    end_date = "2025-03-05"
+    start_date = "2025-03-04"  # Điều chỉnh ngày để có dữ liệu
+    end_date = "2025-03-06"
     interval = Client.KLINE_INTERVAL_5MINUTE
     
     # Chạy test với top 10 coin
-    test_filtered_coins(start_date, end_date, interval, num_coins=30)
+    test_multi_coin_strategy(start_date, end_date, interval)

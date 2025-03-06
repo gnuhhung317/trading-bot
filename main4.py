@@ -19,6 +19,9 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 client = Client(API_KEY, API_SECRET)
 
 COINS = {
+    'SUIUSDT': {"leverage": 10, "quantity_precision": 1, "min_size": 0.1},
+    'MOVEUSDT': {"leverage": 10, "quantity_precision": 0, "min_size": 1},
+    'CETUSUSDT': {"leverage": 10, "quantity_precision": 0, "min_size": 1},
     "XRPUSDT": {"leverage": 10, "quantity_precision": 1, "min_size": 0.1},  # Giảm đòn bẩy
     "ETHUSDT": {"leverage": 10, "quantity_precision": 3, "min_size": 0.001},
     'AAVEUSDT': {'leverage': 10, 'quantity_precision': 1, 'min_size': 0.1},
