@@ -141,7 +141,7 @@ def add_signal_indicators(df):
     df['breakout_up'] = (df['close'] > df['high_5'].shift(1)) & (df['close'].shift(1) <= df['high_5'].shift(2))
     df['breakout_down'] = (df['close'] < df['low_5'].shift(1)) & (df['close'].shift(1) >= df['low_5'].shift(2))
     df['volume_ma10'] = df['volume'].rolling(10).mean()
-    df['volume_increase'] = df['volume'] > df['volume_ma10'] * 1. # điều kiện volume
+    df['volume_increase'] = df['volume'] > df['volume_ma10'] * 1 # điều kiện volume
     return df
 
 def add_trend_indicators(df):

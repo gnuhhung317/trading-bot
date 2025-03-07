@@ -1,230 +1,47 @@
-2025-03-06 12:45:22,049 - INFO - Bắt đầu backtest...
-2025-03-06 12:45:22,291 - INFO - Lấy dữ liệu XRPUSDT (5m) thành công, 1000 nến
-2025-03-06 12:45:22,438 - INFO - Lấy dữ liệu XRPUSDT (15m) thành công, 1000 nến
-2025-03-06 12:45:22,564 - INFO - Hoàn thành backtest với 15m: {'Higher Timeframe': '15m', 'Total Trades': 102, 'Win Rate (%)': 0.0, 'Profit Factor': 0.0, 'Total Profit (USDT)': np.float64(0.0), 'Max Drawdown (USDT)': 0, 'Final Balance (USDT)': nan}
-2025-03-06 12:45:22,728 - INFO - Lấy dữ liệu XRPUSDT (30m) thành công, 1000 nến
-2025-03-06 12:45:22,842 - INFO - Hoàn thành backtest với 30m: {'Higher Timeframe': '30m', 'Total Trades': 107, 'Win Rate (%)': 0.0, 'Profit Factor': 0.0, 'Total Profit (USDT)': np.float64(0.0), 'Max Drawdown (USDT)': 0, 'Final Balance (USDT)': nan}
-2025-03-06 12:45:22,988 - INFO - Lấy dữ liệu XRPUSDT (1h) thành công, 1000 nến
-2025-03-06 12:45:23,050 - INFO - Hoàn thành backtest với 1h: {'Higher Timeframe': '1h', 'Total Trades': 109, 'Win Rate (%)': 0.0, 'Profit Factor': 0.0, 'Total Profit (USDT)': np.float64(0.0), 'Max Drawdown (USDT)': 0, 'Final Balance (USDT)': nan}
-2025-03-06 12:45:23,207 - INFO - Lấy dữ liệu XRPUSDT (4h) thành công, 1000 nến
-2025-03-06 12:45:23,342 - INFO - Hoàn thành backtest với 4h: {'Higher Timeframe': '4h', 'Total Trades': 112, 'Win Rate (%)': 0.0, 'Profit Factor': 0.0, 'Total Profit (USDT)': np.float64(0.0), 'Max Drawdown (USDT)': 0, 'Final Balance (USDT)': nan}
-2025-03-06 12:45:23,358 - INFO - 
-Kết quả Backtest:
-2025-03-06 12:45:23,363 - INFO - Higher Timeframe  Total Trades  Win Rate (%)  Profit Factor  Total Profit (USDT)  Max Drawdown (USDT)  Final Balance (USDT)
-             15m           102           0.0            0.0                  0.0                    0                   NaN
-             30m           107           0.0            0.0                  0.0                    0                   NaN
-              1h           109           0.0            0.0                  0.0                    0                   NaN
-              4h           112           0.0            0.0                  0.0                    0                   NaN
-2025-03-06 12:45:23,363 - INFO - Hoàn thành backtest!
-2025-03-06 12:45:52,609 - INFO - Bắt đầu backtest...
-2025-03-06 12:45:52,838 - INFO - Lấy dữ liệu SOLUSDT (5m) thành công, 1000 nến
-2025-03-06 12:45:52,974 - INFO - Lấy dữ liệu SOLUSDT (15m) thành công, 1000 nến
-2025-03-06 12:45:53,116 - INFO - Hoàn thành backtest với 15m: {'Higher Timeframe': '15m', 'Total Trades': 111, 'Win Rate (%)': 0.0, 'Profit Factor': 0.0, 'Total Profit (USDT)': np.float64(0.0), 'Max Drawdown (USDT)': 0, 'Final Balance (USDT)': nan}
-2025-03-06 12:45:53,261 - INFO - Lấy dữ liệu SOLUSDT (30m) thành công, 1000 nến
-2025-03-06 12:45:53,362 - INFO - Hoàn thành backtest với 30m: {'Higher Timeframe': '30m', 'Total Trades': 117, 'Win Rate (%)': 0.0, 'Profit Factor': 0.0, 'Total Profit (USDT)': np.float64(0.0), 'Max Drawdown (USDT)': 0, 'Final Balance (USDT)': nan}
-2025-03-06 12:45:53,506 - INFO - Lấy dữ liệu SOLUSDT (1h) thành công, 1000 nến
-2025-03-06 12:45:53,569 - INFO - Hoàn thành backtest với 1h: {'Higher Timeframe': '1h', 'Total Trades': 121, 'Win Rate (%)': 0.0, 'Profit Factor': 0.0, 'Total Profit (USDT)': np.float64(0.0), 'Max Drawdown (USDT)': 0, 'Final Balance (USDT)': nan}
-2025-03-06 12:45:53,730 - INFO - Lấy dữ liệu SOLUSDT (4h) thành công, 1000 nến
-2025-03-06 12:45:53,793 - INFO - Hoàn thành backtest với 4h: {'Higher Timeframe': '4h', 'Total Trades': 122, 'Win Rate (%)': 0.0, 'Profit Factor': 0.0, 'Total Profit (USDT)': np.float64(0.0), 'Max Drawdown (USDT)': 0, 'Final Balance (USDT)': nan}
-2025-03-06 12:45:53,793 - INFO - 
-Kết quả Backtest:
-2025-03-06 12:45:53,793 - INFO - Higher Timeframe  Total Trades  Win Rate (%)  Profit Factor  Total Profit (USDT)  Max Drawdown (USDT)  Final Balance (USDT)
-             15m           111           0.0            0.0                  0.0                    0                   NaN
-             30m           117           0.0            0.0                  0.0                    0                   NaN
-              1h           121           0.0            0.0                  0.0                    0                   NaN
-              4h           122           0.0            0.0                  0.0                    0                   NaN
-2025-03-06 12:45:53,793 - INFO - Hoàn thành backtest!
-2025-03-06 12:49:13,456 - INFO - Bắt đầu backtest với Backtrader...
-2025-03-06 12:49:13,676 - INFO - Lấy dữ liệu XRPUSDT (5m) thành công, 500 nến
-2025-03-06 12:49:13,826 - INFO - Lấy dữ liệu XRPUSDT (15m) thành công, 500 nến
-2025-03-06 12:49:13,826 - INFO - Bắt đầu backtest với higher timeframe: 15m
-2025-03-06 12:51:30,402 - INFO - Bắt đầu backtest với Backtrader...
-2025-03-06 12:51:30,654 - INFO - Lấy dữ liệu XRPUSDT (5m) thành công, 500 nến
-2025-03-06 12:51:30,792 - INFO - Lấy dữ liệu XRPUSDT (15m) thành công, 500 nến
-2025-03-06 12:51:30,792 - INFO - Bắt đầu backtest với higher timeframe: 15m
-2025-03-06 13:26:13,653 - INFO - Bắt đầu backtest với Backtrader...
-2025-03-06 13:26:13,962 - INFO - Lấy dữ liệu XRPUSDT (5m) thành công, 500 nến
-2025-03-06 13:26:14,104 - INFO - Lấy dữ liệu XRPUSDT (15m) thành công, 500 nến
-2025-03-06 13:26:14,108 - INFO - Bắt đầu backtest với higher timeframe: 15m
-2025-03-06 13:26:14,279 - INFO - Trade closed: Profit = -104.17
-2025-03-06 13:26:14,294 - INFO - Trade closed: Profit = -12.08
-2025-03-06 13:26:14,294 - INFO - Kết quả 15m: {'Higher Timeframe': '15m', 'Total Trades': 2, 'Win Rate (%)': 0.0, 'Profit Factor': 0.0, 'Total Profit (USDT)': -116.2541376098378, 'Max Drawdown (USDT)': 116.254137609836, 'Final Balance (USDT)': 883.745862390164}
-2025-03-06 13:26:14,431 - INFO - Lấy dữ liệu XRPUSDT (30m) thành công, 500 nến
-2025-03-06 13:26:14,431 - INFO - Bắt đầu backtest với higher timeframe: 30m
-2025-03-06 13:26:14,573 - INFO - Trade closed: Profit = -104.17
-2025-03-06 13:26:14,589 - INFO - Trade closed: Profit = -12.08
-2025-03-06 13:26:14,589 - INFO - Kết quả 30m: {'Higher Timeframe': '30m', 'Total Trades': 2, 'Win Rate (%)': 0.0, 'Profit Factor': 0.0, 'Total Profit (USDT)': -116.2541376098378, 'Max Drawdown (USDT)': 116.254137609836, 'Final Balance (USDT)': 883.745862390164}
-2025-03-06 13:26:14,732 - INFO - Lấy dữ liệu XRPUSDT (1h) thành công, 500 nến
-2025-03-06 13:26:14,732 - INFO - Bắt đầu backtest với higher timeframe: 1h
-2025-03-06 13:26:14,869 - INFO - Trade closed: Profit = -104.17
-2025-03-06 13:26:14,892 - INFO - Trade closed: Profit = -12.08
-2025-03-06 13:26:14,900 - INFO - Kết quả 1h: {'Higher Timeframe': '1h', 'Total Trades': 2, 'Win Rate (%)': 0.0, 'Profit Factor': 0.0, 'Total Profit (USDT)': -116.2541376098378, 'Max Drawdown (USDT)': 116.254137609836, 'Final Balance (USDT)': 883.745862390164}
-2025-03-06 13:26:15,019 - INFO - Lấy dữ liệu XRPUSDT (4h) thành công, 360 nến
-2025-03-06 13:26:15,035 - INFO - Bắt đầu backtest với higher timeframe: 4h
-2025-03-06 13:42:07,290 - INFO - Bắt đầu backtest với Backtrader...
-2025-03-06 13:42:07,583 - INFO - Lấy dữ liệu XRPUSDT (5m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:42:07,734 - INFO - Lấy dữ liệu XRPUSDT (15m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:42:07,742 - INFO - Bắt đầu backtest với higher timeframe: 15m
-2025-03-06 13:42:08,415 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:42:08,438 - INFO - Kết quả 15m: {'Higher Timeframe': '15m', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:42:08,588 - INFO - Lấy dữ liệu XRPUSDT (30m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:42:08,591 - INFO - Bắt đầu backtest với higher timeframe: 30m
-2025-03-06 13:42:09,044 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:42:09,068 - INFO - Kết quả 30m: {'Higher Timeframe': '30m', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:42:09,216 - INFO - Lấy dữ liệu XRPUSDT (1h) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:42:09,219 - INFO - Bắt đầu backtest với higher timeframe: 1h
-2025-03-06 13:42:09,770 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:42:09,818 - INFO - Kết quả 1h: {'Higher Timeframe': '1h', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:42:09,955 - INFO - Lấy dữ liệu XRPUSDT (4h) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:42:09,956 - INFO - Bắt đầu backtest với higher timeframe: 4h
-2025-03-06 13:42:14,385 - INFO - Bắt đầu backtest với Backtrader...
-2025-03-06 13:42:14,713 - INFO - Lấy dữ liệu XRPUSDT (5m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:42:14,867 - INFO - Lấy dữ liệu XRPUSDT (15m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:42:14,872 - INFO - Bắt đầu backtest với higher timeframe: 15m
-2025-03-06 13:42:15,591 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:42:15,633 - INFO - Kết quả 15m: {'Higher Timeframe': '15m', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:42:15,783 - INFO - Lấy dữ liệu XRPUSDT (30m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:42:15,787 - INFO - Bắt đầu backtest với higher timeframe: 30m
-2025-03-06 13:42:16,654 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:42:16,701 - INFO - Kết quả 30m: {'Higher Timeframe': '30m', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:42:16,847 - INFO - Lấy dữ liệu XRPUSDT (1h) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:42:16,850 - INFO - Bắt đầu backtest với higher timeframe: 1h
-2025-03-06 13:42:17,430 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:42:17,488 - INFO - Kết quả 1h: {'Higher Timeframe': '1h', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:42:17,633 - INFO - Lấy dữ liệu XRPUSDT (4h) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:42:17,638 - INFO - Bắt đầu backtest với higher timeframe: 4h
-2025-03-06 13:42:27,526 - INFO - Bắt đầu backtest với Backtrader...
-2025-03-06 13:42:27,748 - INFO - Lấy dữ liệu XRPUSDT (5m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:42:27,897 - INFO - Lấy dữ liệu XRPUSDT (15m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:42:27,901 - INFO - Bắt đầu backtest với higher timeframe: 15m
-2025-03-06 13:42:28,126 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:42:28,138 - INFO - Kết quả 15m: {'Higher Timeframe': '15m', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:42:28,277 - INFO - Lấy dữ liệu XRPUSDT (30m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:42:28,277 - INFO - Bắt đầu backtest với higher timeframe: 30m
-2025-03-06 13:42:28,492 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:42:28,506 - INFO - Kết quả 30m: {'Higher Timeframe': '30m', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:42:28,648 - INFO - Lấy dữ liệu XRPUSDT (1h) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:42:28,648 - INFO - Bắt đầu backtest với higher timeframe: 1h
-2025-03-06 13:42:28,860 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:42:28,875 - INFO - Kết quả 1h: {'Higher Timeframe': '1h', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:42:29,008 - INFO - Lấy dữ liệu XRPUSDT (4h) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:42:29,008 - INFO - Bắt đầu backtest với higher timeframe: 4h
-2025-03-06 13:47:48,568 - INFO - Bắt đầu backtest với Backtrader...
-2025-03-06 13:47:48,832 - INFO - Lấy dữ liệu XRPUSDT (5m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:47:48,977 - INFO - Lấy dữ liệu XRPUSDT (15m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:47:48,982 - INFO - Bắt đầu backtest với higher timeframe: 15m
-2025-03-06 13:47:49,196 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:47:49,209 - INFO - Kết quả 15m: {'Higher Timeframe': '15m', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:47:49,343 - INFO - Lấy dữ liệu XRPUSDT (30m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:47:49,343 - INFO - Bắt đầu backtest với higher timeframe: 30m
-2025-03-06 13:47:49,565 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:47:49,580 - INFO - Kết quả 30m: {'Higher Timeframe': '30m', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:47:49,726 - INFO - Lấy dữ liệu XRPUSDT (1h) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:47:49,727 - INFO - Bắt đầu backtest với higher timeframe: 1h
-2025-03-06 13:47:49,902 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:47:49,915 - INFO - Kết quả 1h: {'Higher Timeframe': '1h', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:47:50,061 - INFO - Lấy dữ liệu XRPUSDT (4h) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:47:50,063 - INFO - Bắt đầu backtest với higher timeframe: 4h
-2025-03-06 13:47:57,952 - INFO - Bắt đầu backtest với Backtrader...
-2025-03-06 13:47:58,157 - INFO - Lấy dữ liệu XRPUSDT (5m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:47:58,298 - INFO - Lấy dữ liệu XRPUSDT (15m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:47:58,298 - INFO - Bắt đầu backtest với higher timeframe: 15m
-2025-03-06 13:47:58,503 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:47:58,503 - INFO - Kết quả 15m: {'Higher Timeframe': '15m', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:47:58,659 - INFO - Lấy dữ liệu XRPUSDT (30m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:47:58,659 - INFO - Bắt đầu backtest với higher timeframe: 30m
-2025-03-06 13:47:58,849 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:47:58,881 - INFO - Kết quả 30m: {'Higher Timeframe': '30m', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:47:59,031 - INFO - Lấy dữ liệu XRPUSDT (1h) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:47:59,031 - INFO - Bắt đầu backtest với higher timeframe: 1h
-2025-03-06 13:47:59,193 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:47:59,212 - INFO - Kết quả 1h: {'Higher Timeframe': '1h', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:47:59,346 - INFO - Lấy dữ liệu XRPUSDT (4h) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:47:59,346 - INFO - Bắt đầu backtest với higher timeframe: 4h
-2025-03-06 13:49:22,673 - INFO - Bắt đầu backtest với Backtrader...
-2025-03-06 13:49:22,980 - INFO - Lấy dữ liệu XRPUSDT (5m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:49:23,122 - INFO - Lấy dữ liệu XRPUSDT (15m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:49:23,138 - INFO - Bắt đầu backtest với higher timeframe: 15m
-2025-03-06 13:49:26,537 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:49:36,710 - INFO - Kết quả 15m: {'Higher Timeframe': '15m', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:49:39,052 - INFO - Lấy dữ liệu XRPUSDT (30m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:49:44,868 - INFO - Bắt đầu backtest với higher timeframe: 30m
-2025-03-06 13:49:48,614 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:49:51,262 - INFO - Kết quả 30m: {'Higher Timeframe': '30m', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:49:51,404 - INFO - Lấy dữ liệu XRPUSDT (1h) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:49:51,407 - INFO - Bắt đầu backtest với higher timeframe: 1h
-2025-03-06 13:49:52,572 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:49:52,593 - INFO - Kết quả 1h: {'Higher Timeframe': '1h', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:49:52,734 - INFO - Lấy dữ liệu XRPUSDT (4h) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:49:52,734 - INFO - Bắt đầu backtest với higher timeframe: 4h
-2025-03-06 13:50:35,487 - INFO - Bắt đầu backtest với Backtrader...
-2025-03-06 13:50:35,691 - INFO - Lấy dữ liệu XRPUSDT (5m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:50:35,832 - INFO - Lấy dữ liệu XRPUSDT (15m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:50:35,832 - INFO - Bắt đầu backtest với higher timeframe: 15m
-2025-03-06 13:50:35,974 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:50:35,990 - INFO - Kết quả 15m: {'Higher Timeframe': '15m', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:50:36,132 - INFO - Lấy dữ liệu XRPUSDT (30m) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:50:36,132 - INFO - Bắt đầu backtest với higher timeframe: 30m
-2025-03-06 13:50:36,290 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:50:36,305 - INFO - Kết quả 30m: {'Higher Timeframe': '30m', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:50:36,453 - INFO - Lấy dữ liệu XRPUSDT (1h) thành công, 500 nến sau khi làm sạch
-2025-03-06 13:50:36,453 - INFO - Bắt đầu backtest với higher timeframe: 1h
-2025-03-06 13:50:36,604 - INFO - Trade closed: Profit = 45.48
-2025-03-06 13:50:36,622 - INFO - Kết quả 1h: {'Higher Timeframe': '1h', 'Total Trades': 1, 'Win Rate (%)': 100.0, 'Profit Factor': 45.48384254118807, 'Total Profit (USDT)': 45.48384254118807, 'Max Drawdown (USDT)': 16.599910837618836, 'Final Balance (USDT)': 1045.483842541188}
-2025-03-06 13:50:36,635 - INFO - 
-Kết quả Backtest:
-2025-03-06 13:50:36,635 - INFO - Higher Timeframe  Total Trades  Win Rate (%)  Profit Factor  Total Profit (USDT)  Max Drawdown (USDT)  Final Balance (USDT)
-             15m             1         100.0      45.483843            45.483843            16.599911           1045.483843
-             30m             1         100.0      45.483843            45.483843            16.599911           1045.483843
-              1h             1         100.0      45.483843            45.483843            16.599911           1045.483843
-2025-03-06 13:50:36,635 - INFO - Hoàn thành backtest!
-2025-03-06 13:53:28,030 - INFO - Bắt đầu backtest với Backtrader...
-2025-03-06 13:53:28,288 - INFO - Lấy dữ liệu XRPUSDT (3m) thành công, 500 nến
-2025-03-06 13:53:28,424 - INFO - Lấy dữ liệu XRPUSDT (15m) thành công, 500 nến
-2025-03-06 13:53:28,426 - INFO - Bắt đầu backtest với higher timeframe: 15m
-2025-03-06 13:53:38,974 - INFO - Bắt đầu backtest với Backtrader...
-2025-03-06 13:53:39,185 - INFO - Lấy dữ liệu XRPUSDT (3m) thành công, 500 nến
-2025-03-06 13:53:39,333 - INFO - Lấy dữ liệu XRPUSDT (15m) thành công, 500 nến
-2025-03-06 13:53:39,333 - INFO - Bắt đầu backtest với higher timeframe: 15m
-2025-03-06 13:56:02,371 - INFO - Bắt đầu backtest với Backtrader...
-2025-03-06 13:56:02,371 - INFO - Bắt đầu backtest cho XRPUSDT
-2025-03-06 13:56:02,584 - INFO - Lấy dữ liệu XRPUSDT (3m) thành công, 500 nến
-2025-03-06 13:56:02,735 - INFO - Lấy dữ liệu XRPUSDT (15m) thành công, 500 nến
-2025-03-06 13:56:02,737 - INFO - Chạy backtest cho XRPUSDT với higher timeframe: 15m
-2025-03-06 13:56:02,915 - INFO - Kết quả XRPUSDT - 15m: {'Symbol': 'XRPUSDT', 'Higher Timeframe': '15m', 'Total Trades': 0, 'Win Rate (%)': 0, 'Profit Factor': 0.0, 'Total Profit (USDT)': 0, 'Max Drawdown (USDT)': 0, 'Final Balance (USDT)': 1000.0}
-2025-03-06 13:56:03,050 - INFO - Lấy dữ liệu XRPUSDT (30m) thành công, 500 nến
-2025-03-06 13:56:03,050 - INFO - Chạy backtest cho XRPUSDT với higher timeframe: 30m
-2025-03-06 13:56:03,215 - INFO - Kết quả XRPUSDT - 30m: {'Symbol': 'XRPUSDT', 'Higher Timeframe': '30m', 'Total Trades': 0, 'Win Rate (%)': 0, 'Profit Factor': 0.0, 'Total Profit (USDT)': 0, 'Max Drawdown (USDT)': 0, 'Final Balance (USDT)': 1000.0}
-2025-03-06 13:56:03,215 - INFO - Bắt đầu backtest cho SHIBUSDT
-2025-03-06 13:56:03,332 - ERROR - Lỗi lấy dữ liệu SHIBUSDT (3m): APIError(code=-1121): Invalid symbol.
-2025-03-06 13:56:03,332 - ERROR - Dữ liệu 3m cho SHIBUSDT không đủ (0 nến), cần ít nhất 50 nến
-2025-03-06 13:56:03,332 - INFO - Bắt đầu backtest cho DOGEUSDT
-2025-03-06 13:56:03,487 - INFO - Lấy dữ liệu DOGEUSDT (3m) thành công, 500 nến
-2025-03-06 13:56:03,632 - INFO - Lấy dữ liệu DOGEUSDT (15m) thành công, 500 nến
-2025-03-06 13:56:03,632 - INFO - Chạy backtest cho DOGEUSDT với higher timeframe: 15m
-2025-03-06 13:56:03,775 - INFO - Kết quả DOGEUSDT - 15m: {'Symbol': 'DOGEUSDT', 'Higher Timeframe': '15m', 'Total Trades': 0, 'Win Rate (%)': 0, 'Profit Factor': 0.0, 'Total Profit (USDT)': 0, 'Max Drawdown (USDT)': 0, 'Final Balance (USDT)': 1000.0}
-2025-03-06 13:56:03,916 - INFO - Lấy dữ liệu DOGEUSDT (30m) thành công, 500 nến
-2025-03-06 13:56:03,932 - INFO - Chạy backtest cho DOGEUSDT với higher timeframe: 30m
-2025-03-06 13:56:18,928 - INFO - Bắt đầu backtest với Backtrader...
-2025-03-06 13:56:18,928 - INFO - Bắt đầu backtest cho XRPUSDT
-2025-03-06 13:56:19,133 - INFO - Lấy dữ liệu XRPUSDT (3m) thành công, 500 nến
-2025-03-06 13:56:19,280 - INFO - Lấy dữ liệu XRPUSDT (15m) thành công, 500 nến
-2025-03-06 13:56:19,280 - INFO - Chạy backtest cho XRPUSDT với higher timeframe: 15m
-2025-03-06 13:56:19,421 - INFO - Kết quả XRPUSDT - 15m: {'Symbol': 'XRPUSDT', 'Higher Timeframe': '15m', 'Total Trades': 0, 'Win Rate (%)': 0, 'Profit Factor': 0.0, 'Total Profit (USDT)': 0, 'Max Drawdown (USDT)': 0, 'Final Balance (USDT)': 1000.0}
-2025-03-06 13:56:19,421 - INFO - Bắt đầu backtest cho SHIBUSDT
-2025-03-06 13:56:19,550 - ERROR - Lỗi lấy dữ liệu SHIBUSDT (3m): APIError(code=-1121): Invalid symbol.
-2025-03-06 13:56:19,550 - ERROR - Dữ liệu 3m cho SHIBUSDT không đủ (0 nến), cần ít nhất 50 nến
-2025-03-06 13:56:19,550 - INFO - Bắt đầu backtest cho DOGEUSDT
-2025-03-06 13:56:19,700 - INFO - Lấy dữ liệu DOGEUSDT (3m) thành công, 500 nến
-2025-03-06 13:56:19,834 - INFO - Lấy dữ liệu DOGEUSDT (15m) thành công, 500 nến
-2025-03-06 13:56:19,834 - INFO - Chạy backtest cho DOGEUSDT với higher timeframe: 15m
-2025-03-06 13:56:20,025 - INFO - Kết quả DOGEUSDT - 15m: {'Symbol': 'DOGEUSDT', 'Higher Timeframe': '15m', 'Total Trades': 0, 'Win Rate (%)': 0, 'Profit Factor': 0.0, 'Total Profit (USDT)': 0, 'Max Drawdown (USDT)': 0, 'Final Balance (USDT)': 1000.0}
-2025-03-06 13:56:20,025 - INFO - Bắt đầu backtest cho PEPEUSDT
-2025-03-06 13:56:20,147 - ERROR - Lỗi lấy dữ liệu PEPEUSDT (3m): APIError(code=-1121): Invalid symbol.
-2025-03-06 13:56:20,147 - ERROR - Dữ liệu 3m cho PEPEUSDT không đủ (0 nến), cần ít nhất 50 nến
-2025-03-06 13:56:20,149 - INFO - 
-Kết quả Backtest:
-2025-03-06 13:56:20,159 - INFO -   Symbol Higher Timeframe  Total Trades  Win Rate (%)  Profit Factor  Total Profit (USDT)  Max Drawdown (USDT)  Final Balance (USDT)
- XRPUSDT              15m             0             0            0.0                    0                    0                1000.0
-DOGEUSDT              15m             0             0            0.0                    0                    0                1000.0
-2025-03-06 13:56:20,159 - INFO - Hoàn thành backtest!
+2025-03-07 11:04:38,541 - INFO - Starting backtest...
+2025-03-07 11:04:38,932 - INFO - Fetched 500 candles for SUIUSDT (5m)
+2025-03-07 11:04:39,167 - INFO - Fetched 77 candles for SUIUSDT (1h)
+2025-03-07 11:04:39,637 - INFO - Fetched 500 candles for MOVEUSDT (5m)
+2025-03-07 11:04:39,853 - INFO - Fetched 77 candles for MOVEUSDT (1h)
+2025-03-07 11:04:40,294 - INFO - Fetched 500 candles for CETUSUSDT (5m)
+2025-03-07 11:04:40,517 - INFO - Fetched 77 candles for CETUSUSDT (1h)
+2025-03-07 11:04:40,952 - INFO - Fetched 500 candles for XRPUSDT (5m)
+2025-03-07 11:04:41,178 - INFO - Fetched 77 candles for XRPUSDT (1h)
+2025-03-07 11:04:41,255 - INFO - Opened LONG position for XRPUSDT at 2.5171
+2025-03-07 11:04:41,611 - INFO - Fetched 500 candles for ETHUSDT (5m)
+2025-03-07 11:04:41,839 - INFO - Fetched 77 candles for ETHUSDT (1h)
+2025-03-07 11:04:41,924 - INFO - Opened LONG position for ETHUSDT at 2254.33
+2025-03-07 11:04:41,955 - INFO - Backtest Results:
+Initial Balance: 10
+Final Balance: 11.17
+Total Trades: 4
+Win Rate: 100.00%
+Profit Factor: inf
+Total Profit: 1.17
+2025-03-07 11:05:17,928 - INFO - Starting backtest...
+2025-03-07 11:05:18,305 - INFO - Fetched 500 candles for SUIUSDT (5m)
+2025-03-07 11:05:18,633 - INFO - Fetched 500 candles for SUIUSDT (1h)
+2025-03-07 11:05:19,103 - INFO - Fetched 500 candles for MOVEUSDT (5m)
+2025-03-07 11:05:19,447 - INFO - Fetched 500 candles for MOVEUSDT (1h)
+2025-03-07 11:05:19,890 - INFO - Fetched 500 candles for CETUSUSDT (5m)
+2025-03-07 11:05:20,231 - INFO - Fetched 500 candles for CETUSUSDT (1h)
+2025-03-07 11:05:20,669 - INFO - Fetched 500 candles for XRPUSDT (5m)
+2025-03-07 11:05:21,093 - INFO - Fetched 500 candles for XRPUSDT (1h)
+2025-03-07 11:05:21,532 - INFO - Fetched 500 candles for ETHUSDT (5m)
+2025-03-07 11:05:21,877 - INFO - Fetched 500 candles for ETHUSDT (1h)
+2025-03-07 11:06:33,774 - INFO - Starting backtest...
+2025-03-07 11:06:34,149 - INFO - Fetched 500 candles for SUIUSDT (5m)
+2025-03-07 11:06:34,481 - INFO - Fetched 500 candles for SUIUSDT (1h)
+2025-03-07 11:06:34,936 - INFO - Fetched 500 candles for MOVEUSDT (5m)
+2025-03-07 11:06:35,265 - INFO - Fetched 500 candles for MOVEUSDT (1h)
+2025-03-07 11:06:45,464 - INFO - Starting backtest...
+2025-03-07 11:06:45,825 - INFO - Fetched 500 candles for SUIUSDT (5m)
+2025-03-07 11:06:46,169 - INFO - Fetched 500 candles for SUIUSDT (1h)
+2025-03-07 11:06:46,607 - INFO - Fetched 500 candles for MOVEUSDT (5m)
+2025-03-07 11:06:46,952 - INFO - Fetched 500 candles for MOVEUSDT (1h)
+2025-03-07 11:06:47,392 - INFO - Fetched 500 candles for CETUSUSDT (5m)
+2025-03-07 11:06:47,736 - INFO - Fetched 500 candles for CETUSUSDT (1h)
+2025-03-07 11:06:48,174 - INFO - Fetched 500 candles for XRPUSDT (5m)
+2025-03-07 11:06:48,504 - INFO - Fetched 500 candles for XRPUSDT (1h)
+2025-03-07 11:06:48,978 - INFO - Fetched 500 candles for ETHUSDT (5m)
+2025-03-07 11:06:49,326 - INFO - Fetched 500 candles for ETHUSDT (1h)
