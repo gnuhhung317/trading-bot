@@ -295,7 +295,6 @@ def send_periodic_report():
 def trading_loop():
     global balance
     last_report_time = datetime.now()
-    
     while True:
         try:
             now = datetime.now()
@@ -303,7 +302,8 @@ def trading_loop():
             # if seconds_to_next_candle > 0:
             #     time.sleep(seconds_to_next_candle)
             time.sleep(1)
-            logging.info(f"[SIM] Số dư hiện tại: Balance={balance}")
+            if now.minute%5==0 :
+                send_telegram_message(f"[SIM] Số dư hiện tại: Balance={balance}")
             
             if balance < initial_balance * STOP_LOSS_THRESHOLD:
                 logging.critical(f"[SIM] Số dư dưới {STOP_LOSS_THRESHOLD*100}% ({balance} < {initial_balance * STOP_LOSS_THRESHOLD}). Dừng bot!")
