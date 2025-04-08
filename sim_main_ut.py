@@ -171,28 +171,34 @@ def enter_position(symbol, signal):
         if position_size < COINS[symbol]["min_size"]:
             return
         
-        stop_loss = current['xATRTrailingStop']
-        take_profit = entry_price + 2 * nLoss if signal == 'LONG' else entry_price - 2 * nLoss
+        # Khởi tạo trailing stop ban đầu
+        if signal == 'LONG':
+            trailing_stop = entry_price - nLoss  # Dưới entry price
+            take_profit = entry_price + 2 * nLoss
+        else:  # SHORT
+            trailing_stop = entry_price + nLoss  # Trên entry price
+            take_profit = entry_price - 2 * nLoss
         
         position = {
             'id': f"SIM_{symbol}_{datetime.now().timestamp()}",
             'type': signal,
             'entry_time': datetime.now(),
             'entry_price': entry_price,
-            'stop_loss': stop_loss,
+            'trailing_stop': trailing_stop,  # Thay 'stop_loss' bằng 'trailing_stop'
             'take_profit': take_profit,
             'size': position_size,
-            'risk_per_r': risk_amount
+            'risk_per_r': risk_amount,
+            'prev_price': entry_price  # Lưu giá trước đó để tính trailing stop
         }
         positions[symbol].append(position)
         
-        logging.info(f"{symbol} - [SIM] Vào lệnh {signal}: Price={entry_price}, SL={stop_loss}, TP={take_profit}, Size={position_size}")
+        logging.info(f"{symbol} - [SIM] Vào lệnh {signal}: Price={entry_price}, Trailing Stop={trailing_stop}, TP={take_profit}, Size={position_size}")
         message = (
             f"<b>[SIM] {symbol} - {signal} Order</b>\n"
             f"Time: {position['entry_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
             f"Price: {entry_price:.4f}\n"
             f"Size: {position_size:.4f}\n"
-            f"Stop Loss: {stop_loss:.4f}\n"
+            f"Trailing Stop: {trailing_stop:.4f}\n"
             f"Take Profit: {take_profit:.4f}"
         )
         send_telegram_message(message)
@@ -207,22 +213,36 @@ def manage_positions(symbol, df):
     
     current = df.iloc[-1]
     current_price = float(client.futures_symbol_ticker(symbol=symbol)['price'])
+    nLoss = current['nLoss']  # Lấy nLoss từ dữ liệu hiện tại
     
     for i, position in enumerate(positions[symbol][:]):
         profit = (current_price - position['entry_price']) * position['size'] * (1 if position['type'] == 'LONG' else -1)
         
-        should_exit = False
-        exit_price = current_price
-        
+        # Cập nhật trailing stop theo logic UT Bot
         if position['type'] == 'LONG':
-            if current_price <= position['stop_loss'] or current_price >= position['take_profit'] or current['sell']:
-                should_exit = True
-                exit_price = position['stop_loss'] if current_price <= position['stop_loss'] else current_price
-        else:  # SHORT
-            if current_price >= position['stop_loss'] or current_price <= position['take_profit'] or current['buy']:
-                should_exit = True
-                exit_price = position['stop_loss'] if current_price >= position['stop_loss'] else current_price
+            if current_price > position['prev_price'] and current_price > position['trailing_stop']:
+                # Giá tăng: nâng trailing stop lên
+                new_trailing_stop = max(position['trailing_stop'], current_price - nLoss)
+                position['trailing_stop'] = new_trailing_stop
+                logging.info(f"{symbol} - [SIM] Cập nhật Trailing Stop LONG: {new_trailing_stop}")
+            # Kiểm tra thoát lệnh
+            should_exit = current_price <= position['trailing_stop'] or current_price >= position['take_profit'] or current['sell']
+            exit_price = position['trailing_stop'] if current_price <= position['trailing_stop'] else current_price
         
+        else:  # SHORT
+            if current_price < position['prev_price'] and current_price < position['trailing_stop']:
+                # Giá giảm: hạ trailing stop xuống
+                new_trailing_stop = min(position['trailing_stop'], current_price + nLoss)
+                position['trailing_stop'] = new_trailing_stop
+                logging.info(f"{symbol} - [SIM] Cập nhật Trailing Stop SHORT: {new_trailing_stop}")
+            # Kiểm tra thoát lệnh
+            should_exit = current_price >= position['trailing_stop'] or current_price <= position['take_profit'] or current['buy']
+            exit_price = position['trailing_stop'] if current_price >= position['trailing_stop'] else current_price
+        
+        # Cập nhật prev_price cho lần tiếp theo
+        position['prev_price'] = current_price
+        
+        # Thoát lệnh nếu cần
         if should_exit:
             trade = {
                 'type': f"{position['type']} (Exit)",
@@ -245,7 +265,7 @@ def manage_positions(symbol, df):
                 f"Profit: {trade['profit']:.4f}"
             )
             send_telegram_message(message)
-
+            
 def send_periodic_report():
     if not trades:
         return
