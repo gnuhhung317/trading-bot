@@ -1,0 +1,24 @@
+2025-03-09 21:23:48,368 - ERROR - Lỗi đặt leverage cho SUI/USDT:USDT: bitget does not have market symbol SUI/USDT:USDT
+2025-03-09 21:23:49,043 - ERROR - Lỗi đặt leverage cho MATIC/USDT:USDT: bitget does not have market symbol SMATIC/SUSDT:SUSDT
+2025-03-09 21:23:49,701 - ERROR - Lỗi đặt leverage cho XRP/USDT:USDT: bitget does not have market symbol SXRP/SUSDT:SUSDT
+2025-03-09 21:23:50,362 - ERROR - Lỗi đặt leverage cho ETH/USDT:USDT: bitget does not have market symbol SETH/SUSDT:SUSDT
+2025-03-09 21:23:51,015 - ERROR - Lỗi đặt leverage cho AAVE/USDT:USDT: bitget does not have market symbol SAAVE/SUSDT:SUSDT
+2025-03-09 21:23:51,704 - ERROR - Lỗi đặt leverage cho LINK/USDT:USDT: bitget does not have market symbol SLINK/SUSDT:SUSDT
+2025-03-09 21:23:52,344 - ERROR - Lỗi đặt leverage cho LTC/USDT:USDT: bitget does not have market symbol SLTC/SUSDT:SUSDT
+2025-03-09 21:23:53,003 - ERROR - Lỗi đặt leverage cho BNB/USDT:USDT: bitget does not have market symbol SBNB/SUSDT:SUSDT
+2025-03-09 21:23:53,004 - INFO - Bắt đầu bot giao dịch Bitget...
+2025-03-09 21:23:58,513 - ERROR - Lỗi khi đồng bộ vị thế: bitget {"code":"40012","msg":"apikey/password is incorrect","requestTime":1741530235372,"data":null}
+2025-03-09 21:24:15,580 - INFO - Bắt đầu vòng lặp giao dịch
+2025-03-09 21:24:32,832 - ERROR - Lỗi khi lấy dữ liệu cho SUI/USDT:USDT: bitget does not have market symbol SUI/USDT:USDT
+2025-03-09 21:24:36,970 - ERROR - Lỗi khi lấy dữ liệu cho SUI/USDT:USDT: bitget does not have market symbol SUI/USDT:USDT
+2025-03-09 21:29:48,603 - ERROR - Lỗi đặt leverage cho SUI/USDT:USDT: bitget {"code":"40099","msg":"exchange environment is incorrect","requestTime":1741530585458,"data":null}
+2025-03-09 21:29:48,605 - ERROR - Lỗi đặt leverage cho MATIC/USDT:USDT: bitget does not have market symbol MATIC/USDT:USDT
+2025-03-09 21:29:48,775 - ERROR - Lỗi đặt leverage cho XRP/USDT:USDT: bitget {"code":"40099","msg":"exchange environment is incorrect","requestTime":1741530585634,"data":null}
+2025-03-09 21:29:48,976 - ERROR - Lỗi đặt leverage cho ETH/USDT:USDT: bitget {"code":"40099","msg":"exchange environment is incorrect","requestTime":1741530585841,"data":null}
+2025-03-09 21:29:49,171 - ERROR - Lỗi đặt leverage cho AAVE/USDT:USDT: bitget {"code":"40099","msg":"exchange environment is incorrect","requestTime":1741530586035,"data":null}
+2025-03-09 21:29:49,374 - ERROR - Lỗi đặt leverage cho LINK/USDT:USDT: bitget {"code":"40099","msg":"exchange environment is incorrect","requestTime":1741530586237,"data":null}
+2025-03-09 21:29:49,581 - ERROR - Lỗi đặt leverage cho LTC/USDT:USDT: bitget {"code":"40099","msg":"exchange environment is incorrect","requestTime":1741530586441,"data":null}
+2025-03-09 21:29:49,778 - ERROR - Lỗi đặt leverage cho BNB/USDT:USDT: bitget {"code":"40099","msg":"exchange environment is incorrect","requestTime":1741530586635,"data":null}
+2025-03-09 21:29:49,778 - INFO - Bắt đầu bot giao dịch Bitget...
+2025-03-09 21:36:40,938 - ERROR - Lỗi khi đồng bộ vị thế: bitget {"code":"40099","msg":"exchange environment is incorrect","requestTime":1741530997786,"data":null}
+2025-03-09 21:36:41,918 - INFO - Bắt đầu vòng lặp giao dịch

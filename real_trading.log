@@ -387,3 +387,33 @@
 2025-03-06 18:43:24,447 - INFO - Khởi tạo balance: 3.64839826
 2025-03-06 18:43:24,582 - INFO - Đồng bộ vị thế từ Binance thành công. Balance: 3.64839826
 2025-03-06 18:43:24,715 - INFO - Số dư hiện tại: Balance=3.64839826, Total Equity=5.25769751
+2025-03-07 23:40:21,098 - WARNING - Không tìm thấy thông tin precision cho SUIUSDT
+2025-03-07 23:40:21,745 - WARNING - Không tìm thấy thông tin precision cho MOVEUSDT
+2025-03-07 23:40:22,368 - WARNING - Không tìm thấy thông tin precision cho CETUSUSDT
+2025-03-07 23:40:23,002 - WARNING - Không tìm thấy thông tin precision cho XRPUSDT
+2025-03-07 23:40:23,615 - WARNING - Không tìm thấy thông tin precision cho ETHUSDT
+2025-03-07 23:40:24,228 - WARNING - Không tìm thấy thông tin precision cho AAVEUSDT
+2025-03-07 23:40:24,818 - WARNING - Không tìm thấy thông tin precision cho LINKUSDT
+2025-03-07 23:40:25,441 - WARNING - Không tìm thấy thông tin precision cho VANAUSDT
+2025-03-07 23:40:26,032 - WARNING - Không tìm thấy thông tin precision cho TAOUSDT
+2025-03-07 23:40:26,644 - WARNING - Không tìm thấy thông tin precision cho TIAUSDT
+2025-03-07 23:40:27,269 - WARNING - Không tìm thấy thông tin precision cho MKRUSDT
+2025-03-07 23:40:27,863 - WARNING - Không tìm thấy thông tin precision cho LTCUSDT
+2025-03-07 23:40:28,446 - WARNING - Không tìm thấy thông tin precision cho ENAUSDT
+2025-03-07 23:40:29,026 - WARNING - Không tìm thấy thông tin precision cho NEARUSDT
+2025-03-07 23:40:29,658 - WARNING - Không tìm thấy thông tin precision cho BNXUSDT
+2025-03-07 23:52:36,487 - WARNING - Không tìm thấy thông tin precision cho SUIUSDT
+2025-03-07 23:52:36,818 - WARNING - Không tìm thấy thông tin precision cho MOVEUSDT
+2025-03-07 23:52:37,144 - WARNING - Không tìm thấy thông tin precision cho CETUSUSDT
+2025-03-07 23:52:37,477 - WARNING - Không tìm thấy thông tin precision cho XRPUSDT
+2025-03-07 23:52:37,785 - WARNING - Không tìm thấy thông tin precision cho ETHUSDT
+2025-03-07 23:52:38,111 - WARNING - Không tìm thấy thông tin precision cho AAVEUSDT
+2025-03-07 23:52:38,447 - WARNING - Không tìm thấy thông tin precision cho LINKUSDT
+2025-03-07 23:52:38,784 - WARNING - Không tìm thấy thông tin precision cho VANAUSDT
+2025-03-07 23:52:39,096 - WARNING - Không tìm thấy thông tin precision cho TAOUSDT
+2025-03-07 23:52:39,415 - WARNING - Không tìm thấy thông tin precision cho TIAUSDT
+2025-03-07 23:52:39,741 - WARNING - Không tìm thấy thông tin precision cho MKRUSDT
+2025-03-07 23:52:40,080 - WARNING - Không tìm thấy thông tin precision cho LTCUSDT
+2025-03-07 23:52:40,410 - WARNING - Không tìm thấy thông tin precision cho ENAUSDT
+2025-03-07 23:52:40,768 - WARNING - Không tìm thấy thông tin precision cho NEARUSDT
+2025-03-07 23:52:41,095 - WARNING - Không tìm thấy thông tin precision cho BNXUSDT

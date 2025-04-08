@@ -422,19 +422,19 @@ def backtest_momentum_strategy(df, higher_tf_df, initial_balance=10, leverage=20
                 if any(exit_conditions):
                     exit_price = current_price if current_price < position['stop_loss'] else position['stop_loss']
                     
-                    trade = {
+                trade = {
                         'type': position['type'] + " (Final)",
-                        'entry_time': position['entry_time'],
-                        'exit_time': current.name,
-                        'entry_price': position['entry_price'],
+                    'entry_time': position['entry_time'],
+                    'exit_time': current.name,
+                    'entry_price': position['entry_price'],
                         'exit_price': exit_price,
                         'profit': (position['entry_price'] - exit_price) * position['size'],
                         'hold_time': (current.name - position['entry_time']).total_seconds()/3600,
                         'r_multiple': r_multiple
-                    }
-                    trades.append(trade)
+                }
+                trades.append(trade)
                     balance += trade['profit']
-                    position = None
+                position = None
                     # print(f"Final exit: {trade}")  # Debug print
         
         # ====== ENTRY LOGIC ======
@@ -652,7 +652,7 @@ def test_strategy(start_date, end_date, interval, top_symbols):
             
             # Xử lý an toàn cho dữ liệu
             try:
-                df = get_historical_data(symbol, interval, start_date, end_date)
+        df = get_historical_data(symbol, interval, start_date, end_date)
             except Exception as e:
                 print(f"Lỗi khi tải dữ liệu chính: {str(e)}")
                 df = pd.DataFrame()
@@ -663,10 +663,10 @@ def test_strategy(start_date, end_date, interval, top_symbols):
                 print(f"Lỗi khi tải dữ liệu khung thời gian cao: {str(e)}")
                 higher_tf_df = pd.DataFrame()
             
-            if df.empty:
+        if df.empty:
                 print("Không tải được dữ liệu đầy đủ!")
                 results_summary.append({'Symbol': symbol, 'Số giao dịch': 0, 'Tỷ lệ thắng (%)': 0, 'P&L (USDT)': 0, 'Lợi nhuận (%)': 0})
-                continue
+            continue
 
             df = add_signal_indicators(df)
             higher_tf_df = add_trend_indicators(higher_tf_df)
@@ -674,16 +674,16 @@ def test_strategy(start_date, end_date, interval, top_symbols):
             trades_df, final_balance, profit, profit_percent = backtest_momentum_strategy(
                 df, higher_tf_df, initial_balance=10, leverage=10, risk_per_trade=0.02
             )
-            
-            if not trades_df.empty:
+
+        if not trades_df.empty:
                 trades_df.to_csv(f'temp/momentum_trades_{symbol}_{start_date}_{end_date}.csv')
                 print(f"Đã lưu giao dịch tại: temp/momentum_trades_{symbol}_{start_date}_{end_date}.csv")
                 
                 analyzed_trades = analyze_results(trades_df, 10, final_balance, profit_percent)
                 
-                win_trades = len(trades_df[trades_df['profit'] > 0])
-                total_trades = len(trades_df)
-                win_rate = (win_trades / total_trades) * 100 if total_trades > 0 else 0
+            win_trades = len(trades_df[trades_df['profit'] > 0])
+            total_trades = len(trades_df)
+            win_rate = (win_trades / total_trades) * 100 if total_trades > 0 else 0
                 
                 print("\n===== KẾT QUẢ BACKTEST MOMENTUM =====")
                 print(f"Tổng giao dịch: {total_trades}")
@@ -692,12 +692,12 @@ def test_strategy(start_date, end_date, interval, top_symbols):
                 print(f"Lợi nhuận %: {profit_percent:.2f}%")
                 
                 plot_trades(df, trades_df, symbol, start_date, end_date)
-                
-                results_summary.append({
-                    'Symbol': symbol,
-                    'Số giao dịch': total_trades,
-                    'Tỷ lệ thắng (%)': round(win_rate, 2),
-                    'P&L (USDT)': round(profit, 2),
+
+        results_summary.append({
+            'Symbol': symbol,
+            'Số giao dịch': total_trades,
+            'Tỷ lệ thắng (%)': round(win_rate, 2),
+            'P&L (USDT)': round(profit, 2),
                     'Lợi nhuận (%)': round(profit_percent, 2)
                 })
             else:
