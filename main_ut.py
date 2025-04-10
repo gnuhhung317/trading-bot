@@ -8,7 +8,7 @@ import os
 import logging
 import requests
 import sys
-
+import math
 load_dotenv()
 
 # === Configuration ===
@@ -64,7 +64,8 @@ for symbol in COINS:
 
 def round_to_precision(symbol, value, value_type="quantity"):
     precision = COINS[symbol]["quantity_precision"] if value_type == "quantity" else COINS[symbol]["price_precision"]
-    rounded_value = round(value, precision)
+    factor = 10 ** precision
+    rounded_value = math.floor(value * factor) / factor
     if precision == 0:
         rounded_value = int(rounded_value)
     return rounded_value

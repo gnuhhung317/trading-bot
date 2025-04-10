@@ -1,0 +1,43 @@
+2025-04-11 00:11:37,518 - INFO - Đặt đòn bẩy 10 cho ETHUSDT
+2025-04-11 00:11:37,518 - INFO - Khởi động bot giao dịch UT Bot...
+2025-04-11 00:11:38,683 - INFO - Gửi tin nhắn Telegram: Bot giao dịch UT Bot đã khởi động!...
+2025-04-11 00:11:41,762 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:11:42,340 - ERROR - ETHUSDT - Lỗi khi vào lệnh: APIError(code=-2019): Margin is insufficient.
+2025-04-11 00:11:43,494 - INFO - Gửi tin nhắn Telegram: ETHUSDT - Lỗi vào lệnh: APIError(code=-2019): Marg...
+2025-04-11 00:11:46,573 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:11:47,049 - ERROR - ETHUSDT - Lỗi khi vào lệnh: APIError(code=-2019): Margin is insufficient.
+2025-04-11 00:11:48,130 - INFO - Gửi tin nhắn Telegram: ETHUSDT - Lỗi vào lệnh: APIError(code=-2019): Marg...
+2025-04-11 00:11:51,209 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:11:51,761 - ERROR - ETHUSDT - Lỗi khi vào lệnh: APIError(code=-2019): Margin is insufficient.
+2025-04-11 00:11:52,828 - INFO - Gửi tin nhắn Telegram: ETHUSDT - Lỗi vào lệnh: APIError(code=-2019): Marg...
+2025-04-11 00:12:05,592 - INFO - Đặt đòn bẩy 10 cho ETHUSDT
+2025-04-11 00:12:05,592 - INFO - Khởi động bot giao dịch UT Bot...
+2025-04-11 00:12:06,687 - INFO - Gửi tin nhắn Telegram: Bot giao dịch UT Bot đã khởi động!...
+2025-04-11 00:12:16,448 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:15:08,453 - INFO - Đặt đòn bẩy 10 cho ETHUSDT
+2025-04-11 00:15:08,454 - INFO - Khởi động bot giao dịch UT Bot...
+2025-04-11 00:15:09,626 - INFO - Gửi tin nhắn Telegram: Bot giao dịch UT Bot đã khởi động!...
+2025-04-11 00:15:18,296 - INFO - Đặt đòn bẩy 10 cho ETHUSDT
+2025-04-11 00:15:18,296 - INFO - Khởi động bot giao dịch UT Bot...
+2025-04-11 00:15:19,365 - INFO - Gửi tin nhắn Telegram: Bot giao dịch UT Bot đã khởi động!...
+2025-04-11 00:15:22,460 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:15:23,507 - INFO - Gửi tin nhắn Telegram: [SIM] Số dư hiện tại: Balance=20.0056028...
+2025-04-11 00:15:26,855 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:15:30,205 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:15:33,796 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:15:37,388 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:15:40,816 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:15:44,205 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:15:47,608 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:15:51,064 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:15:54,469 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:15:57,773 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:16:01,175 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:16:04,492 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:16:07,802 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:16:11,145 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:16:14,461 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:16:17,764 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:16:21,143 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:16:24,465 - INFO - Số dư hiện tại: 20.0056028
+2025-04-11 00:16:27,779 - INFO - Số dư hiện tại: 20.0056028
