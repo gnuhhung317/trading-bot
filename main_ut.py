@@ -274,6 +274,39 @@ def sync_balance():
         future_balance = float(account_info["totalMarginBalance"])
         if initial_balance is None:
             initial_balance = balance
+
+        all_positions = client.futures_position_information()
+        positions.clear()
+        positions.update({symbol: [] for symbol in COINS})
+        
+        for pos in all_positions:
+            symbol = pos.get('symbol')
+            if symbol in COINS:
+                amt = float(pos.get('positionAmt', 0))
+                if COINS[symbol]["quantity_precision"] == 0:
+                    amt = int(amt)
+                if abs(amt) > 0:
+                    position_type = 'LONG' if amt > 0 else 'SHORT'
+                    entry_price = float(pos.get('entryPrice', 0))
+                    stop_loss = entry_price * (1 - 0.02) if position_type == 'LONG' else entry_price * (1 + 0.02)
+                    risk_amount = balance * RISK_PER_TRADE if balance > 0 else 0.01
+                    risk_per_r = abs(entry_price - stop_loss) / risk_amount if risk_amount > 0 else 1
+                    
+                    position_dict = {
+                        'id': None,
+                        'type': position_type,
+                        'entry_time': pd.to_datetime(pos.get('updateTime', 0), unit='ms'),
+                        'entry_price': entry_price,
+                        'stop_loss': stop_loss,
+                        'size': abs(amt),
+                        'risk_per_r': risk_amount,
+                        'breakeven_activated': False,
+                        'first_target_hit': False,
+                        'second_target_hit': False
+                    }
+                    positions[symbol].append(position_dict)
+                    logging.info(f"Đồng bộ {symbol}: {position_type}, Size={abs(amt)}, Entry={entry_price}")
+        
         logging.info(f"Số dư hiện tại: {balance}")
     except Exception as e:
         logging.error(f"Lỗi đồng bộ số dư: {e}")
@@ -291,7 +324,7 @@ def trading_loop():
             sync_balance()
 
             if now.minute %5==0 and flag:
-                send_telegram_message(f"[SIM] Số dư hiện tại: Balance={balance}")
+                send_telegram_message(f"Số dư hiện tại: Balance={future_balance:.4f} USDT")
                 flag = False
             elif now.minute %5!=0 :
                 flag = True
