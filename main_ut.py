@@ -170,12 +170,17 @@ def enter_position(symbol, signal):
             logging.warning(f"{symbol} - Kích thước lệnh ({position_size}) nhỏ hơn min_size")
             return
         
-        # Trailing Stop and Take Profit
+        # Thêm cơ chế stop loss cố định kết hợp với trailing stop
         if signal == "LONG":
+            # Hard stop loss kết hợp với trailing stop
+            hard_stop_loss = entry_price * (1 - 0.02)  # 2% dưới giá vào
             trailing_stop = entry_price - nLoss
+            stop_loss = max(hard_stop_loss, trailing_stop)  # Chọn giá trị gần giá nhất
             take_profit = entry_price + 2 * nLoss
         else:  # SHORT
+            hard_stop_loss = entry_price * (1 + 0.02)  # 2% trên giá vào  
             trailing_stop = entry_price + nLoss
+            stop_loss = min(hard_stop_loss, trailing_stop)  # Chọn giá trị gần giá nhất
             take_profit = entry_price - 2 * nLoss
         
         side = "BUY" if signal == "LONG" else "SELL"
@@ -187,9 +192,11 @@ def enter_position(symbol, signal):
                 "entry_time": datetime.now(),
                 "entry_price": entry_price,
                 "trailing_stop": round_to_precision(symbol, trailing_stop, "price"),
+                "hard_stop_loss": round_to_precision(symbol, hard_stop_loss, "price"),
                 "take_profit": round_to_precision(symbol, take_profit, "price"),
                 "size": position_size,
-                "risk_amount": risk_amount
+                "risk_amount": risk_amount,
+                "breakeven_activated": False  # Thêm cờ để theo dõi trạng thái
             }
             positions[symbol].append(position)
             
@@ -217,57 +224,127 @@ def manage_positions(symbol, df):
     nLoss = current["nLoss"]
     
     for i, position in enumerate(positions[symbol][:]):
-        profit = (current_price - position["entry_price"]) * position["size"] * (1 if position["type"] == "LONG" else -1)
+        # Tính toán phần trăm lợi nhuận - chỉ dùng để điều chỉnh trailing stop
+        profit_pct = (current_price - position["entry_price"]) / position["entry_price"] * (1 if position["type"] == "LONG" else -1)
         
-        # Update Trailing Stop
+        # Cập nhật trailing stop linh hoạt hơn
         if position["type"] == "LONG":
-            if current_price > position["entry_price"] + nLoss:
-                position["trailing_stop"] = round_to_precision(symbol, max(position["trailing_stop"], current_price - nLoss), "price")
-            should_exit = (current_price <= position["trailing_stop"] or 
-                          current_price >= position["take_profit"] or 
-                          current["sellSignal"])
-            exit_price = position["trailing_stop"] if current_price <= position["trailing_stop"] else current_price
+            # Di chuyển trailing stop lên khi giá đã có lợi nhuận
+            if current_price > position["entry_price"]:
+                # Nếu đã đạt 1R lợi nhuận, di chuyển stop lên breakeven
+                if profit_pct >= 0.01 and not position["breakeven_activated"]:
+                    position["trailing_stop"] = position["entry_price"]
+                    position["breakeven_activated"] = True
+                # Nếu đã đạt 2R, sử dụng trailing stop chặt hơn (0.5 ATR)
+                elif profit_pct >= 0.02:
+                    new_stop = current_price - (nLoss * 0.5)
+                    position["trailing_stop"] = round_to_precision(
+                        symbol, max(position["trailing_stop"], new_stop), "price"
+                    )
+                # Trường hợp thông thường, trailing stop chuẩn (1 ATR)
+                elif current_price > position["entry_price"] + nLoss:
+                    new_stop = current_price - nLoss
+                    position["trailing_stop"] = round_to_precision(
+                        symbol, max(position["trailing_stop"], new_stop), "price"
+                    )
+            
+            # Điều kiện thoát lệnh kết hợp cả hard stop và trailing stop
+            should_exit = (
+                current_price <= position["trailing_stop"] or
+                current_price <= position["hard_stop_loss"] or
+                current_price >= position["take_profit"] or
+                current["sellSignal"]
+            )
         
         else:  # SHORT
-            if current_price < position["entry_price"] - nLoss:
-                position["trailing_stop"] = round_to_precision(symbol, min(position["trailing_stop"], current_price + nLoss), "price")
-            should_exit = (current_price >= position["trailing_stop"] or 
-                          current_price <= position["take_profit"] or 
-                          current["buySignal"])
-            exit_price = position["trailing_stop"] if current_price >= position["trailing_stop"] else current_price
+            # Di chuyển trailing stop xuống khi giá đã có lợi nhuận
+            if current_price < position["entry_price"]:
+                # Nếu đã đạt 1R lợi nhuận, di chuyển stop lên breakeven
+                if profit_pct >= 0.01 and not position["breakeven_activated"]:
+                    position["trailing_stop"] = position["entry_price"]
+                    position["breakeven_activated"] = True
+                # Nếu đã đạt 2R, sử dụng trailing stop chặt hơn (0.5 ATR)
+                elif profit_pct >= 0.02:
+                    new_stop = current_price + (nLoss * 0.5)
+                    position["trailing_stop"] = round_to_precision(
+                        symbol, min(position["trailing_stop"], new_stop), "price"
+                    )
+                # Trường hợp thông thường, trailing stop chuẩn (1 ATR)
+                elif current_price < position["entry_price"] - nLoss:
+                    new_stop = current_price + nLoss
+                    position["trailing_stop"] = round_to_precision(
+                        symbol, min(position["trailing_stop"], new_stop), "price"
+                    )
+            
+            # Điều kiện thoát lệnh kết hợp cả hard stop và trailing stop
+            should_exit = (
+                current_price >= position["trailing_stop"] or
+                current_price >= position["hard_stop_loss"] or
+                current_price <= position["take_profit"] or
+                current["buySignal"]
+            )
         
-        # Exit Position
+        # Xác định lý do thoát lệnh nếu cần thoát
         if should_exit:
+            # Xác định giá thoát và trigger
+            exit_price = current_price  # Sử dụng giá hiện tại làm giá thoát
+            
+            if current_price <= position["trailing_stop"] and position["type"] == "LONG":
+                exit_trigger = "trailing_stop"
+            elif current_price >= position["trailing_stop"] and position["type"] == "SHORT":
+                exit_trigger = "trailing_stop"
+            elif current_price <= position["hard_stop_loss"] and position["type"] == "LONG":
+                exit_trigger = "hard_stop"
+            elif current_price >= position["hard_stop_loss"] and position["type"] == "SHORT":
+                exit_trigger = "hard_stop"
+            elif (current_price >= position["take_profit"] and position["type"] == "LONG") or \
+                 (current_price <= position["take_profit"] and position["type"] == "SHORT"):
+                exit_trigger = "take_profit"
+            else:
+                exit_trigger = "signal"
+            
+            # Exit Position
             side = "SELL" if position["type"] == "LONG" else "BUY"
             order = client.futures_create_order(
                 symbol=symbol, side=side, type="MARKET", quantity=position["size"], reduceOnly=True
             )
             if order and order["status"] == "FILLED":
+                # Tính lợi nhuận thực tế
+                if position["type"] == "LONG":
+                    profit = (exit_price - position["entry_price"]) * position["size"] * (1 - TAKER_FEE)
+                else:  # SHORT
+                    profit = (position["entry_price"] - exit_price) * position["size"] * (1 - TAKER_FEE)
+                
                 trade = {
                     "type": position["type"],
                     "entry_time": position["entry_time"],
                     "exit_time": datetime.now(),
                     "entry_price": position["entry_price"],
                     "exit_price": exit_price,
-                    "profit": (exit_price - position["entry_price"]) * position["size"] * (1 - TAKER_FEE) if position["type"] == "LONG" else (position["entry_price"] - exit_price) * position["size"] * (1 - TAKER_FEE)
+                    "exit_trigger": exit_trigger,
+                    "profit": profit
                 }
                 trades.append(trade)
-                balance += trade["profit"]
+                balance += profit
                 positions[symbol].pop(i)
                 
-                logging.info(f"{symbol} - Thoát {position['type']}: Exit Price={exit_price}, Profit={trade['profit']}")
+                # Ghi log một lần với thông tin đầy đủ
+                logging.info(f"{symbol} - Thoát {position['type']} do {exit_trigger}: Exit Price={exit_price}, Profit={profit}")
+                
+                # Gửi thông báo Telegram
                 message = (
                     f"<b>{symbol} - {position['type']} Exit</b>\n"
                     f"Time: {trade['exit_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
                     f"Entry Price: {position['entry_price']:.4f}\n"
                     f"Exit Price: {exit_price:.4f}\n"
+                    f"Exit Reason: {exit_trigger}\n"
                     f"Size: {position['size']:.4f}\n"
-                    f"Profit: {trade['profit']:.4f}"
+                    f"Profit: {profit:.4f}"
                 )
                 send_telegram_message(message)
 
 def sync_balance():
-    global balance, initial_balance,future_balance
+    global balance, initial_balance, future_balance
     try:
         account_info = client.futures_account()
         balance = float(account_info["availableBalance"])
@@ -286,26 +363,75 @@ def sync_balance():
                 if COINS[symbol]["quantity_precision"] == 0:
                     amt = int(amt)
                 if abs(amt) > 0:
-                    position_type = 'LONG' if amt > 0 else 'SHORT'
-                    entry_price = float(pos.get('entryPrice', 0))
-                    stop_loss = entry_price * (1 - 0.02) if position_type == 'LONG' else entry_price * (1 + 0.02)
-                    risk_amount = balance * RISK_PER_TRADE if balance > 0 else 0.01
-                    risk_per_r = abs(entry_price - stop_loss) / risk_amount if risk_amount > 0 else 1
+                    # Lấy dữ liệu thị trường để tính ATR
+                    df = get_historical_data(symbol, TIMEFRAME)
+                    df = calculate_indicators(df)
                     
-                    position_dict = {
-                        'id': None,
-                        'type': position_type,
-                        'entry_time': pd.to_datetime(pos.get('updateTime', 0), unit='ms'),
-                        'entry_price': entry_price,
-                        'stop_loss': stop_loss,
-                        'size': abs(amt),
-                        'risk_per_r': risk_amount,
-                        'breakeven_activated': False,
-                        'first_target_hit': False,
-                        'second_target_hit': False
-                    }
-                    positions[symbol].append(position_dict)
-                    logging.info(f"Đồng bộ {symbol}: {position_type}, Size={abs(amt)}, Entry={entry_price}")
+                    if not df.empty:
+                        current = df.iloc[-1]
+                        nLoss = current["nLoss"]
+                        
+                        position_type = 'LONG' if amt > 0 else 'SHORT'
+                        entry_price = float(pos.get('entryPrice', 0))
+                        current_price = float(client.futures_symbol_ticker(symbol=symbol)["price"])
+                        
+                        # Tính trailing stop và hard stop loss theo logic mới
+                        if position_type == 'LONG':
+                            hard_stop_loss = entry_price * (1 - 0.02)  # 2% dưới giá vào
+                            base_trailing_stop = entry_price - nLoss
+                            
+                            # Kiểm tra nếu giá hiện tại có lợi nhuận để điều chỉnh trailing stop
+                            profit_pct = (current_price - entry_price) / entry_price
+                            if profit_pct >= 0.02:  # Nếu lợi nhuận >= 2%
+                                trailing_stop = max(base_trailing_stop, current_price - (nLoss * 0.5))
+                                breakeven_activated = True
+                            elif profit_pct >= 0.01:  # Nếu lợi nhuận >= 1%
+                                trailing_stop = max(base_trailing_stop, entry_price)
+                                breakeven_activated = True
+                            else:
+                                trailing_stop = base_trailing_stop
+                                breakeven_activated = False
+                            
+                            take_profit = entry_price + 2 * nLoss
+                        else:  # SHORT
+                            hard_stop_loss = entry_price * (1 + 0.02)  # 2% trên giá vào
+                            base_trailing_stop = entry_price + nLoss
+                            
+                            # Kiểm tra nếu giá hiện tại có lợi nhuận để điều chỉnh trailing stop
+                            profit_pct = (entry_price - current_price) / entry_price
+                            if profit_pct >= 0.02:  # Nếu lợi nhuận >= 2%
+                                trailing_stop = min(base_trailing_stop, current_price + (nLoss * 0.5))
+                                breakeven_activated = True
+                            elif profit_pct >= 0.01:  # Nếu lợi nhuận >= 1%
+                                trailing_stop = min(base_trailing_stop, entry_price)
+                                breakeven_activated = True
+                            else:
+                                trailing_stop = base_trailing_stop
+                                breakeven_activated = False
+                            
+                            take_profit = entry_price - 2 * nLoss
+                        
+                        # Làm tròn giá trị theo độ chính xác của symbol
+                        trailing_stop = round_to_precision(symbol, trailing_stop, "price")
+                        hard_stop_loss = round_to_precision(symbol, hard_stop_loss, "price")
+                        take_profit = round_to_precision(symbol, take_profit, "price")
+                        
+                        risk_amount = balance * RISK_PER_TRADE if balance > 0 else 0.01
+                        
+                        position_dict = {
+                            'id': None,
+                            'type': position_type,
+                            'entry_time': pd.to_datetime(pos.get('updateTime', 0), unit='ms'),
+                            'entry_price': entry_price,
+                            'trailing_stop': trailing_stop,
+                            'hard_stop_loss': hard_stop_loss,
+                            'take_profit': take_profit,
+                            'size': abs(amt),
+                            'risk_amount': risk_amount,
+                            'breakeven_activated': breakeven_activated
+                        }
+                        positions[symbol].append(position_dict)
+                        logging.info(f"Đồng bộ {symbol}: {position_type}, Size={abs(amt)}, Entry={entry_price}, Trailing Stop={trailing_stop}")
         
         logging.info(f"Số dư hiện tại: {balance}")
     except Exception as e:
