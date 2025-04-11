@@ -45,7 +45,6 @@ trades = []
 initial_balance = None
 balance = None
 future_balance = None
-
 # === Utility Functions ===
 def get_symbol_precision(symbol):
     try:
@@ -161,9 +160,13 @@ def enter_position(symbol, signal):
         entry_price = float(client.futures_symbol_ticker(symbol=symbol)["price"])
         nLoss = current["nLoss"]
         
+        # Đảm bảo nLoss không quá nhỏ để tránh position_size quá lớn
+        min_nLoss = entry_price * 0.005  # Ít nhất 0.5% giá vào
+        nLoss = max(nLoss, min_nLoss)
+        
         position_size = (risk_amount / nLoss) * COINS[symbol]["leverage"]
         max_size = (balance * COINS[symbol]["leverage"] / entry_price) * (1 - TAKER_FEE * 2)
-        position_size = min(position_size, max_size)
+        position_size = min(position_size, max_size) * 0.9  # Giảm kích thước lệnh 10% để tránh margin không đủ
         position_size = round_to_precision(symbol, position_size)
         
         if position_size < COINS[symbol]["min_size"]:
@@ -184,32 +187,84 @@ def enter_position(symbol, signal):
             take_profit = entry_price - 2 * nLoss
         
         side = "BUY" if signal == "LONG" else "SELL"
-        order = client.futures_create_order(symbol=symbol, side=side, type="MARKET", quantity=position_size)
-        if order and order["status"] == "FILLED":
-            position = {
-                "id": order["orderId"],
-                "type": signal,
-                "entry_time": datetime.now(),
-                "entry_price": entry_price,
-                "trailing_stop": round_to_precision(symbol, trailing_stop, "price"),
-                "hard_stop_loss": round_to_precision(symbol, hard_stop_loss, "price"),
-                "take_profit": round_to_precision(symbol, take_profit, "price"),
-                "size": position_size,
-                "risk_amount": risk_amount,
-                "breakeven_activated": False  # Thêm cờ để theo dõi trạng thái
-            }
-            positions[symbol].append(position)
-            
-            logging.info(f"{symbol} - Vào {signal}: Price={entry_price}, Size={position_size}, Trailing Stop={trailing_stop}, TP={take_profit}")
-            message = (
-                f"<b>{symbol} - {signal} Entry</b>\n"
-                f"Time: {position['entry_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
-                f"Price: {entry_price:.4f}\n"
-                f"Size: {position_size:.4f}\n"
-                f"Trailing Stop: {trailing_stop:.4f}\n"
-                f"Take Profit: {take_profit:.4f}"
-            )
-            send_telegram_message(message)
+        
+        # Tạo thông báo trước khi gửi lệnh
+        order_message = f"{symbol} - Vào {signal}: Price={entry_price}, Size={position_size}, Trailing Stop={trailing_stop}, TP={take_profit}"
+        logging.info(f"Chuẩn bị gửi lệnh: {order_message}")
+        
+        # Kiểm tra lại margin một lần nữa trước khi gửi lệnh
+        try:
+            # Gửi lệnh vào thị trường
+            order = client.futures_create_order(symbol=symbol, side=side, type="MARKET", quantity=position_size)
+            if order and order["status"] == "FILLED":
+                position = {
+                    "id": order["orderId"],
+                    "type": signal,
+                    "entry_time": datetime.now(),
+                    "entry_price": entry_price,
+                    "trailing_stop": round_to_precision(symbol, trailing_stop, "price"),
+                    "hard_stop_loss": round_to_precision(symbol, hard_stop_loss, "price"),
+                    "take_profit": round_to_precision(symbol, take_profit, "price"),
+                    "size": position_size,
+                    "risk_amount": risk_amount,
+                    "breakeven_activated": False  # Thêm cờ để theo dõi trạng thái
+                }
+                positions[symbol].append(position)
+                
+                logging.info(order_message)
+                message = (
+                    f"<b>{symbol} - {signal} Entry</b>\n"
+                    f"Time: {position['entry_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
+                    f"Price: {entry_price:.4f}\n"
+                    f"Size: {position_size:.4f}\n"
+                    f"Trailing Stop: {trailing_stop:.4f}\n"
+                    f"Take Profit: {take_profit:.4f}"
+                )
+                send_telegram_message(message)
+        except Exception as margin_error:
+            if "APIError(code=-2019): Margin is insufficient" in str(margin_error):
+                # Thử lại với kích thước vị thế nhỏ hơn
+                smaller_position_size = round_to_precision(symbol, position_size * 0.7)  # Giảm xuống 70%
+                if smaller_position_size >= COINS[symbol]["min_size"]:
+                    logging.warning(f"{symbol} - Margin không đủ, thử lại với kích thước nhỏ hơn: {smaller_position_size}")
+                    try:
+                        # Gửi lệnh với kích thước nhỏ hơn
+                        order = client.futures_create_order(symbol=symbol, side=side, type="MARKET", quantity=smaller_position_size)
+                        if order and order["status"] == "FILLED":
+                            position = {
+                                "id": order["orderId"],
+                                "type": signal,
+                                "entry_time": datetime.now(),
+                                "entry_price": entry_price,
+                                "trailing_stop": round_to_precision(symbol, trailing_stop, "price"),
+                                "hard_stop_loss": round_to_precision(symbol, hard_stop_loss, "price"),
+                                "take_profit": round_to_precision(symbol, take_profit, "price"),
+                                "size": smaller_position_size,
+                                "risk_amount": risk_amount,
+                                "breakeven_activated": False
+                            }
+                            positions[symbol].append(position)
+                            
+                            updated_message = f"{symbol} - Vào {signal} (kích thước giảm): Price={entry_price}, Size={smaller_position_size}, Trailing Stop={trailing_stop}, TP={take_profit}"
+                            logging.info(updated_message)
+                            message = (
+                                f"<b>{symbol} - {signal} Entry (kích thước giảm)</b>\n"
+                                f"Time: {position['entry_time'].strftime('%Y-%m-%d %H:%M:%S')}\n"
+                                f"Price: {entry_price:.4f}\n"
+                                f"Size: {smaller_position_size:.4f}\n"
+                                f"Trailing Stop: {trailing_stop:.4f}\n"
+                                f"Take Profit: {take_profit:.4f}"
+                            )
+                            send_telegram_message(message)
+                    except Exception as retry_error:
+                        logging.error(f"{symbol} - Lỗi khi thử lại với kích thước nhỏ hơn: {retry_error}")
+                        send_telegram_message(f"{symbol} - Lỗi khi thử lại với kích thước nhỏ hơn: {retry_error}")
+                else:
+                    logging.error(f"{symbol} - Không thể giảm kích thước vị thế hơn nữa ({smaller_position_size} < {COINS[symbol]['min_size']})")
+                    send_telegram_message(f"{symbol} - Không thể giảm kích thước vị thế hơn nữa do đã dưới ngưỡng tối thiểu")
+            else:
+                # Xử lý các lỗi khác
+                raise margin_error
     except Exception as e:
         logging.error(f"{symbol} - Lỗi khi vào lệnh: {e}")
         send_telegram_message(f"{symbol} - Lỗi vào lệnh: {e}")
