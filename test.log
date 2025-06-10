@@ -1,4 +1,0 @@
-2025-03-05 22:57:54,540 - INFO - ['AAVEUSDT', 'LINKUSDT', 'PEPEUSDT', 'VANAUSDT', 'TAOUSDT', 'TIAUSDT', 'RAYUSDT', 'SUIUSDT', 'MKRUSDT', 'LTCUSDT', 'ENAUSDT', 'NEARUSDT', 'RUNEUSDT', 'BNXUSDT']
-2025-03-05 23:53:03,988 - ERROR - Lỗi lấy precision cho AAVEUSDT: name 'client' is not defined
-2025-03-05 23:54:20,149 - WARNING - Không tìm thấy thông tin precision cho PEPEUSDT
-2025-03-05 23:58:22,301 - WARNING - Không tìm thấy thông tin precision cho PEPEUSDT

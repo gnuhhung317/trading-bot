@@ -1,0 +1,42 @@
+2025-06-10 17:42:51,200 - ERROR - Lỗi đặt leverage cho ETHUSDT: APIError(code=-2015): Invalid API-key, IP, or permissions for action, request ip: 42.113.240.27 - 474
+2025-06-10 17:42:51,200 - INFO - Lỗi đặt leverage cho ETHUSDT: APIError(code=-2015): Invalid API-key, IP, or permissions for action, request ip: 42.113.240.27 - 474
+2025-06-10 17:42:51,298 - ERROR - Lỗi đặt leverage cho SOLUSDT: APIError(code=-2015): Invalid API-key, IP, or permissions for action, request ip: 42.113.240.27 - 474
+2025-06-10 17:42:51,303 - INFO - Lỗi đặt leverage cho SOLUSDT: APIError(code=-2015): Invalid API-key, IP, or permissions for action, request ip: 42.113.240.27 - 474
+2025-06-10 17:42:51,403 - ERROR - Lỗi đặt leverage cho BTCUSDT: APIError(code=-2015): Invalid API-key, IP, or permissions for action, request ip: 42.113.240.27 - 474
+2025-06-10 17:42:51,403 - INFO - Lỗi đặt leverage cho BTCUSDT: APIError(code=-2015): Invalid API-key, IP, or permissions for action, request ip: 42.113.240.27 - 474
+2025-06-10 17:42:51,513 - ERROR - Lỗi đặt leverage cho BNBUSDT: APIError(code=-2015): Invalid API-key, IP, or permissions for action, request ip: 42.113.240.27 - 474
+2025-06-10 17:42:51,513 - INFO - Lỗi đặt leverage cho BNBUSDT: APIError(code=-2015): Invalid API-key, IP, or permissions for action, request ip: 42.113.240.27 - 474
+2025-06-10 17:42:51,513 - INFO - Bắt đầu bot giao dịch...
+2025-06-10 17:42:51,513 - INFO - Bot giao dịch đã khởi động!
+2025-06-10 17:42:51,614 - ERROR - Lỗi khi đồng bộ vị thế: APIError(code=-2015): Invalid API-key, IP, or permissions for action, request ip: 42.113.240.27 - 336
+2025-06-10 17:42:51,614 - INFO - Lỗi khi đồng bộ vị thế: APIError(code=-2015): Invalid API-key, IP, or permissions for action, request ip: 42.113.240.27 - 336
+2025-06-10 17:44:28,300 - ERROR - Lỗi đặt leverage cho ETHUSDT: APIError(code=-1021): Timestamp for this request was 1000ms ahead of the server's time. - 474
+2025-06-10 17:44:28,301 - INFO - Lỗi đặt leverage cho ETHUSDT: APIError(code=-1021): Timestamp for this request was 1000ms ahead of the server's time. - 474
+2025-06-10 17:44:28,401 - ERROR - Lỗi đặt leverage cho SOLUSDT: APIError(code=-1021): Timestamp for this request was 1000ms ahead of the server's time. - 474
+2025-06-10 17:44:28,401 - INFO - Lỗi đặt leverage cho SOLUSDT: APIError(code=-1021): Timestamp for this request was 1000ms ahead of the server's time. - 474
+2025-06-10 17:44:28,504 - ERROR - Lỗi đặt leverage cho BTCUSDT: APIError(code=-1021): Timestamp for this request was 1000ms ahead of the server's time. - 474
+2025-06-10 17:44:28,504 - INFO - Lỗi đặt leverage cho BTCUSDT: APIError(code=-1021): Timestamp for this request was 1000ms ahead of the server's time. - 474
+2025-06-10 17:44:28,607 - ERROR - Lỗi đặt leverage cho BNBUSDT: APIError(code=-1021): Timestamp for this request was 1000ms ahead of the server's time. - 474
+2025-06-10 17:44:28,607 - INFO - Lỗi đặt leverage cho BNBUSDT: APIError(code=-1021): Timestamp for this request was 1000ms ahead of the server's time. - 474
+2025-06-10 17:44:28,607 - INFO - Bắt đầu bot giao dịch...
+2025-06-10 17:44:28,607 - INFO - Bot giao dịch đã khởi động!
+2025-06-10 17:44:28,706 - ERROR - Lỗi khi đồng bộ vị thế: APIError(code=-1021): Timestamp for this request was 1000ms ahead of the server's time. - 336
+2025-06-10 17:44:28,706 - INFO - Lỗi khi đồng bộ vị thế: APIError(code=-1021): Timestamp for this request was 1000ms ahead of the server's time. - 336
+2025-06-10 17:45:00,804 - ERROR - Lỗi trong vòng lặp chính: APIError(code=-1021): Timestamp for this request was 1000ms ahead of the server's time. - 422
+2025-06-10 17:45:00,804 - INFO - Lỗi trong vòng lặp chính: APIError(code=-1021): Timestamp for this request was 1000ms ahead of the server's time. - 422
+2025-06-10 17:46:22,626 - INFO - Đặt leverage 10 cho ETHUSDT
+2025-06-10 17:46:22,736 - INFO - Đặt leverage 10 cho SOLUSDT
+2025-06-10 17:46:22,846 - INFO - Đặt leverage 10 cho BTCUSDT
+2025-06-10 17:46:22,940 - INFO - Đặt leverage 10 cho BNBUSDT
+2025-06-10 17:46:22,940 - INFO - Bắt đầu bot giao dịch...
+2025-06-10 17:46:22,940 - INFO - Bot giao dịch đã khởi động!
+2025-06-10 17:46:23,065 - INFO - Khởi tạo balance: 0.0
+2025-06-10 17:46:23,174 - INFO - Đồng bộ vị thế từ Binance thành công. Balance: 0.0
+2025-06-10 19:00:44,584 - INFO - Đặt leverage 10 cho ETHUSDT
+2025-06-10 19:00:44,695 - INFO - Đặt leverage 10 cho SOLUSDT
+2025-06-10 19:00:44,802 - INFO - Đặt leverage 10 cho BTCUSDT
+2025-06-10 19:00:44,896 - INFO - Đặt leverage 10 cho BNBUSDT
+2025-06-10 19:00:44,896 - INFO - Bắt đầu bot giao dịch...
+2025-06-10 19:00:44,896 - INFO - Bot giao dịch đã khởi động!
+2025-06-10 19:00:45,006 - INFO - Khởi tạo balance: 0.0
+2025-06-10 19:00:45,101 - INFO - Đồng bộ vị thế từ Binance thành công. Balance: 0.0

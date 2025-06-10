@@ -1,0 +1,2 @@
+symbol,total_trades,win_rate,profit_factor,expectancy,max_drawdown,sharpe_ratio,sortino_ratio,calmar_ratio,equity_final,equity_peak,return_pct,buy_hold_return
+BTCUSDT,0,,,,-0.0,,,,10000.0,10000.0,0.0,156.7591984380165
