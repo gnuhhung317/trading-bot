@@ -43,7 +43,7 @@ logging.basicConfig(
 
 positions = {symbol: [] for symbol in COINS}
 trades = []
-initial_balance = None
+initial_balance = 10.0
 balance = None
 is_blocked_tele=False
 def get_symbol_precision(symbol):

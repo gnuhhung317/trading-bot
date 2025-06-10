@@ -76,7 +76,6 @@ class ForexFuryStrategy(Strategy):
         # Calculate position size based on risk
         stop_distance = self.atr[-1] * self.atr_sl_multiplier
         position_size = round((self.equity * self.risk_per_trade) / stop_distance) if stop_distance > 0 else 1
-        position_size*=10
         # Check if we have a position
         if self.position:
             # Exit conditions (handled by SL/TP/trailing stop in entry)
