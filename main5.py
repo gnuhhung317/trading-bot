@@ -45,7 +45,7 @@ positions = {symbol: [] for symbol in COINS}
 trades = []
 initial_balance = None
 balance = None
-
+is_blocked_tele=False
 def get_symbol_precision(symbol):
     try:
         exchange_info = client.futures_exchange_info()
@@ -72,22 +72,26 @@ def round_to_precision(symbol, size, value_type='quantity'):
     return rounded_value
 
 def send_telegram_message(message):
-    # url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    # payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "HTML"}
-    # for attempt in range(3):
-    #     try:
-    #         response = requests.post(url, json=payload, timeout=5)
-    #         response.raise_for_status()
-    #         logging.info(f"Gửi tin nhắn Telegram thành công: {message[:50]}...")
-    #         return response.json()
-    #     except Exception as e:
-    #         exc_type, exc_obj, tb = sys.exc_info()
-    #         line_number = tb.tb_lineno
-    #         logging.error(f"Lỗi gửi tin nhắn Telegram (lần {attempt+1}): {e} - {line_number}")
-    #         time.sleep(2)
-    # logging.critical("Telegram không hoạt động sau 3 lần thử!")
-    logging.info(message)
-    return None
+    global is_blocked_tele
+    if is_blocked_tele:
+        logging.info(message)
+    else:
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+        payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message, "parse_mode": "HTML"}
+        for attempt in range(3):
+            try:
+                response = requests.post(url, json=payload, timeout=5)
+                response.raise_for_status()
+                logging.info(f"Gửi tin nhắn Telegram thành công: {message[:50]}...")
+                return response.json()
+            except Exception as e:
+                exc_type, exc_obj, tb = sys.exc_info()
+                line_number = tb.tb_lineno
+                logging.error(f"Lỗi gửi tin nhắn Telegram (lần {attempt+1}): {e} - {line_number}")
+                time.sleep(2)
+        logging.critical("Telegram không hoạt động sau 3 lần thử!")
+        is_blocked_tele=True
+        return None
 
 def get_historical_data(symbol, interval, limit=1000):
     for attempt in range(3):

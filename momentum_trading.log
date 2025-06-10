@@ -1,7 +1,43 @@
-2025-06-10 19:01:30,063 - INFO - Đặt leverage 10 cho ETHUSDT
-2025-06-10 19:01:30,164 - INFO - Đặt leverage 10 cho SOLUSDT
-2025-06-10 19:01:30,261 - INFO - Đặt leverage 10 cho BNBUSDT
-2025-06-10 19:01:30,262 - INFO - Bắt đầu bot giao dịch...
-2025-06-10 19:01:30,262 - INFO - Bot giao dịch đã khởi động!
-2025-06-10 19:01:30,370 - INFO - Khởi tạo balance: 0.0
-2025-06-10 19:01:30,474 - INFO - Đồng bộ vị thế từ Binance thành công. Balance: 0.0
+2025-06-10 19:10:22,348 - INFO - Đặt leverage 10 cho ETHUSDT
+2025-06-10 19:10:22,458 - INFO - Đặt leverage 10 cho SOLUSDT
+2025-06-10 19:10:22,552 - INFO - Đặt leverage 10 cho BNBUSDT
+2025-06-10 19:10:22,552 - INFO - Bắt đầu bot giao dịch...
+2025-06-10 19:10:22,552 - INFO - Bot giao dịch đã khởi động!
+2025-06-10 19:10:22,670 - INFO - Khởi tạo balance: 10.0
+2025-06-10 19:10:22,766 - INFO - Đồng bộ vị thế từ Binance thành công. Balance: 10.0
+2025-06-10 19:15:00,960 - INFO - Số dư hiện tại: Balance=10.0, Total Equity=10.0
+2025-06-10 19:15:02,281 - INFO - Khởi tạo balance: 10.0
+2025-06-10 19:15:02,375 - INFO - Đồng bộ vị thế từ Binance thành công. Balance: 10.0
+2025-06-10 19:30:00,563 - INFO - Số dư hiện tại: Balance=10.0, Total Equity=10.0
+2025-06-10 19:30:01,815 - INFO - Khởi tạo balance: 10.0
+2025-06-10 19:30:01,925 - INFO - Đồng bộ vị thế từ Binance thành công. Balance: 10.0
+2025-06-10 19:45:01,142 - INFO - Số dư hiện tại: Balance=10.0, Total Equity=10.0
+2025-06-10 19:45:02,375 - INFO - Khởi tạo balance: 10.0
+2025-06-10 19:45:02,484 - INFO - Đồng bộ vị thế từ Binance thành công. Balance: 10.0
+2025-06-10 19:56:21,808 - INFO - Đặt leverage 10 cho ETHUSDT
+2025-06-10 19:56:21,916 - INFO - Đặt leverage 10 cho SOLUSDT
+2025-06-10 19:56:22,015 - INFO - Đặt leverage 10 cho BNBUSDT
+2025-06-10 19:56:22,015 - INFO - Bắt đầu bot giao dịch...
+2025-06-10 19:56:32,045 - ERROR - Lỗi gửi tin nhắn Telegram (lần 1): HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot/sendMessage (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x000001FE770990A0>, 'Connection to api.telegram.org timed out. (connect timeout=5)')) - 79
+2025-06-10 19:56:44,057 - ERROR - Lỗi gửi tin nhắn Telegram (lần 2): HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot/sendMessage (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x000001FE7709B440>, 'Connection to api.telegram.org timed out. (connect timeout=5)')) - 79
+2025-06-10 19:56:56,106 - ERROR - Lỗi gửi tin nhắn Telegram (lần 3): HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot/sendMessage (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x000001FE7709ABA0>, 'Connection to api.telegram.org timed out. (connect timeout=5)')) - 79
+2025-06-10 19:56:58,107 - CRITICAL - Telegram không hoạt động sau 3 lần thử!
+2025-06-10 19:56:58,219 - INFO - Khởi tạo balance: 10.0
+2025-06-10 19:56:58,312 - INFO - Đồng bộ vị thế từ Binance thành công. Balance: 10.0
+2025-06-10 19:57:54,497 - INFO - Đặt leverage 10 cho ETHUSDT
+2025-06-10 19:57:54,606 - INFO - Đặt leverage 10 cho SOLUSDT
+2025-06-10 19:57:54,711 - INFO - Đặt leverage 10 cho BNBUSDT
+2025-06-10 19:57:54,711 - INFO - Bắt đầu bot giao dịch...
+2025-06-10 19:58:12,995 - INFO - Đặt leverage 10 cho ETHUSDT
+2025-06-10 19:58:13,087 - INFO - Đặt leverage 10 cho SOLUSDT
+2025-06-10 19:58:13,198 - INFO - Đặt leverage 10 cho BNBUSDT
+2025-06-10 19:58:13,198 - INFO - Bắt đầu bot giao dịch...
+2025-06-10 19:58:23,203 - ERROR - Lỗi gửi tin nhắn Telegram (lần 1): HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot/sendMessage (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x000001EEF8859220>, 'Connection to api.telegram.org timed out. (connect timeout=5)')) - 83
+2025-06-10 19:58:35,227 - ERROR - Lỗi gửi tin nhắn Telegram (lần 2): HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot/sendMessage (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x000001EEF885AF30>, 'Connection to api.telegram.org timed out. (connect timeout=5)')) - 83
+2025-06-10 19:58:47,236 - ERROR - Lỗi gửi tin nhắn Telegram (lần 3): HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot/sendMessage (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x000001EEF885B3E0>, 'Connection to api.telegram.org timed out. (connect timeout=5)')) - 83
+2025-06-10 19:58:49,237 - CRITICAL - Telegram không hoạt động sau 3 lần thử!
+2025-06-10 19:58:49,350 - INFO - Khởi tạo balance: 10.0
+2025-06-10 19:58:49,452 - INFO - Đồng bộ vị thế từ Binance thành công. Balance: 10.0
+2025-06-10 20:00:00,561 - INFO - Số dư hiện tại: Balance=10.0, Total Equity=10.0
+2025-06-10 20:00:02,945 - INFO - Khởi tạo balance: 10.0
+2025-06-10 20:00:03,042 - INFO - Đồng bộ vị thế từ Binance thành công. Balance: 10.0
