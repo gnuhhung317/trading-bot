@@ -208,7 +208,7 @@ class WaveRiderStrategy:
         current_momentum = self.momentum.iloc[index]
         momentum_threshold = self.atr.iloc[index] * 0.05
 
-        if position['side'] == 'BUY':
+        if position['positionSide'] == 'BUY':
             return (
                 current_momentum < -momentum_threshold or
                 current_volume < current_volume_ma * 0.3
@@ -287,7 +287,7 @@ def main():
                     try:
                         client.futures_create_order(
                             symbol=symbol,
-                            side='SELL' if current_position['side'] == 'BUY' else 'BUY',
+                            side='SELL' if current_position['positionSide'] == 'BUY' else 'BUY',
                             type='MARKET',
                             quantity=abs(float(current_position['positionAmt']))
                         )
