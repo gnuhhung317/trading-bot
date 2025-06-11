@@ -1,3 +1,0 @@
-Symbol,Strategy,Total Trades,Win Rate (%),Return (%),Buy Hold (%),Max Drawdown (%),Sharpe Ratio,Profit Factor,Expectancy (%)
-ETHUSDT,OptimizedFuturesStrategy,165,35.76,-7.1,-2.58,-13.65,-2.21,1.17,0.04
-SOLUSDT,OptimizedFuturesStrategy,250,40.4,-6.69,44.06,-10.08,-1.58,1.24,0.05
