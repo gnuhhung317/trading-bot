@@ -207,8 +207,11 @@ class WaveRiderStrategy:
         current_volume_ma = self.volume_ma.iloc[index]
         current_momentum = self.momentum.iloc[index]
         momentum_threshold = self.atr.iloc[index] * 0.05
+        
+        position_amt = float(position['positionAmt'])
+        is_long = position_amt > 0
 
-        if position['positionSide'] == 'BUY':
+        if is_long:
             return (
                 current_momentum < -momentum_threshold or
                 current_volume < current_volume_ma * 0.3
@@ -285,11 +288,13 @@ def main():
                 # Check exit conditions
                 if current_position and strategy.check_exit_conditions(df, -1, current_position):
                     try:
+                        position_amt = float(current_position['positionAmt'])
+                        close_side = 'SELL' if position_amt > 0 else 'BUY'
                         client.futures_create_order(
                             symbol=symbol,
-                            side='SELL' if current_position['positionSide'] == 'BUY' else 'BUY',
+                            side=close_side,
                             type='MARKET',
-                            quantity=abs(float(current_position['positionAmt']))
+                            quantity=abs(position_amt)
                         )
                         logger.info(f"Closed position for {symbol}")
                     except Exception as e:

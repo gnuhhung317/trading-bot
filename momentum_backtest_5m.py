@@ -27,7 +27,7 @@ class WaveRiderStrategy(Strategy):
     rsi_overbought = 75        # [65, 70, 75] - More lenient
     rsi_oversold = 15        # [25, 30, 35] - More lenient
     sma_length = 100           # [100, 200, 300] - Shorter for faster trend detection
-    max_holding_period = 20       # [10, 20, 30] - Increased to let winners run
+    max_holding_period = 20    # [10, 20, 30] - Increased to let winners run
     # Define parameters with optimization ranges
     # volume_ma_length = 10     # [10, 20, 30]
     # volume_threshold = 1.8    # [1.5, 2.0, 2.5] - Reduced to catch more waves
