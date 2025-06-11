@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
-from backtesting import Backtest, Strategy
-from backtesting.lib import crossover
+
 import logging
 from binance import Client
 from datetime import datetime, timedelta
@@ -26,7 +25,7 @@ COINS = [
     {
         'symbol': 'SOLUSDT',
         'leverage': 20,
-        'quantity_precision': 0.1,
+        'quantity_precision': 1,
         'min_qty': 0.1,
         'max_qty': 100,
         'price_precision': 2,
@@ -38,7 +37,9 @@ class WaveRiderStrategy:
         self.client = client
         self.coin_params = coin_params
         self.symbol = coin_params['symbol']
+        self.quantity_precision = coin_params["quantity_precision"]
         self.leverage = coin_params['leverage']
+        self.price_precision = coin_params['price_precision']
         
         # Strategy parameters
         self.volume_ma_length = 10
@@ -150,14 +151,14 @@ class WaveRiderStrategy:
             account = self.client.futures_account_balance()
             usdt_balance = float(next((item['balance'] for item in account if item['asset'] == 'USDT'), 0))
             
-            # Calculate position size
-            risk_amount = usdt_balance * self.risk_per_trade
-            position_size = (risk_amount * self.leverage) / stop_distance
+            position_size = usdt_balance*0.3
             
             # Apply quantity constraints
             position_size = round(position_size, self.coin_params['quantity_precision'])
             position_size = max(min(position_size, self.coin_params['max_qty']), self.coin_params['min_qty'])
             
+            position_size = position_size*self.leverage / current_price
+            position_size = self.round_to_precision(position_size)
             return position_size
         except Exception as e:
             logger.error(f"Error calculating position size: {str(e)}")
@@ -217,6 +218,16 @@ class WaveRiderStrategy:
                 current_momentum > momentum_threshold or
                 current_volume < current_volume_ma * 0.3
             )
+        
+    def round_to_precision(self,size, value_type='quantity'):
+        if value_type == 'quantity':
+            precision = self.quantity_precision
+        elif value_type == 'price':
+            precision = self.price_precision
+        rounded_value = round(size, precision)
+        if precision == 0:
+            rounded_value = int(rounded_value)
+        return rounded_value
 
 def get_historical_data(client, symbol, interval, limit=100):
     try:
@@ -287,7 +298,6 @@ def main():
                 # Check entry conditions
                 if not current_position:
                     long_entry, short_entry = strategy.check_entry_conditions(df, -1)
-                    
                     if long_entry or short_entry:
                         current_price = df['close'].iloc[-1]
                         stop_distance = strategy.atr.iloc[-1] * strategy.atr_sl_multiplier
