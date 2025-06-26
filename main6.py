@@ -24,9 +24,17 @@ logger = logging.getLogger(__name__)
 COINS = [
     {
         'symbol': 'SOLUSDT',
-        'leverage': 20,
+        'leverage': 50,
         'quantity_precision': 1,
         'min_qty': 0.1,
+        'max_qty': 100,
+        'price_precision': 2,
+    },
+    {
+        'symbol': 'ETHUSDT',
+        'leverage': 50,
+        'quantity_precision': 3,
+        'min_qty': 0.01,
         'max_qty': 100,
         'price_precision': 2,
     }
