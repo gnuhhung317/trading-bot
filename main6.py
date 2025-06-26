@@ -208,22 +208,46 @@ class WaveRiderStrategy:
         current_volume = df['volume'].iloc[index]
         current_volume_ma = self.volume_ma.iloc[index]
         current_momentum = self.momentum.iloc[index]
-        momentum_threshold = self.atr.iloc[index] * 0.05
+        momentum_threshold = self.atr.iloc[index] * 0.15  # Increased from 0.1 to reduce sensitivity
+        atr = self.atr.iloc[index]
+        entry_price = float(position['entryPrice'])
         
         position_amt = float(position['positionAmt'])
         is_long = position_amt > 0
 
-        if is_long:
-            return (
-                current_momentum < -momentum_threshold or
-                current_volume < current_volume_ma * 0.3
-            )
-        else:
-            return (
-                current_momentum > momentum_threshold or
-                current_volume < current_volume_ma * 0.3
-            )
-        
+        # Trailing stop logic
+        trailing_stop_price = self.trailing_stop(entry_price, current_price, atr)
+        if is_long and current_price < trailing_stop_price:
+            return True
+        elif not is_long and current_price > trailing_stop_price:
+            return True
+
+        # Additional exit conditions with trend confirmation
+        # Check momentum over the last 3 candles to confirm reversal
+        try:
+            recent_momentum = self.momentum.iloc[index-2:index+1].values
+            if is_long and np.all(recent_momentum < -momentum_threshold):  # Consistent reversal
+                return True
+            elif not is_long and np.all(recent_momentum > momentum_threshold):
+                return True
+        except (IndexError, ValueError):
+            if is_long and current_momentum < -momentum_threshold:
+                return True
+            elif not is_long and current_momentum > momentum_threshold:
+                return True
+
+        # Relaxed volume condition
+        if current_volume < current_volume_ma * 0.7:  # Increased from 0.5 to 0.7
+            return True
+
+        try:
+        # Check holding period as a soft limit (log warning but don't force exit)
+            if position["updateTime"] and (datetime.now() - self.entry_time).total_seconds() / 300 > self.max_holding_period:
+                logger.warning(f"Trade for {self.symbol} exceeded max holding period of {self.max_holding_period} candles")
+                return False  # Allow trade to continue unless other conditions trigger
+        except Exception as e:
+            logger.error("Exit error: ",e)
+        return False
     def round_to_precision(self,size, value_type='quantity'):
         if value_type == 'quantity':
             precision = self.quantity_precision
