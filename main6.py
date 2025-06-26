@@ -326,7 +326,7 @@ def main():
                             strategy.execute_trade('SELL', quantity, current_price, stop_loss, take_profit)
             
             # Wait for next candle
-            time.sleep(60)
+            time.sleep(300)
             
         except Exception as e:
             logger.error(f"Error in main loop: {str(e)}")
