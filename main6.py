@@ -72,6 +72,9 @@ class WaveRiderStrategy:
         self.volume_acceleration = None
         self.rsi = None
         self.sma200 = None
+
+        self.highest_price=0;
+        self.lowest_price=0
         
         # Set leverage
         self.set_leverage()
@@ -256,6 +259,35 @@ class WaveRiderStrategy:
         except Exception as e:
             logger.error("Exit error: ",e)
         return False
+
+    def trailing_stop(self, entry_price, current_price, atr, is_long):
+        """
+        Calculate the trailing stop price for long and short positions.
+        Tracks the highest/lowest price for long/short positions respectively, trailing by a multiple of ATR.
+        
+        Args:
+            entry_price (float): Price at which the position was entered
+            current_price (float): Current market price
+            atr (float): Average True Range value
+            is_long (bool): True for long position, False for short position
+        
+        Returns:
+            float: Trailing stop price
+        """
+        atr_mult = self.atr_sl_multiplier  # Default to 2.0 if not set
+        if not hasattr(self, 'highest_price'):
+            self.highest_price = entry_price
+            self.lowest_price = entry_price
+
+        if is_long:
+            # Update highest price for long position
+            self.highest_price = max(self.highest_price, current_price)
+            return self.highest_price - atr * atr_mult
+        else:
+            # Update lowest price for short position
+            self.lowest_price = min(self.lowest_price, current_price)
+            return self.lowest_price + atr * atr_mult
+        
     def round_to_precision(self,size, value_type='quantity'):
         if value_type == 'quantity':
             precision = self.quantity_precision
