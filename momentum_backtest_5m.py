@@ -10,7 +10,6 @@ import time
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
@@ -103,7 +102,7 @@ class WaveRiderStrategy(Strategy):
         current_rsi = self.rsi[-1]
         current_price = self.data.Close[-1]
         current_sma200 = self.sma200[-1]
-
+        timestamp = self.data.index[-1]
         # Dynamic momentum threshold based on ATR
         momentum_threshold = self.atr[-1] * 0.05  # Reduced to catch more moves
 
@@ -164,13 +163,13 @@ class WaveRiderStrategy(Strategy):
                 sl = current_price - stop_distance
                 tp = current_price + (self.atr[-1] * self.atr_tp_multiplier)
                 self.buy(sl=sl, tp=tp, size=position_size)
-                logger.info(f"LONG Entry - Price: {current_price:.2f}, Volume: {current_volume:.2f}, Momentum: {current_momentum:.2f}%")
+                logger.info(f"{timestamp} LONG Entry - Price: {current_price:.5f}, Volume: {current_volume:.2f}, Momentum: {current_momentum:.2f}%")
 
             elif all(short_conditions):
                 sl = current_price + stop_distance
                 tp = current_price - (self.atr[-1] * self.atr_tp_multiplier)
                 self.sell(sl=sl, tp=tp, size=position_size)
-                logger.info(f"SHORT Entry - Price: {current_price:.2f}, Volume: {current_volume:.2f}, Momentum: {current_momentum:.2f}%")
+                logger.info(f"{timestamp}SHORT Entry - Price: {current_price:.5f}, Volume: {current_volume:.2f}, Momentum: {current_momentum:.2f}%")
 
 def get_historical_data(client: Client, symbol: str, interval: str, start_date: str, end_date: str) -> pd.DataFrame:
     """Get historical data from Binance"""
@@ -258,7 +257,7 @@ def run_backtest(symbol: str, interval: str, start_date: str, end_date: str, ini
 
 def main():
     """Main function to run backtest"""
-    symbol = "SOLUSDT"
+    symbol = "ALTUSDT"  # Replace with your desired symbol
     
     logger.info(f"\n{'='*50}")
     logger.info(f"OPTIMIZING WAVE RIDER STRATEGY FOR {symbol}")
@@ -268,7 +267,7 @@ def main():
     client = Client()
     
     # Get historical data
-    df = get_historical_data(client, symbol, "5m", "2024-07-01", "2025-04-30")
+    df = get_historical_data(client, symbol, "5m", "2025-06-14", "2025-06-16")
     if df.empty:
         logger.error(f"No data available for {symbol}")
         return
@@ -307,10 +306,10 @@ def main():
     # Print optimization results
     logger.info("\nOptimization Results:")
     logger.info("=" * 50)
-    logger.info(f"Best Parameters:")
-    for param, value in stats._strategy.__dict__.items():
-        if not param.startswith('_'):
-            logger.info(f"{param}: {value}")
+    # logger.info(f"Best Parameters:")
+    # for param, value in stats._strategy.__dict__.items():
+    #     if not param.startswith('_'):
+    #         logger.info(f"{param}: {value}")
     
     logger.info("\nPerformance Metrics:")
     logger.info("=" * 50)

@@ -165,6 +165,8 @@ class WaveRiderStrategy:
             return None
 
     def execute_trade(self, side, quantity, price, stop_loss, take_profit):
+        stop_loss = self.round_to_precision(stop_loss,'price')
+        take_profit= self.round_to_precision(take_profit,'price')
         try:
             # Place main order
             order = self.client.futures_create_order(
@@ -289,6 +291,7 @@ def main():
                 if current_position and strategy.check_exit_conditions(df, -1, current_position):
                     try:
                         position_amt = float(current_position['positionAmt'])
+                        position_amt = strategy.round_to_precision(position_amt)
                         close_side = 'SELL' if position_amt > 0 else 'BUY'
                         client.futures_create_order(
                             symbol=symbol,

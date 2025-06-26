@@ -1,43 +1,31 @@
-# config.py
-from binance.client import Client
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.svm import SVC
 
-# KHÔNG BAO GIỜ ĐƯUA API KEY VÀO MÃ NGUỒN MỞ - SỬ DỤNG BIẾN MÔI TRƯỜNG
-import os 
-from dotenv import load_dotenv
+# Sample data: two classes
+X = np.array([[1, 2], [2, 3], [3, 3], [2, 1], [3, 2], [4, 2]])
+y = np.array([0, 0, 0, 1, 1, 1])
 
-# Load biến môi trường từ file .env (nếu có)
-load_dotenv()
+# Train a linear SVM
+model = SVC(kernel='linear')
+model.fit(X, y)
 
-# Lấy API key từ biến môi trường, hoặc sử dụng giá trị mặc định cho testnet
-API_KEY = os.getenv("BINANCE_API_KEY", "")
-API_SECRET = os.getenv("BINANCE_API_SECRET", "")
+# Plot data points
+plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='bwr', label='Data points')
 
-# Flag để xác định có sử dụng testnet hay không
-USE_TESTNET = False
+# Plot support vectors
+plt.scatter(model.support_vectors_[:, 0], model.support_vectors_[:, 1], 
+            s=150, facecolors='none', edgecolors='k', linewidths=2, label='Support Vectors')
 
-# Khởi tạo client
-client = Client(API_KEY, API_SECRET, testnet=USE_TESTNET)
-# Thông số bot
-SYMBOL = "ETHUSDT"
-TIMEFRAME = "15m"
-HIGHER_TIMEFRAME = "4h"
-LEVERAGE = 5
-RISK_PER_TRADE = 0.02
-INITIAL_BALANCE = 10
-LOG_FILE = "logs/trading_log.txt"
+# Plot decision boundary
+w = model.coef_[0]
+b = model.intercept_[0]
+x_plot = np.linspace(0, 5, 100)
+y_plot = -(w[0] * x_plot + b) / w[1]
+plt.plot(x_plot, y_plot, 'k--', label='Decision boundary')
 
-# Danh sách symbols để giao dịch
-SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "ADAUSDT", "DOGEUSDT"]
-
-# Mapping timeframe cho python-binance
-TIMEFRAME_MAP = {
-    "15m": Client.KLINE_INTERVAL_15MINUTE,
-    "4h": Client.KLINE_INTERVAL_4HOUR,
-    "1d": Client.KLINE_INTERVAL_1DAY
-}
-
-# Sandbox mode để kiểm thử
-SANDBOX_MODE = True
-
-# Cache cho thông tin asset precision để tránh gọi API quá nhiều
-ASSET_PRECISION_CACHE = {}
+plt.legend()
+plt.title("Support Vectors in SVM")
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.show()

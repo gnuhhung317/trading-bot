@@ -1,0 +1,247 @@
+import pandas as pd
+import numpy as np
+from backtesting import Backtest, Strategy
+import logging
+from binance import Client
+from datetime import datetime, timedelta
+import time
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+def is_pin_bar(open_price, high, low, close, body_threshold=0.4, lower_shadow_ratio=1.5):
+    """Custom function to detect bullish Pin Bar pattern"""
+    if high == low:  # Avoid division by zero
+        return False
+    body = abs(close - open_price)
+    upper_shadow = high - max(open_price, close)
+    lower_shadow = min(open_price, close) - low
+    
+    is_small_body = body <= (high - low) * body_threshold
+    has_long_lower_shadow = lower_shadow >= body * lower_shadow_ratio
+    has_small_upper_shadow = upper_shadow <= body * 0.3
+    is_bullish = close > open_price
+    
+    return is_small_body and has_long_lower_shadow and has_small_upper_shadow and is_bullish
+
+class PullbackPinBarStrategy(Strategy):
+    # Parameters
+    rsi_period = 14
+    rsi_oversold = 60  # Relaxed oversold level
+    sma_period = 50  # Longer SMA for stronger trend
+    stop_loss_pct = 0.02  # 2% stop-loss
+    take_profit_pct = 0.04  # 4% take-profit
+    hold_period = 5  # Shorter hold period (20 hours on 4h)
+    volume_ma_period = 20  # Volume MA period
+
+    def init(self):
+        super().init()
+        self.entry_index = None
+        self.entry_price = None
+        
+        # Calculate Pin Bar
+        self.pin_bar = self.I(
+            lambda: np.where(
+                is_pin_bar(self.data.Open, self.data.High, self.data.Low, self.data.Close),
+                100, 0
+            ),
+            name='PinBar'
+        )
+        
+        # Calculate RSI manually
+        def calculate_rsi(prices, period=14):
+            prices = np.array(prices)
+            if len(prices) < period + 1:
+                return np.full_like(prices, np.nan)
+            
+            deltas = np.diff(prices)
+            gains = np.where(deltas > 0, deltas, 0)
+            losses = np.where(deltas < 0, -deltas, 0)
+            
+            avg_gain = np.mean(gains[:period])
+            avg_loss = np.mean(losses[:period])
+            
+            rsi = np.zeros_like(prices)
+            rsi[:period] = np.nan
+            
+            if avg_loss == 0:
+                rsi[period] = 100 if avg_gain > 0 else 50
+            else:
+                rs = avg_gain / avg_loss
+                rsi[period] = 100 - (100 / (1 + rs))
+            
+            for i in range(period + 1, len(prices)):
+                avg_gain = (avg_gain * (period - 1) + gains[i-1]) / period
+                avg_loss = (avg_loss * (period - 1) + losses[i-1]) / period
+                if avg_loss == 0:
+                    rsi[i] = 100 if avg_gain > 0 else 50
+                else:
+                    rs = avg_gain / avg_loss
+                    rsi[i] = 100 - (100 / (1 + rs))
+            
+            return rsi
+
+        self.rsi = self.I(lambda: calculate_rsi(self.data.Close, self.rsi_period), name='RSI')
+        
+        # Calculate SMA manually
+        def calculate_sma(prices, period):
+            sma = np.zeros_like(prices)
+            sma[:period-1] = np.nan
+            for i in range(period-1, len(prices)):
+                sma[i] = np.mean(prices[i-period+1:i+1])
+            return sma
+            
+        self.sma = self.I(lambda: calculate_sma(self.data.Close, self.sma_period), name='SMA')
+        
+        # Calculate Volume MA
+        def calculate_volume_ma(prices, period):
+            vol_ma = np.zeros_like(prices)
+            vol_ma[:period-1] = np.nan
+            for i in range(period-1, len(prices)):
+                vol_ma[i] = np.mean(prices[i-period+1:i+1])
+            return vol_ma
+            
+        self.volume_ma = self.I(lambda: calculate_volume_ma(self.data.Volume, self.volume_ma_period), name='VolumeMA')
+
+    def next(self):
+        price = self.data.Close[-1]
+        
+        # Skip if any indicator is NaN
+        if np.isnan(self.rsi[-1]) or np.isnan(self.sma[-1]) or np.isnan(self.volume_ma[-1]):
+            return
+        
+        # Debug log to check indicator values
+        logger.debug(f"PinBar: {self.pin_bar[-1]}, RSI: {self.rsi[-1]:.2f}, Price: {price:.2f}, SMA: {self.sma[-1]:.2f}, Volume: {self.data.Volume[-1]:.2f}, VolumeMA: {self.volume_ma[-1]:.2f}")
+        
+        # Entry condition: Pin Bar, RSI <= 60, price above SMA, volume above MA
+        if (not self.position and 
+            self.pin_bar[-1] == 100 and 
+            self.rsi[-1] <= self.rsi_oversold and 
+            price > self.sma[-1] and
+            self.data.Volume[-1] > self.volume_ma[-1]):
+            self.buy(size=0.02)  # 2% of available capital
+            self.entry_index = len(self.data) - 1
+            self.entry_price = price
+            self.position.sl = price * (1 - self.stop_loss_pct)
+            self.position.tp = price * (1 + self.take_profit_pct)
+            logger.info(f"Buy signal at {price:.2f}, SL: {self.position.sl:.2f}, TP: {self.position.tp:.2f}")
+        
+        # Exit condition: Hold for 5 candles or hit stop-loss/take-profit
+        elif self.position and (len(self.data) - 1 - self.entry_index) >= self.hold_period:
+            self.sell(size=0.02)
+            logger.info(f"Sell signal at {price:.2f} after {self.hold_period} candles")
+
+def get_historical_data(client: Client, symbol: str, interval: str, start_date: str, end_date: str) -> pd.DataFrame:
+    """Get historical data from Binance"""
+    logger.info(f"Fetching data for {symbol}...")
+    start_timestamp = int(datetime.strptime(start_date, "%Y-%m-%d").timestamp() * 1000)
+    end_timestamp = int(datetime.strptime(end_date, "%Y-%m-%d").timestamp() * 1000)
+
+    klines = []
+    current = start_timestamp
+    while current < end_timestamp:
+        temp_klines = client.get_historical_klines(
+            symbol=symbol, interval=interval,
+            start_str=current,
+            end_str=min(current + 1000 * 60 * 60 * 24 * 30, end_timestamp)
+        )
+        if not temp_klines:
+            break
+        klines.extend(temp_klines)
+        current = temp_klines[-1][0] + 1
+        time.sleep(0.5)
+
+    if not klines:
+        logger.error(f"No klines data retrieved for {symbol}")
+        return pd.DataFrame()
+
+    df = pd.DataFrame(klines, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume', 
+                                     'close_time', 'quote_volume', 'trades', 'taker_buy_base', 
+                                     'taker_buy_quote', 'ignored'])
+    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+    df[['open', 'high', 'low', 'close', 'volume']] = df[['open', 'high', 'low', 'close', 'volume']].apply(pd.to_numeric, errors='coerce')
+    
+    # Clean data
+    df = df.dropna(subset=['open', 'high', 'low', 'close', 'volume'])
+    df = df[df['volume'] > 0]
+    if df.empty:
+        logger.error(f"Cleaned data is empty for {symbol}")
+        return pd.DataFrame()
+    
+    df = df.rename(columns={
+        'open': 'Open',
+        'high': 'High',
+        'low': 'Low',
+        'close': 'Close',
+        'volume': 'Volume'
+    })
+    
+    df.set_index('timestamp', inplace=True)
+    logger.info(f"Data sample:\n{df.head()}")
+    return df
+
+def run_pullback_pinbar_backtest(symbol: str, interval: str, start_date: str, end_date: str, 
+                                initial_balance: float = 10000, commission: float = 0.0001) -> dict:
+    """Run backtest for PullbackPinBarStrategy"""
+    try:
+        client = Client()
+        df = get_historical_data(client, symbol, interval, start_date, end_date)
+        if df.empty:
+            logger.error(f"No data available for {symbol}")
+            return None
+            
+        df = df[['Open', 'High', 'Low', 'Close', 'Volume']]
+        bt = Backtest(df, PullbackPinBarStrategy, cash=initial_balance, commission=commission)
+        stats = bt.run()
+        
+        bt.plot(filename=f'backtest_{symbol}_pullback_pinbar.html')
+
+        return {
+            'symbol': symbol,
+            'total_trades': stats['# Trades'],
+            'win_rate': stats['Win Rate [%]'],
+            'profit_factor': stats['Profit Factor'],
+            'expectancy': stats['Expectancy [%]'],
+            'max_drawdown': stats['Max. Drawdown [%]'],
+            'sharpe_ratio': stats['Sharpe Ratio'],
+            'sortino_ratio': stats['Sortino Ratio'],
+            'calmar_ratio': stats['Calmar Ratio'],
+            'equity_final': stats['Equity Final [$]'],
+            'equity_peak': stats['Equity Peak [$]'],
+            'return_pct': stats['Return [%]'],
+            'buy_hold_return': stats['Buy & Hold Return [%]'],
+            'strategy_params': stats['_strategy'].__dict__
+        }
+
+    except Exception as e:
+        logger.error(f"Error running backtest for {symbol}: {str(e)}")
+        return None
+
+def main():
+    """Main function to run Pullback Pin Bar backtest"""
+    symbol = "SOLUSDT"
+    logger.info(f"\n{'='*50}")
+    logger.info(f"RUNNING PULLBACK PIN BAR STRATEGY BACKTEST FOR {symbol}")
+    logger.info(f"{'='*50}")
+    
+    result = run_pullback_pinbar_backtest(
+        symbol=symbol,
+        interval="4h",
+        start_date="2024-01-01",
+        end_date="2024-06-30"
+    )
+    
+    if result:
+        logger.info("\nBacktest Results:")
+        for key, value in result.items():
+            if key != 'strategy_params':
+                logger.info(f"{key}: {value}")
+
+if __name__ == "__main__":
+    main()
+
+# 1 sao chất lượng (không xóa comment này)
