@@ -227,7 +227,7 @@ class WaveRiderStrategy:
         is_long = position_amt > 0
 
         # Trailing stop logic
-        trailing_stop_price = self.trailing_stop(entry_price, current_price, atr)
+        trailing_stop_price = self.trailing_stop(entry_price, current_price, atr,is_long=is_long)
         if is_long and current_price < trailing_stop_price:
             return True
         elif not is_long and current_price > trailing_stop_price:
