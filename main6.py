@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 COINS = [
     {
         'symbol': 'SOLUSDT',
-        'leverage': 20,
+        'leverage': 30,
         'quantity_precision': 1,
         'min_qty': 0.1,
         'max_qty': 100,
@@ -32,7 +32,7 @@ COINS = [
     },
     {
         'symbol': 'ETHUSDT',
-        'leverage': 20,
+        'leverage': 30,
         'quantity_precision': 3,
         'min_qty': 0.01,
         'max_qty': 100,
@@ -180,7 +180,7 @@ class WaveRiderStrategy:
             account = self.client.futures_account_balance()
             usdt_balance = float(next((item['balance'] for item in account if item['asset'] == 'USDT'), 0))
             
-            position_size = usdt_balance*0.3
+            position_size = usdt_balance*0.95
             
             # Apply quantity constraints
             position_size = round(position_size, self.coin_params['quantity_precision'])
