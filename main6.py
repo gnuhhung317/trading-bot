@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 COINS = [
     {
         'symbol': 'SOLUSDT',
-        'leverage': 50,
+        'leverage': 20,
         'quantity_precision': 1,
         'min_qty': 0.1,
         'max_qty': 100,
@@ -32,7 +32,7 @@ COINS = [
     },
     {
         'symbol': 'ETHUSDT',
-        'leverage': 50,
+        'leverage': 20,
         'quantity_precision': 3,
         'min_qty': 0.01,
         'max_qty': 100,
@@ -49,20 +49,20 @@ class WaveRiderStrategy:
         self.leverage = coin_params['leverage']
         self.price_precision = coin_params['price_precision']
         
-        # Strategy parameters
-        self.volume_ma_length = 10
-        self.volume_threshold = 2
-        self.momentum_length = 5
-        self.atr_length = 10
+        # Strategy parameters - Updated for 4H timeframe
+        self.volume_ma_length = 7            # ~1 day (7*4h)
+        self.volume_threshold = 1.8          # Less sensitive volume spike
+        self.momentum_length = 4             # ~16 hours
+        self.atr_length = 14                 # ~2.5 days
         self.atr_sl_multiplier = 2
         self.atr_tp_multiplier = 3.0
         self.risk_per_trade = 0.01
-        self.min_volume_increase = 1.9
-        self.rsi_length = 20
+        self.min_volume_increase = 1.5       # Reduced for 4H
+        self.rsi_length = 14                 # Standard for longer TFs
         self.rsi_overbought = 75
         self.rsi_oversold = 15
-        self.sma_length = 100
-        self.max_holding_period = 20
+        self.sma_length = 50                 # Medium-term trend
+        self.max_holding_period = 24          # 6*4h = 24 hours
 
         # Initialize indicators
         self.volume_ma = None
@@ -75,6 +75,7 @@ class WaveRiderStrategy:
 
         self.highest_price=0;
         self.lowest_price=0
+        self.entry_time = None  # Track entry time for 4H timeframe
         
         # Set leverage
         self.set_leverage()
@@ -132,6 +133,19 @@ class WaveRiderStrategy:
 
         momentum_threshold = self.atr.iloc[index] * 0.05
 
+        # Volatility filter for 4H timeframe
+        atr_pct = self.atr.iloc[index] / current_price
+        valid_volatility = 0.01 < atr_pct < 0.05  # Filter choppy markets
+
+        # Gap detection for 4H timeframe
+        if index > 0:
+            prev_close = df['close'].iloc[index-1]
+            current_open = df['open'].iloc[index]
+            gap_up = current_open > prev_close * 1.01
+            gap_down = current_open < prev_close * 0.99
+        else:
+            gap_up = gap_down = False
+
         # Long conditions
         long_conditions = [
             current_volume > current_volume_ma * self.volume_threshold,
@@ -140,7 +154,9 @@ class WaveRiderStrategy:
             current_velocity > 0,
             current_volume_acc > 0,
             current_rsi < self.rsi_overbought,
-            current_price > current_sma200 * 0.995
+            current_price > current_sma200 * 0.995,
+            valid_volatility,
+            not gap_down  # Avoid entering on negative gaps
         ]
 
         # Short conditions
@@ -151,7 +167,9 @@ class WaveRiderStrategy:
             current_velocity < 0,
             current_volume_acc > 0,
             current_rsi > self.rsi_oversold,
-            current_price < current_sma200 * 1.005
+            current_price < current_sma200 * 1.005,
+            valid_volatility,
+            not gap_up  # Avoid entering on positive gaps
         ]
 
         return all(long_conditions), all(short_conditions)
@@ -187,6 +205,9 @@ class WaveRiderStrategy:
                 quantity=quantity
             )
             
+            # Record entry time for 4H timeframe
+            self.entry_time = datetime.now()
+            
             # Place stop loss
             self.client.futures_create_order(
                 symbol=self.symbol,
@@ -205,7 +226,7 @@ class WaveRiderStrategy:
                 closePosition=True
             )
             
-            logger.info(f"{side} {quantity} {self.symbol} at {price}")
+            logger.info(f"{side} {quantity} {self.symbol} at {price} - Entry time: {self.entry_time}")
             return True
         except Exception as e:
             logger.error(f"Error executing trade: {str(e)}")
@@ -247,15 +268,17 @@ class WaveRiderStrategy:
             elif not is_long and current_momentum > momentum_threshold:
                 return True
 
-        # Relaxed volume condition
+        # Relaxed volume condition for 4H
         if current_volume < current_volume_ma * 0.7:  # Increased from 0.5 to 0.7
             return True
 
         try:
-        # Check holding period as a soft limit (log warning but don't force exit)
-            if position["updateTime"] and (datetime.now() - self.entry_time).total_seconds() / 300 > self.max_holding_period:
-                logger.warning(f"Trade for {self.symbol} exceeded max holding period of {self.max_holding_period} candles")
-                return False  # Allow trade to continue unless other conditions trigger
+            # Check holding period - Updated for 4H timeframe
+            if self.entry_time:
+                holding_hours = (datetime.now() - self.entry_time).total_seconds() / 3600
+                if holding_hours > self.max_holding_period * 4:  # Convert candles to hours
+                    logger.warning(f"Trade for {self.symbol} held {holding_hours:.1f} hours (max: {self.max_holding_period*4}h)")
+                    return True  # Force exit after max holding period for 4H
         except Exception as e:
             logger.error("Exit error: ",e)
         return False
@@ -298,7 +321,7 @@ class WaveRiderStrategy:
             rounded_value = int(rounded_value)
         return rounded_value
 
-def get_historical_data(client, symbol, interval, limit=100):
+def get_historical_data(client, symbol, interval, limit=200):  # Increased limit for 4H
     try:
         klines = client.futures_klines(
             symbol=symbol,
@@ -339,8 +362,8 @@ def main():
     while True:
         try:
             for symbol, strategy in strategies.items():
-                # Get latest data
-                df = get_historical_data(client, symbol, "5m")
+                # Get latest data - Changed to 4H timeframe
+                df = get_historical_data(client, symbol, "4h")
                 if df is None or df.empty:
                     continue
                 
@@ -350,6 +373,12 @@ def main():
                 # Check for open positions
                 positions = client.futures_position_information(symbol=symbol)
                 current_position = next((pos for pos in positions if float(pos['positionAmt']) != 0), None)
+                
+                # Handle existing positions on restart
+                if current_position and not hasattr(strategy, 'entry_time') or strategy.entry_time is None:
+                    # Estimate entry time from position data
+                    strategy.entry_time = datetime.now() - timedelta(hours=4)
+                    logger.warning(f"Existing position found for {symbol}. Approximating entry time")
                 
                 # Check exit conditions
                 if current_position and strategy.check_exit_conditions(df, -1, current_position):
@@ -363,6 +392,7 @@ def main():
                             type='MARKET',
                             quantity=abs(position_amt)
                         )
+                        strategy.entry_time = None  # Reset entry time
                         logger.info(f"Closed position for {symbol}")
                     except Exception as e:
                         logger.error(f"Error closing position: {str(e)}")
@@ -389,8 +419,8 @@ def main():
                             take_profit = current_price - (strategy.atr.iloc[-1] * strategy.atr_tp_multiplier)
                             strategy.execute_trade('SELL', quantity, current_price, stop_loss, take_profit)
             
-            # Wait for next candle
-            time.sleep(300)
+            # Wait for next candle - Changed to 4H (14,400 seconds)
+            time.sleep(14400)
             
         except Exception as e:
             logger.error(f"Error in main loop: {str(e)}")

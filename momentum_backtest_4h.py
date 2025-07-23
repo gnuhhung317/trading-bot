@@ -13,14 +13,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-class WaveRiderStrategy(Strategy):
+class WaveRiderStrategy4H(Strategy):
     # Updated parameters for 4H timeframe
     volume_ma_length = 7       # [5, 7, 10] - ~1 day (7*4h)
-    volume_threshold = 2    # [1.5, 1.8, 2.0] - Less sensitive volume spike
+    volume_threshold = 1.8     # [1.5, 1.8, 2.0] - Less sensitive volume spike
     momentum_length = 4        # [3, 4, 5] - ~16 hours
-    atr_length = 10          # [10, 14, 20] - ~2.5 days
-    atr_sl_multiplier = 1.8      # [1.5, 2.0, 2.5] - Increased for wider stops
-    atr_tp_multiplier = 2.5    # [2.0, 3.0, 4.0] - Increased for better R:R
+    atr_length = 14            # [10, 14, 20] - ~2.5 days
+    atr_sl_multiplier = 2      # [1.5, 2.0, 2.5] - Increased for wider stops
+    atr_tp_multiplier = 3.0    # [2.0, 3.0, 4.0] - Increased for better R:R
     risk_per_trade = 0.01      # [0.005, 0.01, 0.02]
     min_volume_increase = 1.5  # [1.3, 1.5, 1.8] - Reduced for 4H
     rsi_length = 14            # [10, 14, 20] - Standard for longer TFs
@@ -28,20 +28,6 @@ class WaveRiderStrategy(Strategy):
     rsi_oversold = 15          # [15, 20, 25] - More lenient
     sma_length = 50            # [50, 100, 200] - Medium-term trend
     max_holding_period = 6     # [4, 6, 8] - 6*4h = 24 hours
-    # Define parameters with optimization ranges
-    # volume_ma_length = 10     # [10, 20, 30]
-    # volume_threshold = 1.8    # [1.5, 2.0, 2.5] - Reduced to catch more waves
-    # momentum_length = 10       # [5, 10, 15]
-    # atr_length = 10           # [10, 14, 20]
-    # atr_sl_multiplier = 2.5    # [1.5, 2.0, 2.5] - Increased for wider stops
-    # atr_tp_multiplier = 5.0    # [2.0, 3.0, 4.0] - Increased for better R:R
-    # risk_per_trade = 0.01      # [0.005, 0.01, 0.02]
-    # min_volume_increase = 1.3  # [1.3, 1.5, 1.8] - Reduced to catch more waves
-    # rsi_length = 14            # [10, 14, 20]
-    # rsi_overbought = 75        # [65, 70, 75] - More lenient
-    # rsi_oversold = 30         # [25, 30, 35] - More lenient
-    # sma_length = 100           # [100, 200, 300] - Shorter for faster trend detection
-    # max_holding_period = 40    # [10, 20, 30] - Increased to let winners run
 
     def init(self):
         # Calculate Volume MA
@@ -86,8 +72,8 @@ class WaveRiderStrategy(Strategy):
             return (100 - (100 / (1 + rs))).fillna(50)
         self.rsi = self.I(rsi, self.data.Close, self.rsi_length)
 
-        # Calculate 50-period SMA for trend filter (changed from 200)
-        self.sma200 = self.I(
+        # Calculate SMA for trend filter (changed from 200 to configurable)
+        self.sma = self.I(
             lambda x: pd.Series(x).rolling(window=self.sma_length).mean(),
             self.data.Close
         )
@@ -102,8 +88,9 @@ class WaveRiderStrategy(Strategy):
         prev_volume = self.data.Volume[-2]
         current_rsi = self.rsi[-1]
         current_price = self.data.Close[-1]
-        current_sma200 = self.sma200[-1]
+        current_sma = self.sma[-1]
         timestamp = self.data.index[-1]
+        
         # Dynamic momentum threshold based on ATR
         momentum_threshold = self.atr[-1] * 0.05  # Reduced to catch more moves
 
@@ -122,8 +109,8 @@ class WaveRiderStrategy(Strategy):
 
         # Calculate position size based on risk
         stop_distance = self.atr[-1] * self.atr_sl_multiplier
-        position_size = (self.equity * self.risk_per_trade / stop_distance  ) if stop_distance > 0 else 1
-        position_size = round(position_size) if position_size>1 else position_size
+        position_size = (self.equity * self.risk_per_trade / stop_distance) if stop_distance > 0 else 1
+        position_size = round(position_size) if position_size > 1 else position_size
 
         # Update trailing stop for open positions
         if self.position:
@@ -158,7 +145,7 @@ class WaveRiderStrategy(Strategy):
                 current_velocity > 0,                                        # Price moving up
                 current_volume_acc > 0,                                      # Volume accelerating
                 current_rsi < self.rsi_overbought,                           # Not overbought
-                current_price > current_sma200 * 0.995,                      # Slightly below trend is okay
+                current_price > current_sma * 0.995,                         # Slightly below trend is okay
                 valid_volatility,                                            # Valid volatility range
                 not gap_down                                                 # Avoid entering on negative gaps
             ]
@@ -171,7 +158,7 @@ class WaveRiderStrategy(Strategy):
                 current_velocity < 0,                                        # Price moving down
                 current_volume_acc > 0,                                      # Volume accelerating
                 current_rsi > self.rsi_oversold,                             # Not oversold
-                current_price < current_sma200 * 1.005,                      # Slightly above trend is okay
+                current_price < current_sma * 1.005,                         # Slightly above trend is okay
                 valid_volatility,                                            # Valid volatility range
                 not gap_up                                                   # Avoid entering on positive gaps
             ]
@@ -187,11 +174,11 @@ class WaveRiderStrategy(Strategy):
                 sl = current_price + stop_distance
                 tp = current_price - (self.atr[-1] * self.atr_tp_multiplier)
                 self.sell(sl=sl, tp=tp, size=position_size)
-                logger.info(f"{timestamp}SHORT Entry - Price: {current_price:.5f}, Volume: {current_volume:.2f}, Momentum: {current_momentum:.2f}%")
+                logger.info(f"{timestamp} SHORT Entry - Price: {current_price:.5f}, Volume: {current_volume:.2f}, Momentum: {current_momentum:.2f}%")
 
 def get_historical_data(client: Client, symbol: str, interval: str, start_date: str, end_date: str) -> pd.DataFrame:
     """Get historical data from Binance"""
-    logger.info(f"Fetching data for {symbol}...")
+    logger.info(f"Fetching 4H data for {symbol}...")
     start_timestamp = int(datetime.strptime(start_date, "%Y-%m-%d").timestamp() * 1000)
     end_timestamp = int(datetime.strptime(end_date, "%Y-%m-%d").timestamp() * 1000)
 
@@ -230,14 +217,14 @@ def get_historical_data(client: Client, symbol: str, interval: str, start_date: 
     df.set_index('timestamp', inplace=True)
     return df
 
-def run_backtest(symbol: str, interval: str, start_date: str, end_date: str, initial_balance: float = 10000, commission: float = 0.0001) -> dict:
-    """Run backtest for a single symbol"""
+def run_single_backtest(symbol: str, start_date: str, end_date: str, params: dict = None) -> dict:
+    """Run backtest with specific parameters"""
     try:
         # Initialize Binance client
         client = Client()
         
         # Get historical data
-        df = get_historical_data(client, symbol, interval, start_date, end_date)
+        df = get_historical_data(client, symbol, "4h", start_date, end_date)
         if df.empty:
             logger.error(f"No data available for {symbol}")
             return None
@@ -245,12 +232,38 @@ def run_backtest(symbol: str, interval: str, start_date: str, end_date: str, ini
         # Prepare data for backtesting
         df = df[['Open', 'High', 'Low', 'Close', 'Volume']]
 
+        # Create strategy class with custom parameters
+        if params:
+            class CustomStrategy(WaveRiderStrategy4H):
+                pass
+            for key, value in params.items():
+                setattr(CustomStrategy, key, value)
+            strategy_class = CustomStrategy
+        else:
+            strategy_class = WaveRiderStrategy4H
+
+        optimization_params = {
+            'volume_ma_length': [5, 7, 10],
+            'volume_threshold': [1.5, 1.8, 2.0],
+            'momentum_length': [3, 4, 5],
+            # 'atr_length': [10, 14, 20],
+            # 'atr_sl_multiplier': [1.8, 2.0, 2.5],
+            # 'atr_tp_multiplier': [2.5, 3.0, 4.0],
+            # 'risk_per_trade': [0.005, 0.01, 0.02],
+            # 'min_volume_increase': [1.3, 1.5, 1.8],
+            # 'rsi_length': [10, 14, 20],
+            # 'rsi_overbought': [70, 75, 80],
+            # 'rsi_oversold': [15, 20, 25],
+            # 'sma_length': [50, 100, 200],
+            # 'max_holding_period': [4, 6, 8]
+        }
         # Run backtest
-        bt = Backtest(df, WaveRiderStrategy, cash=initial_balance, commission=commission)
-        stats = bt.run()
+        bt = Backtest(df, strategy_class, cash=10000, commission=0.0001)
+        stats = bt.optimize(
+            **optimization_params,)
         
         # Plot results
-        bt.plot(filename=f'backtest_{symbol}_wave_rider.html')
+        bt.plot(filename=f'backtest_{symbol}_4h.html')
 
         return {
             'symbol': symbol,
@@ -274,62 +287,70 @@ def run_backtest(symbol: str, interval: str, start_date: str, end_date: str, ini
         return None
 
 def main():
-    """Main function to run backtest"""
+    """Main function to run backtest and optimization"""
     symbol = "SOLUSDT"  # Replace with your desired symbol
     
-    logger.info(f"\n{'='*50}")
+    logger.info(f"\n{'='*60}")
     logger.info(f"OPTIMIZING WAVE RIDER STRATEGY FOR {symbol} - 4H TIMEFRAME")
-    logger.info(f"{'='*50}")
+    logger.info(f"{'='*60}")
 
     # Initialize Binance client
     client = Client()
     
-    # Get historical data for 4H timeframe
-    df = get_historical_data(client, symbol, "4h", "2025-05-01", "2025-07-14")
+    # Get historical data for 4H timeframe (longer period for better testing)
+    df = get_historical_data(client, symbol, "4h", "2025-03-01", "2025-07-14")
     if df.empty:
         logger.error(f"No data available for {symbol}")
         return
         
     # Prepare data for backtesting
     df = df[['Open', 'High', 'Low', 'Close', 'Volume']]
+    logger.info(f"Data loaded: {len(df)} 4H candles from {df.index[0]} to {df.index[-1]}")
 
     # Run optimization
-    bt = Backtest(df, WaveRiderStrategy, cash=10000, commission=0.0001)
+    bt = Backtest(df, WaveRiderStrategy4H, cash=10000, commission=0.0001)
     
     # Define parameter ranges for optimization - Updated for 4H timeframe
     optimization_params = {
-        # 'volume_ma_length': [5, 7, 10],               # Shorter periods for 4H
-        # 'volume_threshold': [2.0,2.5,3.0],         # Less sensitive for 4H
-        # 'momentum_length': [3, 4, 5],                 # Adjusted for 4H
-        'atr_length': [10, 6, 8],                   # Standard ATR periods
-        'atr_sl_multiplier': [1.8, 1.4,1.6],        # Stop loss multipliers
-        'atr_tp_multiplier': [2.5,2.0],        # Take profit multipliers
-        # 'min_volume_increase': [1.3, 1.5, 1.8],      # Volume increase thresholds
-        # 'rsi_length': [10, 14, 20],                   # RSI periods
-        # 'rsi_overbought': [70, 75, 80],               # Overbought levels
-        # 'rsi_oversold': [15, 20, 25],                 # Oversold levels
-        # 'sma_length': [50, 100, 200],                 # Trend filter periods
-        # 'max_holding_period': [4, 6, 8]              # Max holding in 4H candles
+        'volume_ma_length': [5, 7, 10],               # Shorter periods for 4H
+        'volume_threshold': [1.5, 1.8, 2.0],         # Less sensitive for 4H
+        'momentum_length': [3, 4, 5],                 # Adjusted for 4H
+        'atr_length': [10, 14, 20],                   # Standard ATR periods
+        'atr_sl_multiplier': [1.8, 2.0, 2.5],        # Stop loss multipliers
+        'atr_tp_multiplier': [2.5, 3.0, 4.0],        # Take profit multipliers
+        'risk_per_trade': [0.005, 0.01, 0.02],       # Risk levels
+        'min_volume_increase': [1.3, 1.5, 1.8],      # Volume increase thresholds
+        'rsi_length': [10, 14, 20],                   # RSI periods
+        'rsi_overbought': [70, 75, 80],               # Overbought levels
+        'rsi_oversold': [15, 20, 25],                 # Oversold levels
+        'sma_length': [50, 100, 200],                 # Trend filter periods
+        'max_holding_period': [4, 6, 8]              # Max holding in 4H candles
     }
 
-    # Run optimization
+    # Uncomment to run optimization (can take a long time)
+    logger.info("Running optimization...")
     stats = bt.optimize(
         **optimization_params,
-        maximize='Win Rate [%]',
+        maximize='Return [%]',
         method='grid'
     )
+    
+    # Uncomment to run single backtest with default parameters
     # stats = bt.run()
 
     # Print optimization results
-    logger.info("\nOptimization Results:")
-    logger.info("=" * 50)
-    logger.info(f"Best Parameters:")
-    for param, value in stats._strategy.__dict__.items():
-        if not param.startswith('_'):
-            logger.info(f"{param}: {value}")
+    logger.info("\n" + "="*60)
+    logger.info("OPTIMIZATION RESULTS")
+    logger.info("="*60)
     
-    logger.info("\nPerformance Metrics:")
-    logger.info("=" * 50)
+    if hasattr(stats, '_strategy'):
+        logger.info(f"Best Parameters:")
+        for param, value in stats._strategy.__dict__.items():
+            if not param.startswith('_'):
+                logger.info(f"  {param}: {value}")
+    
+    logger.info(f"\nPerformance Metrics:")
+    logger.info("-" * 40)
     logger.info(f"Total trades: {stats['# Trades']}")
     logger.info(f"Win rate: {stats['Win Rate [%]']:.2f}%")
     logger.info(f"Return: {stats['Return [%]']:.2f}%")
@@ -344,6 +365,7 @@ def main():
 
     # Plot results
     bt.plot(filename=f'backtest_{symbol}_4h_optimized.html')
+    logger.info(f"\nResults saved to: backtest_{symbol}_4h_optimized.html")
 
 if __name__ == "__main__":
     main()

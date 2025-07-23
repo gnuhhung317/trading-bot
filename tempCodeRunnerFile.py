@@ -1,1 +1,10 @@
-talib
+'atr_length': [10, 14, 20],
+            # 'atr_sl_multiplier': [1.8, 2.0, 2.5],
+            # 'atr_tp_multiplier': [2.5, 3.0, 4.0],
+            # 'risk_per_trade': [0.005, 0.01, 0.02],
+            # 'min_volume_increase': [1.3, 1.5, 1.8],
+            # 'rsi_length': [10, 14, 20],
+            # 'rsi_overbought': [70, 75, 80],
+            # 'rsi_oversold': [15, 20, 25],
+            # 'sma_length': [50, 100, 200],
+            # 'max_holding_period': [4, 6, 8]
